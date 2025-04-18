@@ -26,7 +26,7 @@ export default function Header() {
 				show
 					? "translate-y-0 opacity-100"
 					: "-translate-y-full opacity-0"
-			} flex items-center justify-between p-4 bg-gray-800 text-white`}
+			} flex items-center justify-between p-4 bg-gray-800 text-white w-full bg-background text-foreground border-b border-border`}
 		>
 			<div className="text-lg font-bold">Mon Portfolio</div>
 			<nav className="w-4/5">

@@ -1,6 +1,5 @@
-'use client';
+'use client'
 import { Geist, Geist_Mono } from 'next/font/google'
-import { useEffect } from 'react';
 import './globals.css'
 import Header from '@/components/Header/Header'
 
@@ -20,23 +19,10 @@ const metadata = {
 }
 
 export default function RootLayout({ children }) {
-  useEffect(() => {
-	const handleSpace = (e) => {
-	  if (e.code === 'Space' && document.activeElement === document.body) {
-		e.preventDefault(); // empêche le scroll
-	  }
-	};
-
-	window.addEventListener('keydown', handleSpace);
-	return () => {
-	  window.removeEventListener('keydown', handleSpace);
-	};
-  }, []);
-
 	return (
-		<html lang='fr'>
+		<html lang='fr' className='dark'>
 			<body
-				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+				className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background`}
 			>
 				<Header />
 				{children}
