@@ -1,7 +1,10 @@
 'use client';
 import React, { useRef, useEffect } from 'react';
 
-// Ce composant React encapsule la simulation de fluide WebGL
+// Basé sur WebGL-Fluid-Simulation par Pavel Dobryakov
+// https://github.com/PavelDoGreat/WebGL-Fluid-Simulation
+// Sous licence MIT
+
 const FluidSimulation = () => {
 	const canvasRef = useRef(null);
 
