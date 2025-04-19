@@ -38,7 +38,7 @@ export default function Mouselight() {
 	}, []);
 
 	return (
-		<div className='mouselight w-[100vw] h-[100vh] top-0 left-0 pointer-events-none z-50'>
+		<div className='mouselight w-screen h-screen top-0 left-0 pointer-events-none z-50'>
 			<div className='mouselight__circle w-72 h-72 rounded-full bg-primary opacity-30 blur-3xl absolute'></div>
 		</div>
 	)
