@@ -40,6 +40,14 @@ export default function Header() {
 					</li>
 					<li>
 						<a
+							href="#about"
+							className={gradientCss}
+						>
+							A propos
+						</a>
+					</li>
+					<li>
+						<a
 							href="/projects"
 							className={gradientCss}
 						>
