@@ -1,109 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap');
 @import "tailwindcss";
-@import '@fontsource/roboto/300.css';
-@import '@fontsource/roboto/400.css';
-@import '@fontsource/roboto/500.css';
-@import '@fontsource/roboto/700.css';
 
+.backdrop {
+  @apply bg-slate-900 rounded-lg shadow-md border border-2 border-slate-700;
+}
 
 :root {
-  --background: hsl(229 57% 100%);
-  --foreground: hsl(229 63% 4%);
-  --muted: hsl(229 12% 86%);
-  --muted-foreground: hsl(229 10% 37%);
-  --popover: hsl(0 0% 99%);
-  --popover-foreground: hsl(229 63% 3%);
-  --card: hsl(0 0% 99%);
-  --card-foreground: hsl(229 63% 3%);
-  --border: hsl(220 13% 91%);
-  --input: hsl(220 13% 91%);
-  --primary: hsl(229 100% 62%);
-  --primary-foreground: hsl(0 0% 100%);
-  --secondary: hsl(229 20% 90%);
-  --secondary-foreground: hsl(229 20% 30%);
-  --accent: hsl(229 28% 85%);
-  --accent-foreground: hsl(229 28% 25%);
-  --destructive: hsl(3 100% 50%);
-  --destructive-foreground: hsl(3 0% 100%);
-  --ring: hsl(229 100% 62%);
-  --chart-1: hsl(229 100% 62%);
-  --chart-2: hsl(229 20% 90%);
-  --chart-3: hsl(229 28% 85%);
-  --chart-4: hsl(229 20% 93%);
-  --chart-5: hsl(229 103% 62%);
-  --radius: 0.5rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: hsl(229 41% 4%);
-    --foreground: hsl(229 23% 99%);
-    --muted: hsl(229 12% 14%);
-    --muted-foreground: hsl(229 10% 63%);
-    --popover: hsl(229 41% 5%);
-    --popover-foreground: hsl(0 0% 100%);
-    --card: hsl(229 41% 5%);
-    --card-foreground: hsl(0 0% 100%);
-    --border: hsl(215 27.9% 16.9%);
-    --input: hsl(215 27.9% 16.9%);
-    --primary: hsl(229 100% 62%);
-    --primary-foreground: hsl(0 0% 100%);
-    --secondary: hsl(229 14% 8%);
-    --secondary-foreground: hsl(229 14% 68%);
-    --accent: hsl(229 23% 17%);
-    --accent-foreground: hsl(229 23% 77%);
-    --destructive: hsl(3 89% 54%);
-    --destructive-foreground: hsl(0 0% 100%);
-    --ring: hsl(229 100% 62%);
-    --chart-1: hsl(229 100% 62%);
-    --chart-2: hsl(229 14% 8%);
-    --chart-3: hsl(229 23% 17%);
-    --chart-4: hsl(229 14% 11%);
-    --chart-5: hsl(229 103% 62%);
-  }
-}
-
-@theme {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-destructive-foreground: var(--destructive-foreground);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-gradient-1: var(--gradient-1);
-  --radius: var(--radius);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-monospace: 'monospace', monospace;
-}
-
-@keyframes blink {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
-}
-.animate-blink {
-  animation: blink 1s steps(1) infinite;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: 'Roboto', Arial, Helvetica, sans-serif;
+  font-family: 'Fira Code';
+  max-width: 100%;
+  height: 100vh;
+  @apply bg-slate-950 p-[30px];
+  @apply text-slate-50;
 }

@@ -1,7 +1,6 @@
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
-import Header from '@/components/Header'
-import Mouselight from '@/components/Mouselight'
+import MainWrapper from '@/components/MainWrapper'
 
 const geistSans = Geist({
 	variable: '--font-geist-sans',
@@ -21,12 +20,22 @@ export const metadata = {
 export default function RootLayout({ children }) {
 	return (
 		<html lang='en' className='dark'>
+			<head>
+				<link rel='preconnect' href='https://fonts.googleapis.com' />
+				<link
+					rel='preconnect'
+					href='https://fonts.gstatic.com'
+					crossOrigin=''
+				/>
+				<link
+					href='https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap'
+					rel='stylesheet'
+				/>
+			</head>
 			<body
-				className={`${geistSans.variable} ${geistMono.variable} px-10 antialiased`}
+				className={`${geistSans.variable} ${geistMono.variable} h-full bg-slate-700 antialiased`}
 			>
-				<Header />
-				{children}
-				<Mouselight />
+				<MainWrapper>{children}</MainWrapper>
 			</body>
 		</html>
 	)

@@ -1,3 +1,5 @@
+import MainWrapper from '@/components/MainWrapper';
+
 export default function Project() {
 	const project = {
 		title: "Mon Vieux Grimoire",
@@ -7,11 +9,11 @@ export default function Project() {
 	  };
 
 	return (
-		<div>
-			<h1>Project</h1>
-			Ajoute ici des cards avec titre, description courte, et tag techno. Exemple :
+			<div>
+				<h1>Project</h1>
+				Ajoute ici des cards avec titre, description courte, et tag techno. Exemple :
 
-			<pre>{JSON.stringify(project, null, 2)}</pre>
-		</div>
+				<pre>{JSON.stringify(project, null, 2)}</pre>
+			</div>
 	)
 }
