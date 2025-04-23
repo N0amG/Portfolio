@@ -6,7 +6,7 @@ export default function Icon({ path, size = 18, className = ''}) {
       fill="currentColor"
       width={size}
       height={size}
-      className={className}
+      className={className + ' text-slate-500 hover:text-slate-50'}
     >
       <path d={path} />
     </svg>

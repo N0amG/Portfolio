@@ -11,7 +11,7 @@ export default function About() {
 			<div className='flex flex-col justify-start w-[250px]'>
 				<Dropdown
 					title='bio'
-					iconColor='rose-400' // Couleur de l'icône dossier
+					iconColor='text-rose-400' // Couleur de l'icône dossier
 				>
 					<DropdownItem
 						id='bio-1'
@@ -24,7 +24,7 @@ export default function About() {
 
 				<Dropdown
 					title='interests'
-					iconColor='teal-400' // Couleur de l'icône dossier
+					iconColor='text-teal-400' // Couleur de l'icône dossier
 				>
 					<DropdownItem
 						id='interests-1'
@@ -43,7 +43,7 @@ export default function About() {
 				</Dropdown>
 				<Dropdown
 					title='studies'
-					iconColor='indigo-500' // Couleur de l'icône dossier
+					iconColor='text-indigo-500' // Couleur de l'icône dossier
 				>
 					<DropdownItem
 						id='etudes-1'
