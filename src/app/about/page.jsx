@@ -3,6 +3,7 @@
 import Dropdown from '@/components/Dropdown'
 import DropdownItem from '@/components/DropdownItem'
 import IconBox from '@/components/IconBox'
+import Checkbox from '@/components/Checkbox'
 
 import { useState } from 'react'
 
@@ -69,6 +70,7 @@ export default function About() {
 				}
 				className='bg-indigo-300'
 			/>
+			<Checkbox />
 		</>
 	)
 }
