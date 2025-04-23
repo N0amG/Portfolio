@@ -8,6 +8,6 @@ export default function IconBox({
 	className = '',
 }) {
 	return (
-		<Icon path={iconPath} className={`w-[40px] h-[40px] ${iconColor} ${className} rounded-md`} />
+		<Icon path={iconPath} className={`w-[40px] h-[40px] ${iconColor} ${className} transition-colors ease-in-out rounded-md hover:bg-slate-700`} />
 	)
 }
