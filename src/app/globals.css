@@ -5,13 +5,11 @@
   @apply bg-slate-900 rounded-lg shadow-md border border-2 border-slate-700;
 }
 
-:root {
-}
-
 body {
   font-family: 'Fira Code';
   max-width: 100%;
   height: 100vh;
-  @apply bg-slate-950 p-[30px];
-  @apply text-slate-50;
+  padding: 30px 50px;
+  @apply bg-slate-950 text-slate-50;
+
 }
