@@ -139,72 +139,84 @@ export default function About() {
 					/>
 				</Dropdown>
 			</div>
-			{/* Colonne centrale : affichage du contenu sélectionné */}
-			<div className='middle-container flex flex-col items-start justify-start w-2/5 h-full'>
-				{/* Affiche le titre de la section sélectionnée */}
-				{selectedId && (
-					<h3 className='title flex items-center gap-2  w-[250px] px-3 py-2 transition-colors select-none justify-between  border-slate-800 border-r-2'>
-						{
-							Object.values(
-								// Liste des titres pour chaque id
-								[
-									{ id: 'bio-1', title: 'about-me' },
-									{
-										id: 'interests-1',
-										title: 'video-games',
-									},
-									{ id: 'interests-2', title: 'coding' },
-									{
-										id: 'studies-1',
-										title: 'higher-education',
-									},
-									{
-										id: 'studies-2',
-										title: 'high-school',
-									},
-								]
-							).find((item) => item.id === selectedId)?.title
-						}
-						{/* Croix de fermeture (non interactive ici) */}
-						<button onClick={() => setSelectedId(null)}>
-							<Icon path='M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z'/>
-						</button>
-					</h3>
-				)}
-				{/* Affiche le contenu formaté façon commentaire multi-ligne */}
-				{selectedId && (
-					<div className='flex flex-col text-justify text-xl text-slate-400 p-5 border-t-2 border-r-2 border-slate-800 h-full '>
-						{/* Bloc de texte formaté façon commentaire JS multi-ligne */}
-						<div className='flex flex-col font-mono text-[1.1rem] bg-none p-0 m-0 whitespace-pre gap-0'>
-							{/* Première ligne : '1 /**' */}
-							<span className='flex items-start pl-2 indent-0 tabular-nums'>
-								<span className='inline-block w-[2.2em] min-w-[2.2em] text-right text-slate-400 mr-[30px] select-none'>1</span><span className='mr-2.5'>/**</span>
-							</span>
-							{/* Lignes de contenu */}
-							{itemContents[selectedId].map((line, idx) => (
-								<span
-									className='flex items-start pl-2 indent-0 tabular-nums'
-									key={idx}
-								>
+			<div className='right-container flex items-start justify-start w-full h-full'>
+				{/* Colonne centrale : affichage du contenu sélectionné */}
+				<div className='right-left-container flex flex-col items-start justify-start w-1/2 min-w-[600px] h-full'>
+					{/* Affiche le titre de la section sélectionnée */}
+					{selectedId && (
+						<h3 className='title flex items-center gap-2  w-[250px] px-3 py-2 transition-colors select-none justify-between border-slate-800 border-r-2'>
+							{
+								Object.values(
+									// Liste des titres pour chaque id
+									[
+										{ id: 'bio-1', title: 'about-me' },
+										{
+											id: 'interests-1',
+											title: 'video-games',
+										},
+										{ id: 'interests-2', title: 'coding' },
+										{
+											id: 'studies-1',
+											title: 'higher-education',
+										},
+										{
+											id: 'studies-2',
+											title: 'high-school',
+										},
+									]
+								).find((item) => item.id === selectedId)?.title
+							}
+							{/* Croix de fermeture (non interactive ici) */}
+							<button onClick={() => setSelectedId(null)}>
+								<Icon path='M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z' />
+							</button>
+						</h3>
+					)}
+					{/* Affiche le contenu formaté façon commentaire multi-ligne */}
+					{selectedId && (
+						<div className='flex flex-col text-justify text-xl text-slate-400 py-5 px-2 border-t-2 border-r-2 border-slate-800 h-full w-full '>
+							{/* Bloc de texte formaté façon commentaire JS multi-ligne */}
+							<div className='flex flex-col font-mono text-[1.1rem] bg-none p-0 m-0 break-words gap-0'>
+								{/* Première ligne : '1 /**' */}
+								<span className='flex items-start pl-2 indent-0 tabular-nums'>
 									<span className='inline-block w-[2.2em] min-w-[2.2em] text-right text-slate-400 mr-[30px] select-none'>
-										{String(idx + 2)}
+										1
 									</span>
-									<span className='mr-2.5'>*</span>
-									<span className='flex-1 text-left'>
-										{line}
+									<span className='mr-2.5'>/**</span>
+								</span>
+								{/* Lignes de contenu */}
+								{itemContents[selectedId].map((line, idx) => (
+									<span
+										className='flex items-start pl-2 indent-0 tabular-nums'
+										key={idx}
+									>
+										<span className='inline-block w-[2.2em] min-w-[2.2em] text-right text-slate-400 mr-[30px] select-none'>
+											{String(idx + 2)}
+										</span>
+										<span className='mr-2.5'>*</span>
+										<span className='flex-1 text-left break-words'>
+											{line}
+										</span>
 									</span>
+								))}
+								{/* Dernière ligne : */}
+								<span className='flex items-start pl-2 indent-0 tabular-nums'>
+									<span className='inline-block w-[2.2em] min-w-[2.2em] text-right text-slate-400 mr-[30px] select-none'>
+										{itemContents[selectedId].length + 2}
+									</span>
+									<span className='mr-2.5'>*/</span>
 								</span>
-							))}
-							{/* Dernière ligne : */}
-							<span className='flex items-start pl-2 indent-0 tabular-nums'>
-								<span className='inline-block w-[2.2em] min-w-[2.2em] text-right text-slate-400 mr-[30px] select-none'>
-									{itemContents[selectedId].length + 2}
-								</span>
-								<span className='mr-2.5'>*/</span>
-							</span>
+							</div>
 						</div>
-					</div>
-				)}
+					)}
+				</div>
+				{/* Colonne centre : espace vide pour effet de style*/}
+				<span className='right-between-container flex items-start mt-[40px] pt-[10px] justify-center min-w-[40px] bg-transparent border-t-2 h-[calc(100%-40px)] border-slate-800 pt-5=3'>
+					<div className='bg-slate-500 w-[26px] h-[6px]' />
+				</span>
+				{/* Colonne droite : espace de l'activité GitHub */}
+				<div className='right-right-container flex items-start justify-start w-full h-[calc(100%-40px)] mt-[40px] border-l-2 border-t-2 border-slate-800'>
+				</div>
 			</div>
 		</div>
 	)
