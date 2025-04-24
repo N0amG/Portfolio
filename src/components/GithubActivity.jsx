@@ -1,57 +1,52 @@
-import { useEffect, useState } from 'react'
+export default function GithubActivity({ events = [] }) {
+	if (!events.length) return <div>Aucune activité récente trouvée.</div>;
 
-/* Github activity component */
+	// Fonction pour extraire le premier mot du message (avant espace ou symbole)
+	function getFirstWord(message) {
+		if (!message) return '';
+		const match = message.match(/^[^\s:;,.!?\-\[\](){}]+/i);
+		return match ? match[0] : '';
+	}
 
-export default function GithubActivity({ number = 3 }) {
-	const [events, setEvents] = useState([])
-	const [loading, setLoading] = useState(true)
-	const [error, setError] = useState(null)
+	// Fonction pour retirer le premier mot du message
+	function removeFirstWord(message) {
+		if (!message) return '';
+		// Retire le premier mot (avec ou sans symbole) + tous les espaces/symboles qui suivent
+		return message.replace(/^[^\s:;,.!?\-\[\](){}]+/i, '');
+	}
 
-	useEffect(() => {
-		fetch(`https://api.github.com/users/N0amG/events?per_page=${number}`, {
-			headers: {
-				Accept: 'application/vnd.github.v3+json',
-			},
-		})
-			.then((res) => {
-				if (!res.ok)
-					throw new Error(
-						'Erreur lors de la récupération des données GitHub'
-					)
-				return res.json()
-			})
-			.then((data) => {
-				const pushEvents = data.filter(
-					(event) => event.type === 'PushEvent'
-				)
-				setEvents(pushEvents.slice(0, number))
-				setLoading(false)
-			})
-			.catch((err) => {
-				setError(err.message)
-				setLoading(false)
-			})
-	}, [number])
+	// Fonction pour déterminer la couleur du premier mot
+	function getFirstWordColor(firstWord) {
+		const word = firstWord.toLowerCase();
+		if (word.includes('add')) return 'bg-green-600';
+		if (word.includes('fix')) return 'bg-orange-400';
+		if (word.includes('remove') || word.includes('delete')) return 'bg-red-600';
+		return 'bg-rose-500';
+	}
 
-	if (loading) return <div>Chargement de l'activité GitHub...</div>
-	if (error) return <div>Erreur : {error}</div>
-	console.log(events)
 	return (
-		<ul className='flex flex-col items-start justify-start w-full h-full p-5 overflow-y-auto bg-slate-800 text-slate-400'>
-			{events.map((event) => (
-				<li key={event.id} className='ml-5 mb-10'>
-					{event.repo?.name} -{' '} {new Date(event.created_at).toLocaleString()}
-					{event.payload?.commits?.length > 0 && (
-						<ul>
-							{event.payload.commits.map((commit, index) => (
-								<li key={index} className='ml-6'>
-									{commit.message}
-								</li>
-							))}
-						</ul>
-					)}
-				</li>
-			))}
+		<ul className="github-activity-list flex flex-col gap-4 p-2">
+			{events.map((event) => {
+				const firstWord = getFirstWord(event.message);
+				const color = getFirstWordColor(firstWord);
+				const messageSansFirstWord = removeFirstWord(event.message);
+				console.log(event.message, firstWord, messageSansFirstWord, color);
+				return (
+					<li key={event.id} className="github-commit-item bg-slate-800/70 rounded-lg p-4 shadow border border-slate-700 flex flex-col gap-1">
+						<div className="flex items-center gap-2 mb-1">
+							<span className="font-semibold text-indigo-400">{event.repo?.name}</span>
+							<span className="text-xs text-slate-400">{new Date(event.created_at).toLocaleString()}</span>
+						</div>
+						<div className="flex items-start gap-2">
+							<span className={`px-2 py-0.5 rounded text-xs font-bold text-white ${color}`}>{firstWord}</span>
+							<span className="text-slate-200 font-mono text-sm break-words whitespace-pre-line">{messageSansFirstWord}</span>
+						</div>
+						{event.url && (
+							<a href={event.url} target="_blank" rel="noopener noreferrer" className="text-rose-300 hover:underline text-sm mt-1 w-fit">Voir sur GitHub</a>
+						)}
+					</li>
+				)
+			})}
 		</ul>
-	)
+	);
 }
