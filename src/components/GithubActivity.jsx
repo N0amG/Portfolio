@@ -44,7 +44,7 @@ export default function GithubActivity({ number = 3 }) {
 					{event.payload?.commits?.length > 0 && (
 						<ul>
 							{event.payload.commits.map((commit, index) => (
-								<li key={index} className='ml-5'>
+								<li key={index} className='ml-6'>
 									{commit.message}
 								</li>
 							))}
