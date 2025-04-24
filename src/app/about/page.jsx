@@ -3,6 +3,7 @@
 import Dropdown from '@/components/Dropdown'
 import DropdownItem from '@/components/DropdownItem'
 import Icon from '@/components/Icon'
+import GithubActivity from '@/components/GithubActivity'
 
 import { useState } from 'react'
 
@@ -216,6 +217,8 @@ export default function About() {
 				</span>
 				{/* Colonne droite : espace de l'activité GitHub */}
 				<div className='right-right-container flex items-start justify-start w-full h-[calc(100%-40px)] mt-[40px] border-l-2 border-t-2 border-slate-800'>
+					{/* Affichage de l'activité GitHub */}
+					<GithubActivity className='w-full h-full' />
 				</div>
 			</div>
 		</div>
