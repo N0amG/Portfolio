@@ -1,5 +1,7 @@
+// Composant TextCard : affiche un bloc de texte façon terminal avec curseur animé
 export default function TextCard({ children, className }) {
 	return (
+		// Conteneur stylisé façon terminal, avec texte et curseur animé
 		<div
 			className={`bg-black text-card-foreground border border-border rounded-lg p-6 shadow-md text-2xl font-monospace max-w-fit ${className}`}
 		>

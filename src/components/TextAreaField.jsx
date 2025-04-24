@@ -2,10 +2,14 @@
 import { useState } from 'react';
 
 export default function TextAreaField({ maxWidth = '400px', placeholder = 'Votre message...', label = '', error = false }) {
+	// Composant textarea stylisé avec gestion du focus et de l'erreur
 	const [focus, setFocus] = useState(false);
 	return (
+		// Conteneur principal avec largeur maximale personnalisable
 		<div style={{ maxWidth }} className="w-full">
+			{/* Affichage du label si fourni */}
 			{label && <label className="block mb-1 text-slate-200">{label}</label>}
+			{/* Zone de texte stylisée, change de couleur selon focus ou erreur */}
 			<div className={`input-field flex items-center h-auto min-h-[100px] rounded-lg px-2 border transition-colors
 			${error ? 'bg-red-500/30 border-red-500' : focus ? 'bg-slate-800 border-slate-50' : 'bg-slate-800 border-slate-700'} text-slate-50 relative`}>
 				<textarea
@@ -15,6 +19,7 @@ export default function TextAreaField({ maxWidth = '400px', placeholder = 'Votre
 					onBlur={() => setFocus(false)}
 					rows={4}
 				/>
+				{/* Affichage de l'icône d'erreur si error=true */}
 				{error && (
 					<span className="absolute top-2 right-2 flex items-start">
 						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-[24px] h-[24px] text-red-500">
@@ -23,6 +28,7 @@ export default function TextAreaField({ maxWidth = '400px', placeholder = 'Votre
 					</span>
 				)}
 			</div>
+			{/* Message d'erreur sous le champ si error=true */}
 			{error && <span className="text-red-500 text-md mt-2">Something went wrong</span>}
 		</div>
 	)

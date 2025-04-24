@@ -2,42 +2,90 @@
 
 import Dropdown from '@/components/Dropdown'
 import DropdownItem from '@/components/DropdownItem'
+import Icon from '@/components/Icon'
 
 import { useState } from 'react'
 
 export default function About() {
-	const [selectedId, setSelectedId] = useState(null)
+	// État pour savoir quel item du menu est sélectionné
+	const [selectedId, setSelectedId] = useState('bio-1')
+
+	// Contenus affichés pour chaque item sélectionné
+	const itemContents = {
+		'bio-1': [
+			'About me',
+			'I have 5 years of experience in web',
+			'development lorem ipsum dolor sit amet,',
+			'consectetur adipiscing elit, sed do eiusmod',
+			'tempor incididunt ut labore et dolore',
+			'magna aliqua. Ut enim ad minim veniam,',
+			'quis nostrud exercitation ullamco laboris',
+			'nisi ut aliquip ex ea commodo consequat.',
+			'Duis aute irure dolor in reprehenderit in',
+			'',
+			'Duis aute irure dolor in reprehenderit in',
+			'voluptate velit esse cillum dolore eu fugiat',
+			'nulla pariatur. Excepteur sint occaecat',
+			'officia deserunt mollit anim id est laborum.',
+		],
+		'interests-1': [
+			'I love video games, I play a lot of different games,',
+			'but I especially like RPGs and strategy games.',
+			'I also like to play board games with my friends.',
+		],
+		'interests-2': [
+			'I love coding, I spend a lot of time coding and learning new technologies.',
+			'I am currently learning React and Next.js.',
+		],
+		'studies-1': [
+			'I am currently in a 3rd year of computer science at the University of Paris 12.',
+			'I have already done several internships in web development',
+			'and I am currently looking for an internship in this field.',
+		],
+		'studies-2': [
+			'I graduated from high school in 2021 with a scientific baccalaureate.',
+			'I was in the mathematics and physics specialty.',
+			'I also took the computer science option.',
+		],
+	}
+
 	return (
+		// Conteneur principal de la page About
 		<div
 			id='about-me'
-			className='flex flex-1 flex-col items-start justify-start w-full'
+			className='flex flex-1 items-start justify-start w-full'
 		>
-			<div className='left-container flex flex-col items-start self-start justify-start w-[25%] h-full'>
+			{/* Colonne de gauche : menu déroulant (Dropdown) */}
+			<div className='left-container flex flex-col items-start self-start justify-start w-[250px] h-full'>
+				{/* Dropdown principal pour les infos personnelles */}
 				<Dropdown // Label Dropdown
 					title='personnal-info'
 					isLabel={true}
 					className=''
 				>
+					{/* Sous-menu bio */}
 					<Dropdown
 						title='bio'
 						iconColor='text-rose-400' // Couleur de l'icône dossier
+						isOpen={true} // Toujours ouvert pour afficher les sous-menus
 					>
 						<DropdownItem
 							id='bio-1'
-							title='about me'
+							title='about-me'
 							iconPath='M4 22C4 17.5817 7.58172 14 12 14C16.4183 14 20 17.5817 20 22H4ZM12 13C8.685 13 6 10.315 6 7C6 3.685 8.685 1 12 1C15.315 1 18 3.685 18 7C18 10.315 15.315 13 12 13Z'
 							activeId={selectedId}
 							onClick={setSelectedId}
 						/>
 					</Dropdown>
 
+					{/* Sous-menu interests */}
 					<Dropdown
 						title='interests'
 						iconColor='text-teal-400' // Couleur de l'icône dossier
 					>
 						<DropdownItem
 							id='interests-1'
-							title='video games'
+							title='video-games'
 							iconPath='M24 12L18.3431 17.6569L16.9289 16.2426L21.1716 12L16.9289 7.75736L18.3431 6.34315L24 12ZM2.82843 12L7.07107 16.2426L5.65685 17.6569L0 12L5.65685 6.34315L7.07107 7.75736L2.82843 12ZM9.78845 21H7.66009L14.2116 3H16.3399L9.78845 21Z'
 							activeId={selectedId}
 							onClick={setSelectedId}
@@ -50,26 +98,28 @@ export default function About() {
 							onClick={setSelectedId}
 						/>
 					</Dropdown>
+					{/* Sous-menu studies */}
 					<Dropdown
 						title='studies'
 						iconColor='text-indigo-500' // Couleur de l'icône dossier
 					>
 						<DropdownItem
-							id='etudes-1'
-							title='higher education'
+							id='studies-1'
+							title='higher-education'
 							iconPath='M4 16H20V5H4V16ZM13 18V20H17V22H7V20H11V18H2.9918C2.44405 18 2 17.5511 2 16.9925V4.00748C2 3.45107 2.45531 3 2.9918 3H21.0082C21.556 3 22 3.44892 22 4.00748V16.9925C22 17.5489 21.5447 18 21.0082 18H13Z'
 							activeId={selectedId}
 							onClick={setSelectedId}
 						/>
 						<DropdownItem
-							id='etudes-2'
-							title='high school'
+							id='studies-2'
+							title='high-school'
 							iconPath='M12 0.585693L18 6.58569V9H22V19H23V21H1V19H2V9H6V6.58569L12 0.585693ZM18 19H20V11H18V19ZM6 11H4V19H6V11ZM8 7.41412V18.9999H11V12H13V18.9999H16V7.41412L12 3.41412L8 7.41412Z'
 							activeId={selectedId}
 							onClick={setSelectedId}
 						/>
 					</Dropdown>
 				</Dropdown>
+				{/* Dropdown pour les contacts */}
 				<Dropdown // Label Dropdown
 					title='contacts'
 					isLabel={true}
@@ -88,6 +138,73 @@ export default function About() {
 						onClick={() => {}}
 					/>
 				</Dropdown>
+			</div>
+			{/* Colonne centrale : affichage du contenu sélectionné */}
+			<div className='middle-container flex flex-col items-start justify-start w-2/5 h-full'>
+				{/* Affiche le titre de la section sélectionnée */}
+				{selectedId && (
+					<h3 className='title flex items-center gap-2  w-[250px] px-3 py-2 transition-colors select-none justify-between  border-slate-800 border-r-2'>
+						{
+							Object.values(
+								// Liste des titres pour chaque id
+								[
+									{ id: 'bio-1', title: 'about-me' },
+									{
+										id: 'interests-1',
+										title: 'video-games',
+									},
+									{ id: 'interests-2', title: 'coding' },
+									{
+										id: 'studies-1',
+										title: 'higher-education',
+									},
+									{
+										id: 'studies-2',
+										title: 'high-school',
+									},
+								]
+							).find((item) => item.id === selectedId)?.title
+						}
+						{/* Croix de fermeture (non interactive ici) */}
+						<button onClick={() => setSelectedId(null)}>
+							<Icon path='M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z'/>
+						</button>
+					</h3>
+				)}
+				{/* Affiche le contenu formaté façon commentaire multi-ligne */}
+				{selectedId && (
+					<div className='flex flex-col text-justify text-xl text-slate-400 p-5 border-t-2 border-r-2 border-slate-800 h-full '>
+						{/* Bloc de texte formaté façon commentaire JS multi-ligne */}
+						<div className='flex flex-col font-mono text-[1.1rem] bg-none p-0 m-0 whitespace-pre gap-0'>
+							{/* Première ligne : '1 /**' */}
+							<span className='flex items-start pl-2 indent-0 tabular-nums'>
+								<span className='inline-block w-[2.2em] min-w-[2.2em] text-right text-slate-400 mr-[30px] select-none'>1</span><span className='mr-2.5'>/**</span>
+							</span>
+							{/* Lignes de contenu */}
+							{itemContents[selectedId].map((line, idx) => (
+								<span
+									className='flex items-start pl-2 indent-0 tabular-nums'
+									key={idx}
+								>
+									<span className='inline-block w-[2.2em] min-w-[2.2em] text-right text-slate-400 mr-[30px] select-none'>
+										{String(idx + 2)}
+									</span>
+									<span className='mr-2.5'>*</span>
+									<span className='flex-1 text-left'>
+										{line}
+									</span>
+								</span>
+							))}
+							{/* Dernière ligne : */}
+							<span className='flex items-start pl-2 indent-0 tabular-nums'>
+								<span className='inline-block w-[2.2em] min-w-[2.2em] text-right text-slate-400 mr-[30px] select-none'>
+									{itemContents[selectedId].length + 2}
+								</span>
+								<span className='mr-2.5'>*/</span>
+							</span>
+						</div>
+					</div>
+				)}
 			</div>
 		</div>
 	)

@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 
 export default function Mouselight() {
 
+	// Composant décoratif qui suit la souris avec un effet de lumière/flou
 	const [mousePos, setMousePos] = useState([0, 0])
 
 	useEffect(() => {
@@ -11,10 +12,12 @@ export default function Mouselight() {
 		let targetPos = mousePos;
 		let currentPos = [...mousePos];
 
+		// Met à jour la position cible lors du déplacement de la souris
 		const handleMouseMove = (e) => {
 			targetPos = [e.pageX, e.pageY];
 		};
 
+		// Animation fluide de la lumière (lerp)
 		const animate = () => {
 			// Lerp vers la position cible
 			currentPos[0] += (targetPos[0] - currentPos[0]) * 0.1;
@@ -38,6 +41,7 @@ export default function Mouselight() {
 	}, []);
 
 	return (
+		// Deux divs superposées pour l'effet de lumière qui suit la souris
 		<div className='mouselight w-screen h-screen top-0 left-0 pointer-events-none z-50'>
 			<div className='mouselight__circle w-72 h-72 rounded-full bg-primary opacity-30 blur-3xl absolute'></div>
 		</div>

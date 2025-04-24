@@ -1,6 +1,6 @@
 import Icon from './Icon'
 
-// IconBox : icône, couleur icône, couleur titre, titre, className
+// IconBox : affiche une icône stylisée dans un conteneur
 export default function IconBox({
 	iconPath,
 	bgColor = 'bg-slate-700',
@@ -8,6 +8,7 @@ export default function IconBox({
 	className = '',
 }) {
 	return (
+		// Utilise le composant Icon avec styles et couleurs personnalisés
 		<Icon path={iconPath} className={`w-[40px] h-[40px] ${iconColor} ${className} transition-colors ease-in-out rounded-md hover:bg-slate-700`} />
 	)
 }

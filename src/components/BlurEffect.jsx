@@ -1,9 +1,11 @@
+// Composant décoratif pour ajouter un effet de flou coloré en arrière-plan
 export default function BlurEffect({
 	className = '',
 	color = 'bg-teal-400',
 	rotation = 0,
 }) {
 	return (
+		// Div positionnée absolument, avec clipPath et rotation personnalisables
 		<div
 			className={`absolute w-96 h-96 opacity-40 pointer-events-none ${className}`}
 			style={{

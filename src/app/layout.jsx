@@ -2,6 +2,7 @@ import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import MainWrapper from '@/components/MainWrapper'
 
+// Définition des polices Google Fonts utilisées dans tout le site
 const geistSans = Geist({
 	variable: '--font-geist-sans',
 	subsets: ['latin'],
@@ -18,9 +19,11 @@ export const metadata = {
 }
 
 export default function RootLayout({ children }) {
+	// Layout racine de l'application, englobe tout le site
 	return (
 		<html lang='en' className='dark'>
 			<head>
+				{/* Préconnexion et import des polices Google Fonts */}
 				<link rel='preconnect' href='https://fonts.googleapis.com' />
 				<link
 					rel='preconnect'
@@ -33,8 +36,10 @@ export default function RootLayout({ children }) {
 				/>
 			</head>
 			<body
+				// Application des polices et du fond global
 				className={`${geistSans.variable} ${geistMono.variable} h-full bg-slate-700 antialiased`}
 			>
+				{/* MainWrapper englobe tout le contenu de la page (header, footer, etc.) */}
 				<MainWrapper>{children}</MainWrapper>
 			</body>
 		</html>
