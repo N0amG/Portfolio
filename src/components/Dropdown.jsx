@@ -15,7 +15,7 @@ export function DropdownTitle({
 	const arrowPath = !isLabel ? 'M13.1717 12.0007L8.22192 7.05093L9.63614 5.63672L16.0001 12.0007L9.63614 18.3646L8.22192 16.9504L13.1717 12.0007Z' : "M16 12L10 18V6L16 12Z"
 	return (
 		<button
-			className={`flex items-center gap-2 w-full px-3 py-2 rounded transition-colors select-none justify-start ${className}`}
+			className={`flex items-center gap-2 w-full px-3 py-2 transition-colors select-none justify-start  border-slate-800 ${className, isLabel ? open ? 'border-b-2' : 'border-b-1' : ''}`}
 			onClick={onClick}
 			type='button'
 		>
@@ -50,13 +50,13 @@ export default function Dropdown({
 	iconPath,
 	iconColor,
 	children,
-	color,
 	className = '',
 	isLabel,
 }) {
-	const [open, setOpen] = useState(false);
-	return (
-		<div className={`w-full ${className}`}>
+	const [open, setOpen] = isLabel ? useState(true) : useState(false);
+
+	return (								// Met un border basse et droite au dropdown label sauf si c'est le label contacts, enleve le border-bottom
+		<div className={`w-full ${className, (isLabel ? title === 'contacts' ? 'border-r-2 border-slate-800 h-full' : 'border-b-2 border-r-2 border-slate-800' : '')}`}>
 			<DropdownTitle
 				title={title}
 				iconPath={iconPath}
@@ -66,7 +66,7 @@ export default function Dropdown({
 				onClick={() => setOpen((v) => !v)}
 			/>
 			{open && (
-				<div className="pl-12 flex flex-col gap-1 animate-fade-in">
+				<div className="flex flex-col gap-1 animate-fade-in pb-2 pl-5">
 					{children}
 				</div>
 			)}

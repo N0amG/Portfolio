@@ -18,7 +18,7 @@ export default function Home() {
 						{'> Full-Stack Developer'}
 					</h2>
 				</div>
-				<Avatar />
+				<Avatar className={'border-slate-400'}/>
 			</div>
 			<div className='flex flex-col p-4'>
 				<p className='text-slate-400'>//find my profile on Github:</p>

@@ -2,14 +2,19 @@
 @import "tailwindcss";
 
 .backdrop {
-  @apply bg-slate-900 rounded-lg shadow-md border border-2 border-slate-700;
+  @apply bg-slate-900 rounded-lg shadow-md border border-2 border-slate-700 min-h-full;
+}
+html, body {
+  min-height: 100vh;
 }
 
 body {
+  display: flex;
   font-family: 'Fira Code';
   max-width: 100%;
-  height: 100vh;
   padding: 30px 40px;
   @apply bg-slate-950 text-slate-50;
-
 }
+
+
+/* 1er beakpoint, minimum : 880px */
