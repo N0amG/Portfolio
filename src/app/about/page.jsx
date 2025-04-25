@@ -5,12 +5,14 @@ export default function About() {
 	return (
 		<div
 			id='about-me'
-			className='flex flex-1 items-start justify-start w-full'
+			className='flex flex-col w-full h-screen overflow-hidden'
 		>
-			<AboutClient />
-			<div className='right-right-container flex items-start justify-start w-full h-[calc(100%-40px)] mt-[40px] border-l-2 border-t-2 border-slate-800'>
-				<div className='flex w-full h-[460px] overflow-y-auto px-4'>
-					<GithubActivityServer className='w-full h-full' />
+			<div className='flex flex-1 w-full overflow-hidden'>
+				<AboutClient />
+				<div className='right-right-container flex w-full h-full flex-col mt-[40px] border-l-2 border-t-2 border-slate-800 overflow-hidden'>
+					<div className='flex-1 px-4 overflow-y-auto scrollbar-custom'>
+						<GithubActivityServer className='w-full' />
+					</div>
 				</div>
 			</div>
 		</div>

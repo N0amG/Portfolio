@@ -1,6 +1,6 @@
 import GithubActivity from './GithubActivity';
 
-export default async function GithubActivityServer({ repoNum = 5, commitPerRepo = 1, ...props }) {
+export default async function GithubActivityServer({ repoNum = 4, commitPerRepo = 1, ...props }) {
 	const token = process.env.GITHUB_TOKEN;
 	const headers = {
 		Accept: 'application/vnd.github.v3+json',

@@ -45,6 +45,7 @@ export default function GithubActivity({ events = [] }) {
 		if (diffHour < 24) return ` il y a ${diffHour} heure${diffHour > 1 ? 's' : ''}`;
 		if (diffDay < 7) return ` il y a ${diffDay} jour${diffDay > 1 ? 's' : ''}`;
 		if (diffWeek < 5) return ` il y a ${diffWeek} semaine${diffWeek > 1 ? 's' : ''}`;
+		if (diffMonth < 12) return ` il y a ${diffMonth} mois`;
 		if (diffYear >= 1) return ` il y a ${diffYear} an ${diffYear > 1 ? 's' : ''}`;
 		return d.toLocaleString('fr-FR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
 	}
