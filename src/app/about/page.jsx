@@ -10,7 +10,7 @@ export default function About() {
 			<div className='flex flex-1 w-full overflow-hidden'>
 				<AboutClient />
 				<div className='right-right-container flex w-full h-full flex-col mt-[40px] border-l-2 border-t-2 border-slate-800 overflow-hidden'>
-					<div className='flex-1 px-4 overflow-y-auto scrollbar-custom max-h-[calc(100%-56px)]'>
+					<div className='flex-1 px-4 pt-4 overflow-y-auto scrollbar-custom max-h-[calc(100%-56px)]'>
 						<GithubActivityServer className='w-full' />
 					</div>
 				</div>

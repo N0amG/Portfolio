@@ -1,5 +1,4 @@
 'use client'
-
 import Dropdown from '@/components/Dropdown'
 import DropdownItem from '@/components/DropdownItem'
 import Icon from '@/components/Icon'
@@ -98,7 +97,7 @@ export default function AboutClient() {
 					</h3>
 				)}
 				{selectedId && (
-					<div className='flex flex-col text-justify text-xl text-slate-400 py-5 px-2 border-t-2 border-r-2 border-slate-800 h-full w-full '>
+					<div className='flex flex-col text-justify text-xl text-slate-400 py-5 px-2 border-t-2 border-slate-800 h-full w-full '>
 						<div className='flex flex-col font-mono text-[1.1rem] bg-none p-0 m-0 break-words gap-0'>
 							<span className='flex items-start pl-2 indent-0 tabular-nums'>
 								<span className='inline-block w-[2.2em] min-w-[2.2em] text-right text-slate-400 mr-[30px] select-none'>1</span>
@@ -119,7 +118,7 @@ export default function AboutClient() {
 					</div>
 				)}
 			</div>
-			<span className='right-between-container flex items-start mt-[40px] pt-[10px] justify-center min-w-[40px] bg-transparent border-t-2 h-[calc(100%-40px)] border-slate-800 pt-5=3'>
+			<span className='right-between-container flex items-start mt-[40px] pt-[10px] justify-center min-w-[40px] bg-transparent border-t-2 border-l-2 h-[calc(100%-40px)] border-slate-800 pt-5=3'>
 				<div className='bg-slate-500 w-[26px] h-[6px]' />
 			</span>
 		</div>
