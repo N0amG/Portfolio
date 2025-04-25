@@ -59,7 +59,7 @@ export default function AboutClient() {
 		// Conteneur principal de la colonne gauche et centrale
 		<div className='flex items-start justify-start w-full h-full'>
 			{/* Colonne de gauche : menu déroulant (Dropdown) */}
-			<div className='left-container flex flex-col items-start justify-start h-full overflow-y-auto scrollbar-custom min-w-[250px]'>
+			<div className='left-container flex flex-col items-start justify-start h-full overflow-y-auto scrollbar-custom min-w-[250px] w-1/2'>
 
 				<Dropdown title='personnal-info' isLabel={true} className=''>
 					<Dropdown title='bio' iconColor='text-rose-400' isOpen={true}>
@@ -68,7 +68,7 @@ export default function AboutClient() {
 					<Dropdown title='interests' iconColor='text-teal-400'>
 						<DropdownItem id='interests-1' title='video-games' iconPath='M24 12L18.3431 17.6569L16.9289 16.2426L21.1716 12L16.9289 7.75736L18.3431 6.34315L24 12ZM2.82843 12L7.07107 16.2426L5.65685 17.6569L0 12L5.65685 6.34315L7.07107 7.75736L2.82843 12ZM9.78845 21H7.66009L14.2116 3H16.3399L9.78845 21Z' activeId={selectedId} onClick={setSelectedId} />
 						<DropdownItem id='interests-2' title='coding' iconPath='M17 4C20.3137 4 23 6.68629 23 10V14C23 17.3137 20.3137 20 17 20H7C3.68629 20 1 17.3137 1 14V10C1 6.68629 3.68629 4 7 4H17ZM17 6H7C4.8578 6 3.10892 7.68397 3.0049 9.80036L3 10V14C3 16.1422 4.68397 17.8911 6.80036 17.9951L7 18H17C19.1422 18 20.8911 16.316 20.9951 14.1996L21 14V10C21 7.8578 19.316 6.10892 17.1996 6.0049L17 6ZM10 9V11H12V13H9.999L10 15H8L7.999 13H6V11H8V9H10ZM18 13V15H16V13H18ZM16 9V11H14V9H16Z' activeId={selectedId} onClick={setSelectedId} />
-						<DropdownItem id='interests-3' title='Sciences' iconPath='M17 4C20.3137 4 23 6.68629 23 10V14C23 17.3137 20.3137 20 17 20H7C3.68629 20 1 17.3137 1 14V10C1 6.68629 3.68629 4 7 4H17ZM17 6H7C4.8578 6 3.10892 7.68397 3.0049 9.80036L3 10V14C3 16.1422 4.68397 17.8911 6.80036 17.9951L7 18H17C19.1422 18 20.8911 16.316 20.9951 14.1996L21 14V10C21 7.8578 19.316 6.10892 17.1996 6.0049L17 6ZM10 9V11H12V13H9.999L10 15H8L7.999 13H6V11H8V9H10ZM18 13V15H16V13H18ZM16 9V11H14V9H16Z' activeId={selectedId} onClick={setSelectedId} />
+						<DropdownItem id='interests-3' title='sciences' iconPath='M17 4C20.3137 4 23 6.68629 23 10V14C23 17.3137 20.3137 20 17 20H7C3.68629 20 1 17.3137 1 14V10C1 6.68629 3.68629 4 7 4H17ZM17 6H7C4.8578 6 3.10892 7.68397 3.0049 9.80036L3 10V14C3 16.1422 4.68397 17.8911 6.80036 17.9951L7 18H17C19.1422 18 20.8911 16.316 20.9951 14.1996L21 14V10C21 7.8578 19.316 6.10892 17.1996 6.0049L17 6ZM10 9V11H12V13H9.999L10 15H8L7.999 13H6V11H8V9H10ZM18 13V15H16V13H18ZM16 9V11H14V9H16Z' activeId={selectedId} onClick={setSelectedId} />
 
 					</Dropdown>
 					<Dropdown title='studies' iconColor='text-indigo-500'>
@@ -82,7 +82,7 @@ export default function AboutClient() {
 				</Dropdown>
 			</div>
 			{/* Colonne centrale : affichage du contenu sélectionné */}
-			<div className='right-left-container flex flex-col items-start justify-start w-1/2 min-w-[600px] h-full'>
+			<div className='right-left-container flex flex-col items-start justify-start w-full min-w-[600px] h-full'>
 				{selectedId && (
 					<h3 className='title flex items-center gap-2  w-[250px] px-3 py-2 transition-colors select-none justify-between border-slate-800 border-r-2'>
 						{[

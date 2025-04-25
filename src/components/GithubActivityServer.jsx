@@ -1,14 +1,14 @@
 import GithubActivity from './GithubActivity';
 
-export default async function GithubActivityServer({ repoNum = 4, commitPerRepo = 1, ...props }) {
+export default async function GithubActivityServer({ repoNum = 6, commitPerRepo = 2, ...props }) {
 	const token = process.env.GITHUB_TOKEN;
 	const headers = {
 		Accept: 'application/vnd.github.v3+json',
 		...(token ? { Authorization: `Bearer ${token}` } : {})
 	};
 
-	// 1. Récupérer les repoNum repos publics les plus récents
-	const repoRes = await fetch('https://api.github.com/users/N0amG/repos?per_page=' + repoNum + '&sort=updated', { headers, cache: 'no-store' });
+	// 1. Récupérer les repoNum repos publics (sans tri par date de mise à jour)
+	const repoRes = await fetch('https://api.github.com/users/N0amG/repos?per_page=100', { headers, cache: 'no-store' });
 	let repos = [];
 	if (repoRes.ok) {
 		repos = await repoRes.json();
@@ -30,8 +30,10 @@ export default async function GithubActivityServer({ repoNum = 4, commitPerRepo 
 		}
 	}
 
-	// 3. Trier tous les commits par date décroissante et ne garder que les repoNum*commitPerRepo plus récents
+	// 3. Trier tous les commits par date décroissante
 	allCommits.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+	// 4. Limiter le nombre de commits à repoNum * commitPerRepo
 	const events = allCommits.slice(0, repoNum * commitPerRepo);
 
 	return <GithubActivity events={events} {...props} />;

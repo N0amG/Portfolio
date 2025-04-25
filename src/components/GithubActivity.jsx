@@ -18,10 +18,11 @@ export default function GithubActivity({ events = [] }) {
 	// Fonction pour déterminer la couleur du premier mot
 	function getFirstWordColor(firstWord) {
 		const word = firstWord.toLowerCase();
-		if (word.includes('add') || word.includes('optimization') || word.includes('create')) return 'bg-green-600';
-		if (word.includes('fix')) return 'bg-orange-400';
+		if (word.includes('add')  || word.includes('create')) return 'bg-green-600';
+		if (word.includes('fix') || word.includes('optimiz')) return 'bg-orange-400';
 		if (word.includes('remove') || word.includes('delete')) return 'bg-red-600';
 		if (word.includes('update') || word.includes('upgrade')) return 'bg-blue-600';
+		if (word.includes('merge')) return 'bg-purple-700';
 		if (/^v[\d.]+/i.test(firstWord)) return 'bg-slate-50 text-black';
 		return 'bg-black';
 	}
@@ -56,7 +57,6 @@ export default function GithubActivity({ events = [] }) {
 				const firstWord = getFirstWord(event.message);
 				const color = getFirstWordColor(firstWord);
 				const messageSansFirstWord = removeFirstWord(event.message);
-				console.log(event.message, firstWord, messageSansFirstWord, color);
 				return (
 					<li key={event.id} className="github-commit-item bg-slate-800/70 rounded-lg p-4 shadow border border-slate-700 flex flex-col gap-2">
 						<div className="flex flex-wrap items-center gap-1 mb-2">
