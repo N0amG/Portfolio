@@ -14,7 +14,7 @@ export default function TextAreaField({ maxWidth = '400px', placeholder = 'Votre
 			${error ? 'bg-red-500/30 border-red-500' : focus ? 'bg-slate-800 border-slate-50' : 'bg-slate-800 border-slate-700'} text-slate-50 relative`}>
 				<textarea
 					placeholder={placeholder}
-					className="border-none outline-none bg-transparent w-full resize-none text-slate-400 py-3"
+					className="border-none outline-none bg-transparent w-full resize-none text-slate-400 py-2 text-sm"
 					onFocus={() => setFocus(true)}
 					onBlur={() => setFocus(false)}
 					rows={4}
@@ -29,7 +29,7 @@ export default function TextAreaField({ maxWidth = '400px', placeholder = 'Votre
 				)}
 			</div>
 			{/* Message d'erreur sous le champ si error=true */}
-			{error && <span className="text-red-500 text-md mt-2">Something went wrong</span>}
+			{error && <span className="text-red-500 text-sm mt-2">Something went wrong</span>}
 		</div>
 	)
 }

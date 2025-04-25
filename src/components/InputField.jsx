@@ -15,7 +15,7 @@ export default function InputField({ maxWidth = '400px', placeholder = 'Standard
 				<input
 					type='text'
 					placeholder={placeholder}
-					className="border-none outline-none bg-transparent w-full text-slate-400"
+					className="border-none outline-none bg-transparent w-full text-slate-400 text-sm"
 					onFocus={() => setFocus(true)}
 					onBlur={() => setFocus(false)}
 				/>
@@ -29,7 +29,7 @@ export default function InputField({ maxWidth = '400px', placeholder = 'Standard
 				)}
 			</div>
 			{/* Message d'erreur sous le champ si error=true */}
-			{error && <span className="text-red-500 text-md mt-2">Something went wrong</span>}
+			{error && <span className="text-red-500 text-sm mt-2">Something went wrong</span>}
 		</div>
 	)
 }

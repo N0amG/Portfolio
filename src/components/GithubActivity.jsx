@@ -1,4 +1,4 @@
-export default function GithubActivity({ events = [] }) {
+export default function GithubActivity({ events = [], titre }) {
 	if (!events.length) return <div>Aucune activité récente trouvée.</div>;
 
 	// Fonction pour extraire le premier mot du message (avant espace ou symbole)
@@ -42,37 +42,39 @@ export default function GithubActivity({ events = [] }) {
 		const diffYear = Math.floor(diffDay / 365);
 
 		if (diffSec < 60) return " il y a quelques secondes";
-		if (diffMin < 60) return ` il y a ${diffMin} min${diffMin > 1 ? 's' : ''}`;
+		if (diffMin < 60) return ` il y a ${diffMin} minute${diffMin > 1 ? 's' : ''}`;
 		if (diffHour < 24) return ` il y a ${diffHour} heure${diffHour > 1 ? 's' : ''}`;
 		if (diffDay < 7) return ` il y a ${diffDay} jour${diffDay > 1 ? 's' : ''}`;
 		if (diffWeek < 5) return ` il y a ${diffWeek} semaine${diffWeek > 1 ? 's' : ''}`;
 		if (diffMonth < 12) return ` il y a ${diffMonth} mois`;
-		if (diffYear >= 1) return ` il y a ${diffYear} an ${diffYear > 1 ? 's' : ''}`;
-		return d.toLocaleString('fr-FR', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+		return ` il y a ${diffYear} an${diffYear > 1 ? 's' : ''}`;
 	}
 
 	return (
-		<ul className="github-activity-list flex flex-1 flex-col gap-4 p-2 h-full ">
-			{events.map((event) => {
-				const firstWord = getFirstWord(event.message);
-				const color = getFirstWordColor(firstWord);
-				const messageSansFirstWord = removeFirstWord(event.message);
-				return (
-					<li key={event.id} className="github-commit-item bg-slate-800/70 rounded-lg p-4 shadow border border-slate-700 flex flex-col gap-2">
-						<div className="flex flex-wrap items-center gap-1 mb-2">
-							<span className="font-semibold text-indigo-400">{event.repo?.name}</span>
-							<span className="text-xs text-slate-400">{displayDate(event.created_at)}</span>
-						</div>
-						<div className="flex items-start gap-2">
-							<span className={`px-2 py-0.5 rounded text-xs font-bold ${color}`}>{firstWord}</span>
-							<span className="text-slate-200 font-mono text-sm break-words whitespace-pre-line">{messageSansFirstWord}</span>
-						</div>
-						{event.url && (
-							<a href={event.url} target="_blank" rel="noopener noreferrer" className="text-rose-300 hover:underline text-sm mt-1 w-fit">Voir sur GitHub</a>
-						)}
-					</li>
-				)
-			})}
-		</ul>
+		<div>
+			{titre && <h2 className="text-base font-bold mb-2">{titre}</h2>}
+			<ul className="github-activity-list flex flex-1 flex-col gap-4 p-2 h-full ">
+				{events.map((event) => {
+					const firstWord = getFirstWord(event.message);
+					const color = getFirstWordColor(firstWord);
+					const messageSansFirstWord = removeFirstWord(event.message);
+					return (
+						<li key={event.id} className="github-commit-item bg-slate-800/70 rounded-lg p-4 shadow border border-slate-700 flex flex-col gap-2">
+							<div className="flex flex-wrap items-center gap-1 mb-2">
+								<span className="font-semibold text-indigo-400">{event.repo?.name}</span>
+								<span className="text-xs text-slate-400">{displayDate(event.created_at)}</span>
+							</div>
+							<div className="flex items-start gap-2">
+								<span className={`px-2 py-0.5 rounded text-xs font-bold ${color}`}>{firstWord}</span>
+								<span className="text-slate-200 font-mono text-sm break-words whitespace-pre-line">{messageSansFirstWord}</span>
+							</div>
+							{event.url && (
+								<a href={event.url} target="_blank" rel="noopener noreferrer" className="text-rose-300 hover:underline text-xs mt-1 w-fit">Voir sur GitHub</a>
+							)}
+						</li>
+					);
+				})}
+			</ul>
+		</div>
 	);
 }

@@ -13,7 +13,7 @@ export default function Header() {
 	return (
 		// Barre d'en-tête avec nom et navigation
 		<header className='w-full text-slate-400 select-none z-10 border-b-2 border-slate-800'>
-			<div className='flex items-center justify-between w-full h-16'>
+			<div className='flex items-center justify-between w-full h-12'>
 				{/* Logo ou nom à gauche */}
 				<div
 					className={`flex items-center w-1/5 max-w-[300px] h-full px-6 ${borderXClass} border-slate-800 text-lg text-left`}
@@ -21,11 +21,11 @@ export default function Header() {
 					noam-guez
 				</div>
 				{/* Navigation principale */}
-				<nav className='flex-1 flex h-full w-[66.6667%]'>
+				<nav className='flex-1 flex h-full w-[66.6667%] text-sm'>
 					{' '}
 					{/* 2x w-1/3 = w-2/3 */}
 					<ul className='flex items-center h-full divide-slate-800 border-slate-800 w-full'>
-						{/* Lien Accueil */}
+						{/* Lien _accueil */}
 						<li
 							className={`px-8 h-full flex items-center ${borderXClass} cursor-pointer transition-colors ${
 								pathname === '/' ? focusStyle : ''
@@ -35,19 +35,17 @@ export default function Header() {
 							}
 							onMouseLeave={(e) => {
 								if (pathname !== '/')
-									e.currentTarget.classList.remove(
-										'text-slate-50'
-									)
+									e.currentTarget.classList.remove('text-slate-50')
 							}}
 						>
 							<Link
 								href='/'
 								className='w-full h-full flex items-center'
 							>
-								_hello
+								_accueil
 							</Link>
 						</li>
-						{/* Lien About */}
+						{/* Lien _a-propos */}
 						<li
 							className={`px-8 h-full flex items-center ${borderXClass} cursor-pointer transition-colors ${
 								pathname === '/about' ? focusStyle : ''
@@ -57,19 +55,17 @@ export default function Header() {
 							}
 							onMouseLeave={(e) => {
 								if (pathname !== '/about')
-									e.currentTarget.classList.remove(
-										'text-slate-50'
-									)
+									e.currentTarget.classList.remove('text-slate-50')
 							}}
 						>
 							<Link
 								href='/about'
 								className='w-full h-full flex items-center'
 							>
-								_about-me
+								_a-propos
 							</Link>
 						</li>
-						{/* Lien Projects */}
+						{/* Lien _projets */}
 						<li
 							className={`px-8 h-full flex items-center ${
 								isAbout
@@ -83,23 +79,21 @@ export default function Header() {
 							}
 							onMouseLeave={(e) => {
 								if (pathname !== '/projects')
-									e.currentTarget.classList.remove(
-										'text-slate-50'
-									)
+									e.currentTarget.classList.remove('text-slate-50')
 							}}
 						>
 							<Link
 								href='/projects'
 								className='w-full h-full flex items-center'
 							>
-								_projects
+								_projets
 							</Link>
 						</li>
 					</ul>
 				</nav>
-				{/* Lien Contact à droite */}
+				{/* Lien _contact à droite */}
 				<div
-					className={`flex items-center h-full px-6 border-slate-800 border-l-2 cursor-pointer hover:text-slate-50 transition-colors ${
+					className={`flex items-center h-full px-6 border-slate-800 border-l-2 cursor-pointer text-sm hover:text-slate-50 transition-colors ${
 						pathname === '/contact' ? focusStyle : ''
 					}`}
 				>
@@ -107,7 +101,7 @@ export default function Header() {
 						href='/contact'
 						className='w-full h-full flex items-center'
 					>
-						_contact-me
+						_contact
 					</Link>
 				</div>
 			</div>
