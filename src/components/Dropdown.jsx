@@ -63,7 +63,7 @@ export default function Dropdown({
 
 	return ( // Met un border basse et droite au dropdown label sauf si c'est le label contacts, enleve le border-bottom
 		// Conteneur principal du dropdown, applique les bordures selon le type
-		<div className={`w-full ${className, (isLabel ? title === '_contacts' ? 'border-r-2 border-slate-800 h-full' : 'border-b-2 border-r-2 border-slate-800' : '')}`}>
+		<div className={`w-full ${className, (isLabel ? (title === '_contacts' || title === 'projets') ? 'border-r-2 border-slate-800 h-full' : 'border-b-2 border-r-2 border-slate-800' : '')}`}>
 			<DropdownTitle
 				title={title}
 				iconPath={iconPath}
@@ -74,7 +74,7 @@ export default function Dropdown({
 			/>
 			{/* Affichage conditionnel des enfants (DropdownItem) si ouvert */}
 			{open && (
-				<div className="flex flex-col gap-1 animate-fade-in pb-2 pl-5">
+				<div className="flex flex-col gap-1 animate-fade-in pb-2 pt-2 pl-5">
 					{children}
 				</div>
 			)}

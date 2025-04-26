@@ -12,7 +12,7 @@ export default function GithubActivity({ events = [], titre }) {
 	function removeFirstWord(message) {
 		if (!message) return '';
 		// Retire le premier mot (avec ou sans symbole) + tous les espaces/symboles qui suivent
-		return message.replace(/^[^\s:;,!?\-\[\](){}]+/i, '');
+		return message.replace(/^[^\s:;,!?\-\[\](){}]+/i, '').trim();
 	}
 
 	// Fonction pour déterminer la couleur du premier mot
@@ -23,7 +23,7 @@ export default function GithubActivity({ events = [], titre }) {
 		if (word.includes('remove') || word.includes('delete')) return 'bg-red-600';
 		if (word.includes('update') || word.includes('upgrade')) return 'bg-blue-600';
 		if (word.includes('merge')) return 'bg-purple-700';
-		if (/^v[\d.]+/i.test(firstWord)) return 'bg-slate-50 text-black';
+		if (/^v[\d.]+/i.test(firstWord)) return 'bg-slate-50 text-black'; // Si le mot = VX.X
 		return 'bg-black';
 	}
 

@@ -16,7 +16,7 @@ export default function Header() {
 			<div className='flex items-center justify-between w-full h-12'>
 				{/* Logo ou nom à gauche */}
 				<div
-					className={`flex items-center w-1/5 max-w-[300px] h-full px-6 ${borderXClass} border-slate-800 text-lg text-left`}
+					className={`flex items-center w-1/5 max-w-[300px] min-w-[165px] h-full px-6 ${borderXClass} border-slate-800 text-lg text-left`}
 				>
 					noam-guez
 				</div>

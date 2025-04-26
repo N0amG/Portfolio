@@ -123,7 +123,7 @@ export default function AboutClient(className) {
 		// Conteneur principal de la colonne gauche et centrale
 		<div className={`flex items-start w-full h-full ${className} text-sm`}>
 			{/* Colonne de gauche : menu déroulant (Dropdown) */}
-			<div className='left-container flex flex-col items-center justify-start h-full overflow-y-auto scrollbar-custom min-w-[250px] max-w-[700px] w-4/7'>
+			<div className='left-container flex flex-col items-center justify-start h-full overflow-y-auto scrollbar-custom min-w-[260px] max-w-[700px] w-4/7'>
 				<Dropdown
 					title='_infos-personnelles'
 					isLabel={true}

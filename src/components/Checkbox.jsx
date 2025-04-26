@@ -1,3 +1,4 @@
+'use client'
 import { useState } from 'react'
 
 // Composant Checkbox contrôlé, gère son propre état et notifie le parent
@@ -22,7 +23,7 @@ export default function Checkbox({
         type="checkbox"
         checked={checked}
         onChange={handleChange}
-        className="w-5 h-5 rounded border border-slate-500 bg-slate-900 appearance-none transition-colors focus:outline-none focus:ring-2 focus:ring-slate-700 checked:bg-slate-500"
+        className="w-5 h-5 rounded border border-slate-500 bg-slate-900 appearance-none transition-colors hover:outline-none hover:ring-2 hover:ring-slate-700 checked:bg-slate-500"
         {...props}
       />
       {/* Affichage de l'icône SVG si la case est cochée */}
