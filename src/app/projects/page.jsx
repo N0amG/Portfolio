@@ -4,6 +4,7 @@ import Checkbox from '@/components/Checkbox'
 import Dropdown from '@/components/Dropdown'
 import Icon from '@/components/Icon'
 import ProjectCard from '@/components/ProjectCard'
+import projects from '@/data/projects'
 
 export default function Project() {
 	// Page de présentation des projets
@@ -61,58 +62,12 @@ export default function Project() {
 	const selectedLangsTitle =
 		selectedLangs.length > 0 ? selectedLangs.join('; ') : 'tous'
 
-	// Liste de projets (exemple)
-	const projects = [
-		{
-			title: 'Booki',
-			description:
-				'Application pc/mobile de réservation de logements de vacances.',
-			languages: ['HTML', 'CSS', 'responsive'],
-			img: '/img/booki/booki_thumbnail.webp',
-		},
-		{
-			title: 'Sophie Bluel',
-			description: 'Portfolio architecte en javascript',
-			languages: ['HTML', 'CSS', 'Javascript'],
-			img: '/img/booki/booki_thumbnail.webp',
-		},
-		{
-			title: 'Nina Carducci',
-			description:
-				'Site vitrine photographe, optimisation SEO et accessibilité.',
-			languages: ['HTML', 'CSS', 'Javascript'],
-			img: '/img/booki/booki_thumbnail.webp',
-		},
-		{
-			title: 'Kasa',
-			description: 'Application React/NextJS de location immobilière.',
-			languages: ['React', 'CSS'],
-			img: '/img/booki/booki_thumbnail.webp',
-		},
-		{
-			title: 'Mon Vieux Grimoire',
-			description:
-				'Application Node/Express de gestion de livres avec API REST.',
-			languages: ['Node', 'Javascript', 'CSS'],
-			img: '/img/booki/booki_thumbnail.webp',
-		},
-		{
-			title: 'Portfolio',
-			description:
-				'Ce site portfolio, développé avec NextJS et Tailwind.',
-			languages: ['NextJS', 'Tailwind'],
-			img: '/img/booki/booki_thumbnail.webp',
-		},
-	]
-
-	// Filtrage des projets selon les langages sélectionnés
+	// Filtrage des projets selon les langages sélectionnés (filtre OU)
 	const filteredProjects =
 		selectedLangs.length === 0
 			? projects
 			: projects.filter((project) =>
-					selectedLangs.every((lang) =>
-						project.languages.includes(lang)
-					)
+				selectedLangs.some((lang) => project.languages.includes(lang))
 			  )
 
 	return (
@@ -160,7 +115,7 @@ export default function Project() {
 				{selectedTab && (
 					<div
 						id='projects-list'
-						className='flex flex-wrap gap-4 p-2 pt-5 justify-around items-center overflow-y-auto scrollbar-custom border-t-2 border-slate-800'
+						className='flex flex-wrap gap-4 p-2 pt-5 justify-around h-full overflow-y-auto scrollbar-custom border-t-2 border-slate-800'
 					>
 						{filteredProjects.length === 0 ? (
 							<p className='text-slate-400'>

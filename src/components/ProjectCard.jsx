@@ -25,8 +25,8 @@ export default function ProjectCard({
 		const y = e.clientY - rect.top
 		const centerX = rect.width / 2
 		const centerY = rect.height / 2
-		const rotateX = ((y - centerY) / centerY) * 6 // max 6deg (moins prononcé)
-		const rotateY = ((x - centerX) / centerX) * 6
+		const rotateX = ((y - centerY) / centerY) * 10
+		const rotateY = ((x - centerX) / centerX) * 10
 		setTilt({ x: -rotateX, y: rotateY })
 	}
 
@@ -46,7 +46,7 @@ export default function ProjectCard({
 						? 'transform 0.3s cubic-bezier(.23,1.02,.32,1)'
 						: 'transform 0.08s',
 			}}
-			className={`flex flex-col shadow-md p-0 overflow-hidden ${className} cursor-pointer hover:scale-[1.03] transition-transform`}
+			className={`flex flex-col shadow-md p-0 h-fit overflow-hidden ${className} cursor-pointer hover:scale-[1.03] transition-transform`}
 		>
 			{/* Titre au-dessus de la carte, sans background */}
 			<div className='w-full flex pt-3 pb-1'>

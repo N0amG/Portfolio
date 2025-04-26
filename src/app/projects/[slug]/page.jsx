@@ -1,17 +1,6 @@
 // Page dynamique pour chaque projet
 import { notFound } from 'next/navigation';
-
-// Exemple de base de données locale (à remplacer par une vraie source de données)
-const projects = [
-  {
-    slug: 'booki',
-    title: 'Booki',
-    description: 'Application pc/mobile de réservation de logements de vacances.',
-    tags: ['HTML', 'CSS', 'responsive'],
-    img: '/img/booki/booki_thumbnail.webp',
-  },
-  // Ajoute d'autres projets ici
-];
+import projects from '@/data/projects';
 
 export default function ProjectDetail({ params }) {
   const { slug } = params;
