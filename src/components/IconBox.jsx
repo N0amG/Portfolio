@@ -49,7 +49,8 @@ export default function IconBox({
 			bgColor: "bg-blue-400"
 		}
 	}
-	const iconInfo = iconData[language?.toLowerCase()] || iconData['javascript'] // Défaut à JavaScript si le langage n'est pas reconnu
+	const iconInfo = iconData[language?.toLowerCase()] || null // Défaut à JavaScript si le langage n'est pas reconnu
+	if (!iconInfo) return null;
 	const iconPath = iconInfo.path
 	const iconBgColor = iconInfo.bgColor || bgColor
 	return (

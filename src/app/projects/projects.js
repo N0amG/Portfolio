@@ -30,7 +30,7 @@ const projects = [
 		title: 'Mon Vieux Grimoire',
 		description:
 			'Application Node/Express de gestion de livres avec API REST.',
-		languages: ['Node', 'Javascript', 'CSS'],
+		languages: ['Node', 'Javascript', 'CSS', 'MongoDB'],
 		img: '/img/booki/booki_thumbnail.webp',
 	},
 	{

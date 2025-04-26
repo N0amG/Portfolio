@@ -1,10 +1,10 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useState } from 'react'
 import Checkbox from '@/components/Checkbox'
 import Dropdown from '@/components/Dropdown'
 import Icon from '@/components/Icon'
 import ProjectCard from '@/components/ProjectCard'
-import projects from '@/data/projects'
+import projects from '@/app/projects/projects'
 
 export default function Project() {
 	// Page de présentation des projets
