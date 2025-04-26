@@ -23,7 +23,7 @@ const projects = [
 	{
 		title: 'Kasa',
 		description: 'Application React/NextJS de location immobilière.',
-		languages: ['React', 'CSS'],
+		languages: ['React', 'CSS', 'SASS', 'responsive'],
 		img: '/img/booki/booki_thumbnail.webp',
 	},
 	{
