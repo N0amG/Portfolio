@@ -6,7 +6,7 @@ import { useRef, useState } from 'react'
 
 export default function ProjectCard({
 	title,
-	description,
+	subtitle,
 	languages,
 	className,
 	tag = '', // Ajout d'un tag technique optionnel
@@ -90,7 +90,7 @@ export default function ProjectCard({
 					{/* Bloc texte + bouton avec fond slate-950 */}
 					<div className='flex flex-col h-[calc(100%-110px)] justify-between items-center p-2 rounded-b-2xl bg-slate-950'>
 						<p className='text-slate-400 leading-relaxed text-sm'>
-							{description}
+							{subtitle}
 						</p>
 						{/* Bouton view-project en bas à gauche */}
 						<div className='w-full flex justify-start'>

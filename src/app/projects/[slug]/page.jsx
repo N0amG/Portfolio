@@ -3,15 +3,16 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import projects from '@/app/projects/projects'
 import Carousel from '@/components/Carousel'
-export default function ProjectDetail({ params }) {
-	const { slug } = params
+
+export default async function ProjectDetail({ params }) {
+	const { slug } = await params
 	const toSlug = (str) => str.toLowerCase().replace(/\s+/g, '-')
 	const project = projects.find((p) => toSlug(p.title) === slug)
 
 	if (!project) return notFound()
 
 	return (
-		<div className='project-slug flex flex-col h-full w-full px-4 pt-6'>
+		<div className='project-slug flex flex-col h-full max-h-[calc(100%-93px)] w-full px-4 pt-6'>
 			<div className='flex '>
 				<Link href='/projects/' className='self-start'>
 					<svg
@@ -28,8 +29,8 @@ export default function ProjectDetail({ params }) {
 					{project.title}
 				</h1>
 			</div>
-			<div className='container flex h-full ml-20 mb-5 w-full'>
-				<Carousel>
+			<div className='container flex h-full ml-20 max-w-[calc(100%-80px)] max-h-[calc(100%-60px)]'>
+				<Carousel className='h-[calc(100%-40px)] mb-10'>
 					<img
 						src={project.img}
 						alt={project.title}
@@ -58,7 +59,7 @@ export default function ProjectDetail({ params }) {
 				</Carousel>
 				<div
 					id='desciption'
-					className='flex flex-col w-[calc(100% - 50px)] items-center justify-center'
+					className='flex flex-col w-[calc(100%-120px)] items-start overflow-y-auto scrollbar-custom pr-3'
 				>
 					<div className='flex gap-2 mb-4'>
 						{project.languages.map((tag) => (
@@ -70,9 +71,11 @@ export default function ProjectDetail({ params }) {
 							</span>
 						))}
 					</div>
-					<p className='text-slate-300 text-lg mb-4'>
-						{project.description}
-					</p>
+					<ul className='flex flex-col text-slate-300 text-md mb-4 list-inside h-full'>
+						{project.description.map((desc, idx) => (
+							<li key={idx} className='flex flex-wrap'>{desc === "" ? <br/> : desc}</li>
+						))}
+					</ul>
 				</div>
 			</div>
 		</div>

@@ -12,7 +12,7 @@ export default function Header() {
 
 	return (
 		// Barre d'en-tête avec nom et navigation
-		<header className='w-full text-slate-400 select-none z-10 border-b-2 border-slate-800'>
+		<header className='flex w-full text-slate-400 select-none z-10 border-b-2 border-slate-800'>
 			<div className='flex items-center justify-between w-full h-12'>
 				{/* Logo ou nom à gauche */}
 				<div
