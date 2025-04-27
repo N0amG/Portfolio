@@ -71,7 +71,7 @@ export default async function ProjectDetail({ params }) {
 							</span>
 						))}
 					</div>
-					<ul className='flex flex-col text-slate-300 text-md mb-4 list-inside h-full'>
+					<ul className='flex flex-col text-slate-300 text-md my-4 list-inside h-full'>
 						{project.description.map((desc, idx) => (
 							<li key={idx} className='flex flex-wrap'>{desc === "" ? <br/> : desc}</li>
 						))}
