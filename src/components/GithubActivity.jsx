@@ -61,7 +61,7 @@ export default function GithubActivity({ events = [], titre }) {
 					return (
 						<li key={event.id} className="github-commit-item bg-slate-800/70 rounded-lg p-4 shadow border border-slate-700 flex flex-col gap-2">
 							<div className="flex flex-wrap items-center gap-1 mb-2">
-								<span className="font-semibold text-indigo-400">{event.repo?.name}</span>
+								<span className="font-semibold text-indigo-400 mr-2">{event.repo?.name}</span>
 								<span className="text-xs text-slate-400">{displayDate(event.created_at)}</span>
 							</div>
 							<div className="flex items-start gap-2">
