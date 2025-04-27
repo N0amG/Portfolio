@@ -2,7 +2,7 @@
 // Ce module permet de stocker en mémoire les données récupérées depuis l'API GitHub
 // et de les actualiser automatiquement toutes les 5 minutes.
 
-const CACHE_DURATION = 60 * 1000; // 5 minutes
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 let cache = {
   events: [], // Stocke les commits récupérés
   lastFetch: 0, // Timestamp du dernier fetch
