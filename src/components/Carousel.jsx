@@ -1,21 +1,37 @@
 'use client'
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 
 export default function Carousel({ children }) {
   const items = React.Children.toArray(children);
   const [current, setCurrent] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const pauseTimeout = useRef(null);
 
-  // Ajout du défilement automatique toutes les 3 secondes
+  // Défilement automatique toutes les 3 secondes, sauf si "paused" est actif
   useEffect(() => {
+    if (paused) return;
     const interval = setInterval(() => {
       setCurrent((c) => (c === items.length - 1 ? 0 : c + 1));
     }, 3000);
     return () => clearInterval(interval);
-  }, [items.length]);
+  }, [items.length, paused]);
 
-  const prev = () => setCurrent((c) => (c === 0 ? items.length - 1 : c - 1));
-  const next = () => setCurrent((c) => (c === items.length - 1 ? 0 : c + 1));
+  // Fonction pour mettre en pause le défilement auto pendant 8 secondes
+  const triggerPause = () => {
+    setPaused(true);
+    if (pauseTimeout.current) clearTimeout(pauseTimeout.current);
+    pauseTimeout.current = setTimeout(() => setPaused(false), 5000);
+  };
+
+  const prev = () => {
+    setCurrent((c) => (c === 0 ? items.length - 1 : c - 1));
+    triggerPause();
+  };
+  const next = () => {
+    setCurrent((c) => (c === items.length - 1 ? 0 : c + 1));
+    triggerPause();
+  };
 
   return (
     <div className="carousel flex relative w-full max-w-lg overflow-hidden h-full rounded-2xl mr-10">
