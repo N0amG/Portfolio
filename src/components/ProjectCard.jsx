@@ -1,8 +1,6 @@
-'use client'
-
 import IconBox from './IconBox'
 import Link from 'next/link'
-import { useRef, useState } from 'react'
+import TiltWrapper from './TiltWrapper'
 
 export default function ProjectCard({
 	title,
@@ -14,40 +12,9 @@ export default function ProjectCard({
 	onView = null, // Callback pour le bouton view-project
 }) {
 	const slug = title ? title.toLowerCase().replace(/\s+/g, '-') : ''
-	const cardRef = useRef(null)
-	const [tilt, setTilt] = useState({ x: 0, y: 0 })
-
-	function handleMouseMove(e) {
-		const card = cardRef.current
-		if (!card) return
-		const rect = card.getBoundingClientRect()
-		const x = e.clientX - rect.left
-		const y = e.clientY - rect.top
-		const centerX = rect.width / 2
-		const centerY = rect.height / 2
-		const rotateX = ((y - centerY) / centerY) * 15
-		const rotateY = ((x - centerX) / centerX) * 15
-		setTilt({ x: -rotateX, y: rotateY })
-	}
-
-	function handleMouseLeave() {
-		setTilt({ x: 0, y: 0 })
-	}
 
 	return (
-		<div
-			ref={cardRef}
-			onMouseMove={handleMouseMove}
-			onMouseLeave={handleMouseLeave}
-			style={{
-				transform: `perspective(700px) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg) scale(1)`,
-				transition:
-					tilt.x === 0 && tilt.y === 0
-						? 'transform 0.3s cubic-bezier(.23,1.02,.32,1)'
-						: 'transform 0.08s',
-			}}
-			className={`flex flex-col shadow-md p-0 h-fit overflow-hidden ${className} cursor-pointer hover:scale-[1.1] transition-transform`}
-		>
+		<TiltWrapper className={`flex flex-col shadow-md p-0 h-fit overflow-hidden ${className} cursor-pointer hover:scale-[1.1] transition-transform`}>
 			{/* Titre au-dessus de la carte, sans background */}
 			<div className='w-full flex pt-3 pb-1'>
 				<span className='font-mono text-sm text-slate-300'>
@@ -104,6 +71,6 @@ export default function ProjectCard({
 					</div>
 				</div>
 			</Link>
-		</div>
+		</TiltWrapper>
 	)
 }

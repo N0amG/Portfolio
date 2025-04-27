@@ -1,4 +1,5 @@
 import Avatar from '@/components/Avatar'
+import TiltWrapper from '@/components/TiltWrapper'
 
 // Page d'accueil principale du portfolio
 export default function Home() {
@@ -22,7 +23,9 @@ export default function Home() {
 					</h2>
 				</div>
 				{/* Avatar à droite du texte */}
-				<Avatar className={'border-slate-400'}/>
+				<TiltWrapper intensity={25} className='w-[200px] h-[200px] mr-10 hover:scale-[1.3] '>
+					<Avatar className={'border-slate-400'} />
+				</TiltWrapper>
 			</div>
 			{/* Lien Github stylisé façon code */}
 			<div className='flex flex-col p-4'>

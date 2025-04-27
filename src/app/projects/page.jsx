@@ -7,14 +7,6 @@ import ProjectCard from '@/components/ProjectCard'
 import projects from '@/app/projects/projects'
 
 export default function Project() {
-	// Page de présentation des projets
-	const project = {
-		title: 'Booki',
-		description:
-			'Application pc/mobile de réservation de logements de vacances.',
-		tags: ['HTML', 'CSS', 'responsive'],
-		img: '/img/booki/booki_thumbnail.webp',
-	}
 
 	const languages = [
 		'HTML',
@@ -24,7 +16,7 @@ export default function Project() {
 		'NextJS',
 		'Tailwind',
 		'Node',
-		'PHP',
+		//'PHP',
 	]
 	const iconData = {
 		javascript:

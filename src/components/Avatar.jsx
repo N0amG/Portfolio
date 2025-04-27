@@ -5,7 +5,7 @@ export default function Avatar({ src, className }) {
 	return (
 		// Conteneur de l'avatar, centré et arrondi
 		<div
-			className={`avatar relative flex items-center justify-center w-40 h-40 min-w-40 min-h-40
+			className={`avatar relative flex items-center justify-center w-full h-gull min-w-40 min-h-40
 						rounded-full overflow-hidden border-4 select-none ${className}`} >
 			{/* Image de l'avatar (par défaut /assets/noam.webp) */}
 			<img

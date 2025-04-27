@@ -34,7 +34,7 @@ export default function Carousel({ children, className}) {
   };
 
   return (
-    <div className={`carousel flex relative min-w-[400px] w-full max-w-lg overflow-hidden rounded-2xl mr-10 ${className}`}>
+    <div className={`carousel flex relative rounded-2xl overflow-hidden ${className}`}>
       <div
         className="flex transition-transform duration-500 ease-in-out h-full"
         style={{ transform: `translateX(-${current * 100}%)`, width: `${items.length * 100}%` }}
