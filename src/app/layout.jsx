@@ -21,7 +21,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
 	// Layout racine de l'application, englobe tout le site
 	return (
-		<html lang='en' className='dark'>
+		<html lang='fr'>
 			<head>
 				{/* Préconnexion et import des polices Google Fonts */}
 				<link rel='preconnect' href='https://fonts.googleapis.com' />

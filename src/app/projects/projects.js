@@ -12,7 +12,7 @@ const projects = [
  			"Le site est responsive, ce qui signifie que le contenu s'adapte selon la taille d'écran. Le site a une version tablette ainsi qu'une version mobile."
 		],
 		languages: ['HTML', 'CSS', 'Responsive'],
-		img: '/img/booki/booki_thumbnail.webp',
+		imgCount : 4
 	},
 	{
 		title: 'Sophie Bluel',
@@ -26,7 +26,7 @@ const projects = [
 			"Le site est composé d'une présentation professionnelle ainsi que d'un formulaire de contact. Il possède une page de connexion qui permet à l'architecte de s'identifier. En mode connecté, il est possible d'ajouter ou de supprimer des projets dynamiquement via une modale. Les projets peuvent être triés par catégorie dans la page principale.",
 		],
 		languages: ['HTML', 'CSS', 'Javascript'],
-		img: '/img/booki/booki_thumbnail.webp',
+		imgCount : 3
 	},
 	{
 		title: 'Nina Carducci',
@@ -44,7 +44,7 @@ const projects = [
 			"J'ai aussi rendu le code plus clair et j'ai ajouté des balises afin d'améliorer son référencement par les navigateurs de recherche ( SEO ).",
 		],
 		languages: ['HTML', 'CSS', 'Javascript', 'SEO', 'Performances', 'Accessibilité'],
-		img: '/img/booki/booki_thumbnail.webp',
+		imgCount : 3
 	},
 	{
 		title: 'Kasa',
@@ -58,7 +58,7 @@ const projects = [
 		],
 		url:"https://github.com/N0amG/OC_Kasa",
 		languages: ['React', 'CSS', 'SASS', 'Responsive'],
-		img: '/img/booki/booki_thumbnail.webp',
+		imgCount : 4
 	},
 	{
 		title: 'Mon Vieux Grimoire',
@@ -72,7 +72,7 @@ const projects = [
 			"J'ai tout d'abord réalisé les méthodes qui permettent aux utilisateurs de s'inscrire et de se connecter. J'ai ensuite réalisé les routes API qui servent à créer, modifier ou supprimer des livres. Les images des livres sont stockées avec Multer et compressées avec Sharp. J'ai finis par coder les routes qui permettent aux utilisateurs de noter les livres postés sur le site. Les 3 livres les mieux notés apparaissent sur chaque page."
 		],
 		languages: ['Node', 'Javascript', 'CSS', 'Express', 'MongoDB', 'Multer', 'Sharp'],
-		img: '/img/booki/booki_thumbnail.webp',
+		imgCount : 4
 	},
 	{
 		title:'Qwenta',
@@ -88,7 +88,7 @@ const projects = [
 			"J'ai tout d'abord effectué une veille technologique organisée afin de sélectionner les outils du projet. J'ai ensuite créé le document qui liste les détails des spécifications techniques. J'ai alors réparti les tâches au sein d'un tableau Kanban sur Notion afin d'organiser le projet. J'ai finis par préparer la présentation au Product Owner afin de le briefer."
 			],
 		languages:["Feedly", "Notion"],
-		img: '/img/booki/booki_thumbnail.webp',
+		imgCount : 5
 	},
 	{
 		title: 'Portfolio',
@@ -103,7 +103,7 @@ const projects = [
 
 		],
 		languages: ['NextJS', 'Tailwind', 'Responsive', 'Hébergement'],
-		img: '/img/booki/booki_thumbnail.webp',
+		imgCount : 1
 	},
 ];
 
