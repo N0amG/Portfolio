@@ -97,7 +97,7 @@ export default function Contact({ className }) {
 			<div className='right-left-container flex items-start justify-start w-full min-w-[600px] h-full max-h-full mt-[38px]'>
 				<div
 					id='form-container'
-					className='flex flex-col items-center text-justify text-lg text-slate-400 border-t-2 border-r-2 border-slate-800 max-h-[calc(100%-38px)] w-1/2 overflow-y-auto min-h-[400px] scrollbar-custom'
+					className='flex flex-col items-center text-justify text-lg text-slate-400 border-t-2 border-r-2 border-slate-800 w-1/2 overflow-y-auto min-h-[400px] h-[calc(100%-34px)] scrollbar-custom'
 				>
 					<h2 className='text-2xl text-indigo-500 font-bold mb-1 mt-3'>
 						Contactez-moi
@@ -161,10 +161,10 @@ export default function Contact({ className }) {
 				</div>
 				<div
 					id='code-form'
-					className='flex flex-col max-h-[calc(100%-38px)] border-t-2 border-slate-800 w-1/2 overflow-y-auto scrollbar-custom min-h-[400px]'
+					className='flex flex-col max-h-[calc(100%-34px)] border-t-2 border-slate-800 w-1/2 overflow-y-auto scrollbar-custom min-h-[400px]'
 				>
 					{/* Affichage stylisé du code comme dans l'image */}
-					<pre className='relative text-sm font-mono p-4 select-text text-slate-400 h-full overflow-y-auto scrollbar-custom '>
+					<pre className='relative text-sm font-mono p-4 select-text text-slate-400 h-full overflow-y-auto scrollbar-custom'>
 						<div className='flex w-full'>
 							<div className='flex flex-col items-end mx-4 max-h-[calc(100%-300px)] overflow-y-auto scrollbar-custom'>
 								{Array.from({ length: lineCount }, (_, i) => (
@@ -255,7 +255,7 @@ export default function Contact({ className }) {
 						</div>
 					</pre>
 				</div>
-				<span className='right-right-container flex items-start pt-[10px] justify-center min-w-[40px] max-h-[calc(100%-38px)] border-t-2 border-l-2 h-full border-slate-800'>
+				<span className='right-right-container flex items-start pt-[10px] justify-center min-w-[40px] max-h-[calc(100%-34px)] border-t-2 border-l-2 h-full border-slate-800'>
 					<div className='bg-slate-500 w-[26px] h-[6px]' />
 				</span>
 			</div>
