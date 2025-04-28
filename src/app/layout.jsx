@@ -45,7 +45,7 @@ export default function RootLayout({ children }) {
 			</head>
 			<body
 				// Application des polices et du fond global
-				className={`${geistSans.variable} ${geistMono.variable} h-full bg-slate-700 antialiased`}
+				className={`${geistSans.variable} ${geistMono.variable} py-[30px] px-[40px] w-full h-full bg-slate-700 antialiased max-md:py-[15px] max-md:px-[10px]`}
 			>
 				{/* MainWrapper englobe tout le contenu de la page (header, footer, etc.) */}
 				<MainWrapper>{children}</MainWrapper>

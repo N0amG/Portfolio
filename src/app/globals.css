@@ -13,7 +13,6 @@ body {
   display: flex;
   font-family: 'Fira Code';
   max-width: 100%;
-  padding: 30px 40px;
   @apply bg-slate-950 text-slate-50;
 }
 
