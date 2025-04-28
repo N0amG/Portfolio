@@ -1,6 +1,7 @@
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
 import MainWrapper from '@/components/MainWrapper'
+import { Analytics } from "@vercel/analytics/react"
 
 // Définition des polices Google Fonts utilisées dans tout le site
 const geistSans = Geist({
@@ -41,6 +42,7 @@ export default function RootLayout({ children }) {
 			>
 				{/* MainWrapper englobe tout le contenu de la page (header, footer, etc.) */}
 				<MainWrapper>{children}</MainWrapper>
+				<Analytics />
 			</body>
 		</html>
 	)
