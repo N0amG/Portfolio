@@ -56,9 +56,7 @@ export default function Contact({ className }) {
 	// Conteneur principal de la page contact
 	return (
 		// Conteneur principal de la colonne gauche et centrale
-		<div
-			className={`flex items-start w-full h-full ${className} text-sm`}
-		>
+		<div className={`flex items-start w-full h-full ${className} text-sm`}>
 			{/* Colonne de gauche : menu déroulant (Dropdown) */}
 			<div className='left-container flex flex-col items-center justify-start h-full overflow-y-auto scrollbar-custom min-w-[235px] max-w-[301px] w-full'>
 				{/* Titre du menu déroulant (Dropdown) */}
@@ -97,16 +95,16 @@ export default function Contact({ className }) {
 			<div className='right-left-container flex items-start justify-start w-full min-w-[600px] h-full max-h-full mt-[38px]'>
 				<div
 					id='form-container'
-					className='flex flex-col items-center text-justify text-lg text-slate-400 border-t-2 border-r-2 border-slate-800 w-1/2 overflow-y-auto min-h-[400px] h-[calc(100%-38px)] scrollbar-custom'
+					className='flex flex-col items-center justify-center text-justify text-lg text-slate-400 border-t-2 border-r-2 border-slate-800 w-1/2 overflow-y-auto min-h-[400px] h-[calc(100%-38px)] scrollbar-custom'
 				>
-					<h2 className='text-2xl text-indigo-500 font-bold mb-1 mt-3'>
-						Contactez-moi
-					</h2>
 					<form
 						id='form'
 						onSubmit={handleSubmit}
-						className='flex flex-col items-center justify-start w-[70%] h-full gap-5'
+						className='flex flex-col items-center justify-center w-[70%] h-full gap-5'
 					>
+						<h2 className='flex text-2xl text-indigo-500 font-bold mb-1 mt-3'>
+							Contactez-moi
+						</h2>
 						<InputField
 							placeholder='Prénom Nom'
 							type='text'
