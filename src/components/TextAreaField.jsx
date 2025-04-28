@@ -1,23 +1,25 @@
 'use client'
 import { useState } from 'react';
 
-export default function TextAreaField({ maxWidth = '400px', placeholder = 'Votre message...', label = '', error = false }) {
+export default function TextAreaField({placeholder = 'Votre message...', label = '', error = false, className, value, onChange}) {
 	// Composant textarea stylisé avec gestion du focus et de l'erreur
 	const [focus, setFocus] = useState(false);
 	return (
 		// Conteneur principal avec largeur maximale personnalisable
-		<div style={{ maxWidth }} className="w-full">
+		<div className={`w-full ${className}`}>
 			{/* Affichage du label si fourni */}
-			{label && <label className="block mb-1 text-slate-200">{label}</label>}
+			{label && <label className={`block mb-1 ${focus ? 'text-slate-200' : 'text-slate-400'}`}>{label}</label>}
 			{/* Zone de texte stylisée, change de couleur selon focus ou erreur */}
 			<div className={`input-field flex items-center h-auto min-h-[100px] rounded-lg px-2 border transition-colors
-			${error ? 'bg-red-500/30 border-red-500' : focus ? 'bg-slate-800 border-slate-50' : 'bg-slate-800 border-slate-700'} text-slate-50 relative`}>
+			${error ? 'bg-red-500/30 border-red-500' : focus ? 'border-slate-50' : 'bg-slate-950 border-slate-700'} text-slate-50 relative`}>
 				<textarea
 					placeholder={placeholder}
-					className="border-none outline-none bg-transparent w-full resize-none text-slate-400 py-2 text-sm"
+					className="border-none outline-none scrollbar-custom bg-transparent w-full resize-none text-slate-400 py-2 text-sm select-none"
 					onFocus={() => setFocus(true)}
 					onBlur={() => setFocus(false)}
 					rows={4}
+					value={value}
+					onChange={onChange}
 				/>
 				{/* Affichage de l'icône d'erreur si error=true */}
 				{error && (

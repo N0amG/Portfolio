@@ -9,6 +9,7 @@ export default function DropdownItem({
 	onClick,
 	className = '',
 	active = activeId === id,
+	isSelectable = false
 }) {
 	// Détermine la couleur de l'icône selon l'état actif
 	const iconColor = active ? 'text-slate-50' : 'text-slate-700'
@@ -16,7 +17,7 @@ export default function DropdownItem({
 	return (
 		// Bouton stylisé, met en avant l'item actif
 		<button
-			className={`flex items-center justify-end gap-2 py-2 pl-2 mr-2 rounded transition-colors select-none ${
+			className={`flex items-center justify-end gap-2 py-2 pl-2 mr-2 rounded transition-colors ${!isSelectable ? 'select-none ' : ''}${
 				active
 					? 'bg-slate-700 text-slate-50'
 					: 'hover:bg-slate-800 text-slate-500'

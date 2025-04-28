@@ -1,23 +1,25 @@
 'use client'
 import { useState } from 'react';
 
-export default function InputField({ maxWidth = '400px', placeholder = 'Standard input!', label = '', error = false }) {
+export default function InputField({placeholder = 'Standard input!', label = '', error = false, className, value, onChange}) {
 	// Composant champ de saisie stylisé avec gestion du focus et de l'erreur
 	const [focus, setFocus] = useState(false);
 	return (
 		// Conteneur principal avec largeur maximale personnalisable
-		<div style={{ maxWidth }} className="w-full">
+		<div className={`w-full ${className}`}>
 			{/* Affichage du label si fourni */}
-			{label && <label className="block mb-1 text-slate-200">{label}</label>}
+			{label && <label className={`block mb-1 ${focus ? 'text-slate-200' : 'text-slate-400'}`}>{label}</label>}
 			{/* Zone d'entrée stylisée, change de couleur selon focus ou erreur */}
 			<div className={`input-field flex items-center h-[50px] justify-center rounded-lg px-2 border transition-colors
-			${error ? 'bg-red-500/30 border-red-500' : focus ? 'bg-slate-800 border-slate-50' : 'bg-slate-800 border-slate-700'} text-slate-50`}>
+			${error ? 'bg-red-500/30 border-red-500' : focus ? 'border-slate-50' : 'bg-slate-950 border-slate-700'} text-slate-50`}>
 				<input
 					type='text'
 					placeholder={placeholder}
-					className="border-none outline-none bg-transparent w-full text-slate-400 text-sm"
+					className="border-none outline-none bg-transparent w-full text-slate-400 text-sm select-none"
 					onFocus={() => setFocus(true)}
 					onBlur={() => setFocus(false)}
+					value={value}
+					onChange={onChange}
 				/>
 				{/* Affichage de l'icône d'erreur si error=true */}
 				{error && (
