@@ -7,27 +7,58 @@ import TextAreaField from '@/components/TextAreaField'
 
 // Page de contact avec informations et invitation à échanger
 export default function Contact({ className }) {
-	const [name, setName] = useState("");
-	const [email, setEmail] = useState("");
-	const [message, setMessage] = useState("");
-	const codeRef = useRef(null);
-	const [lineCount, setLineCount] = useState(12);
+	const [name, setName] = useState('')
+	const [email, setEmail] = useState('')
+	const [message, setMessage] = useState('')
+	const codeRef = useRef(null)
+	const [lineCount, setLineCount] = useState(12)
+	const [isFormError, setIsFormError] = useState(false)
+	const [isSuccess, setIsSuccess] = useState(false)
+	const [rateLimitError, setRateLimitError] = useState(false)
 
 	useEffect(() => {
 		if (codeRef.current) {
-			const codeEl = codeRef.current;
-			const style = window.getComputedStyle(codeEl);
-			const lineHeight = parseFloat(style.lineHeight);
-			const height = codeEl.scrollHeight;
-			const count = Math.round(height / lineHeight);
-			setLineCount(count);
+			const codeEl = codeRef.current
+			const style = window.getComputedStyle(codeEl)
+			const lineHeight = parseFloat(style.lineHeight)
+			const height = codeEl.scrollHeight
+			const count = Math.round(height / lineHeight)
+			setLineCount(count)
 		}
-	}, [name, email, message]);
+	}, [name, email, message])
+
+	// Fonction pour gérer l'envoi du formulaire de contact
+	const handleSubmit = async (e) => {
+		e.preventDefault()
+		setRateLimitError(false)
+		const res = await fetch('/api/contact', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ name, email, message }),
+		})
+		if (res.ok) {
+			setName('')
+			setEmail('')
+			setMessage('')
+			// Optionnel : afficher un message de succès
+			setIsFormError(false)
+			setIsSuccess(true)
+		} else {
+			const data = await res.json()
+			if (res.status === 429) {
+				setRateLimitError(true)
+			}
+			setIsFormError(true)
+			setIsSuccess(false)
+		}
+	}
 
 	// Conteneur principal de la page contact
 	return (
 		// Conteneur principal de la colonne gauche et centrale
-		<div className={`flex items-start w-full h-full ${className} text-sm`}>
+		<div
+			className={`flex items-start w-full h-full max-h-[calc(100%-100px)] ${className} text-sm`}
+		>
 			{/* Colonne de gauche : menu déroulant (Dropdown) */}
 			<div className='left-container flex flex-col items-center justify-start h-full overflow-y-auto scrollbar-custom min-w-[235px] max-w-[300px] w-full'>
 				{/* Titre du menu déroulant (Dropdown) */}
@@ -63,115 +94,171 @@ export default function Contact({ className }) {
 				</Dropdown>
 			</div>
 			{/* Colonne centrale : affichage du contenu sélectionné */}
-			<div className='right-left-container flex items-start justify-start w-full min-w-[600px] h-full mt-[38px]'>
+			<div className='right-left-container flex items-start justify-start w-full min-w-[600px] h-full max-h-full mt-[38px]'>
 				<div
 					id='form-container'
-					className='flex flex-col items-center text-justify text-lg text-slate-400 border-t-2 border-r-2 border-slate-800 h-[calc(100%-38px)] w-1/2 overflow-y-auto scrollbar-custom'
+					className='flex flex-col items-center text-justify text-lg text-slate-400 border-t-2 border-r-2 border-slate-800 max-h-[calc(100%-38px)] w-1/2 overflow-y-auto min-h-[400px] scrollbar-custom'
 				>
 					<h2 className='text-2xl text-indigo-500 font-bold mb-1 mt-3'>
 						Contactez-moi
 					</h2>
 					<form
 						id='form'
+						onSubmit={handleSubmit}
 						className='flex flex-col items-center justify-start w-[70%] h-full gap-5'
 					>
 						<InputField
-							placeholder='Nom Prénom'
+							placeholder='Prénom Nom'
+							type='text'
 							label='_name'
-							error={false}
+							error={isFormError}
 							value={name}
-							onChange={e => setName(e.target.value)}
+							onChange={(e) => setName(e.target.value)}
 						/>
 						<InputField
 							placeholder='exemple@gmail.com'
 							label='_email'
-							error={false}
+							type='email'
+							error={isFormError}
 							value={email}
-							onChange={e => setEmail(e.target.value)}
+							onChange={(e) => setEmail(e.target.value)}
 						/>
 						<TextAreaField
 							placeholder='Votre message juste ici ...'
 							label='_message'
-							error={false}
+							error={isFormError}
 							value={message}
-							onChange={e => setMessage(e.target.value)}
+							onChange={(e) => setMessage(e.target.value)}
 						/>
-						<button
-							id='submit-button'
-							className='px-4 py-2 mt-3 mb-1 rounded-lg self-start bg-slate-600 text-slate-50 text-sm font-mono hover:bg-slate-500 transition'
-						>
-							envoyez le message
-						</button>
+						<div className='flex flex-col justify-start w-full gap-2'>
+							<button
+								id='submit-button'
+								disabled={rateLimitError}
+								className={`flex flex-nowrap px-4 py-2 mt-3 mb-1 rounded-lg self-start bg-slate-600 text-slate-50 text-sm font-mono hover:bg-slate-500 transition ${
+									rateLimitError
+										? 'opacity-50 cursor-not-allowed'
+										: ''
+								}`}
+							>
+								envoyez le message
+							</button>
+							{isSuccess && (
+								<span
+									id='success-message'
+									className='flex flex-wrap text-green-500 text-sm'
+								>
+									Message envoyé avec succès !
+								</span>
+							)}
+							{rateLimitError && (
+								<span className='flex flex-wrap text-red-500 text-sm'>
+									Limite d'envoi atteinte. Merci de patienter
+									5 minutes avant de réessayer.
+								</span>
+							)}
+						</div>
 					</form>
 				</div>
 				<div
 					id='code-form'
-					className='flex flex-col h-[calc(100%-38px)] border-t-2 border-slate-800 w-1/2'
+					className='flex flex-col max-h-[calc(100%-38px)] border-t-2 border-slate-800 w-1/2 overflow-y-auto scrollbar-custom min-h-[400px]'
 				>
 					{/* Affichage stylisé du code comme dans l'image */}
-					<pre className='flex bg-transparent text-sm font-mono p-4 select-text text-slate-400'>
-						<div className='flex flex-col items-end mx-4'>
-							{Array.from({ length: lineCount }, (_, i) => (
-								<span key={i + 1}>{i + 1}</span>
-							))}
+					<pre className='relative text-sm font-mono p-4 select-text text-slate-400 h-full overflow-y-auto scrollbar-custom '>
+						<div className='flex w-full'>
+							<div className='flex flex-col items-end mx-4 max-h-[calc(100%-300px)] overflow-y-auto scrollbar-custom'>
+								{Array.from({ length: lineCount }, (_, i) => (
+									<span key={i + 1}>{i + 1}</span>
+								))}
+							</div>
+							<code
+								ref={codeRef}
+								style={{
+									whiteSpace: 'pre-wrap',
+									wordBreak: 'break-word',
+									display: 'block',
+								}}
+								className='max-h-[calc(100%-300px)] overflow-y-auto flex-1'
+							>
+								<span className='text-purple-400'>const</span>{' '}
+								<span>button</span>
+								<span className='text-purple-400'>{' = '}</span>
+								<span className='text-indigo-500'>
+									document.querySelector
+								</span>
+								{'('}
+								<span className='text-orange-300'>
+									'#sendBtn'
+								</span>
+								{');'}
+								<br /> <br />
+								<span className='text-purple-400'>
+									const
+								</span>{' '}
+								<span>message</span>
+								<span className='text-purple-400'>{' = '}</span>
+								<span>{'{'}</span>
+								<br />
+								<span className='text-indigo-500'>
+									{'\t'}name
+								</span>
+								<span>{': '}</span>
+								<span className='text-orange-300 text-wrap'>
+									"{name}"
+								</span>
+								<span>,</span>
+								<br />
+								<span className='text-indigo-500'>
+									{'\t'}email
+								</span>
+								<span>{': '}</span>
+								<span className='text-orange-300 text-wrap'>
+									"{email}"
+								</span>
+								<span>,</span>
+								<br />
+								<span className='text-indigo-500'>
+									{'\t'}message
+								</span>
+								<span>{': '}</span>
+								<span className='text-orange-300 text-wrap'>
+									"{message}"
+								</span>
+								<span>,</span>
+								<br />
+								<span className='text-indigo-500'>
+									{'\t'}date
+								</span>
+								<span>{': '}</span>
+								<span className='text-orange-300'>
+									"Thu 21 Apr"
+								</span>
+								<br />
+								<span>{'}'}</span>
+								<br />
+								<br />
+								<span className='text-indigo-500'>
+									button.addEventListener
+								</span>
+								(
+								<span className='text-orange-300'>'click'</span>
+								, () =&gt; &#123;
+								<br />
+								{'\t'}
+								<span className='text-indigo-500'>
+									form.send
+								</span>
+								<span>{'(message);'}</span>
+								<br />
+								<span>{'}'}</span>)
+							</code>
 						</div>
-						<code ref={codeRef} style={{whiteSpace: 'pre-wrap', wordBreak: 'break-word', display: 'block'}}>
-							<span className='text-purple-400'>const</span>{' '}
-							<span>button</span>
-							<span className='text-purple-400'>{' = '}</span>
-							<span className='text-indigo-500'>
-								document.querySelector
-							</span>
-							{'('}
-							<span className='text-orange-300'>'#sendBtn'</span>
-							{');'}
-							<br /> <br />
-							<span className='text-purple-400'>const</span>{' '}
-							<span>message</span>
-							<span className='text-purple-400'>{' = '}</span>
-							<span>{'{'}</span>
-							<br />
-							<span className='text-indigo-500'>{'\t'}name</span>
-							<span>{': '}</span>
-							<span className='text-orange-300 text-wrap'>
-								"{name}"
-							</span>
-							<span>,</span>
-							<br />
-							<span className='text-indigo-500'>{'\t'}email</span>
-							<span>{': '}</span>
-							<span className='text-orange-300 text-wrap'>"{email}"</span>
-							<span>,</span>
-							<br />
-							<span className='text-indigo-500'>{'\t'}message</span>
-							<span>{': '}</span>
-							<span className='text-orange-300 text-wrap'>"{message}"</span>
-							<span>,</span>
-							<br />
-							<span className='text-indigo-500'>{'\t'}date</span>
-							<span>{': '}</span>
-							<span className='text-orange-300'>"Thu 21 Apr"</span>
-							<br />
-							<span>{'}'}</span>
-							<br />
-							<br />
-							<span className='text-indigo-500'>
-								button.addEventListener
-							</span>
-							(<span className='text-orange-300'>'click'</span>
-							, () =&gt; &#123;
-							<br />
-							<span className='text-indigo-500'>form.send</span>
-							<span>{'(message);'}</span>
-							<br />
-							<span>{'}'}</span>)
-						</code>
 					</pre>
 				</div>
-				<span className='right-between-container flex items-start m pt-[10px] justify-center min-w-[40px] bg-transparent border-t-2 border-l-2 h-[calc(100%-38px)] border-slate-800 pt-5=3'>
+				<span className='right-right-container flex items-start pt-[10px] justify-center min-w-[40px] max-h-[calc(100%-38px)] border-t-2 border-l-2 h-full border-slate-800'>
 					<div className='bg-slate-500 w-[26px] h-[6px]' />
 				</span>
 			</div>
 		</div>
 	)
-}
+} // Fin de la fonction Contact

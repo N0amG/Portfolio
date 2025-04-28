@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react';
 
-export default function InputField({placeholder = 'Standard input!', label = '', error = false, className, value, onChange}) {
+export default function InputField({placeholder = 'Standard input!', label = '', error = false, className, type, value, onChange}) {
 	// Composant champ de saisie stylisé avec gestion du focus et de l'erreur
 	const [focus, setFocus] = useState(false);
 	return (
@@ -13,7 +13,7 @@ export default function InputField({placeholder = 'Standard input!', label = '',
 			<div className={`input-field flex items-center h-[50px] justify-center rounded-lg px-2 border transition-colors
 			${error ? 'bg-red-500/30 border-red-500' : focus ? 'border-slate-50' : 'bg-slate-950 border-slate-700'} text-slate-50`}>
 				<input
-					type='text'
+					type={type}
 					placeholder={placeholder}
 					className="border-none outline-none bg-transparent w-full text-slate-400 text-sm select-none"
 					onFocus={() => setFocus(true)}
@@ -31,7 +31,7 @@ export default function InputField({placeholder = 'Standard input!', label = '',
 				)}
 			</div>
 			{/* Message d'erreur sous le champ si error=true */}
-			{error && <span className="text-red-500 text-sm mt-2">Something went wrong</span>}
+			{/*{error && <span className="text-red-500 text-sm mt-2">Something went wrong</span>}*/}
 		</div>
 	)
 }
