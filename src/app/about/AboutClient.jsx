@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 import { useViewport } from '@/utils/ViewportContext'
 
 import { useState } from 'react'
-import { Sedgwick_Ave } from 'next/font/google'
 
 export default function AboutClient({ className }) {
 	const router = useRouter()
@@ -133,18 +132,18 @@ export default function AboutClient({ className }) {
 		>
 			{/* Colonne de gauche : menu déroulant (Dropdown) */}
 			<div
-				className={`left-container flex flex-col items-center justify-start h-full lg:overflow-y-auto scrollbar-custom ${isMobile ? 'min-w-0 max-w-full w-full' : 'min-w-[260px] max-w-[700px] w-4/7'}`}
+				className={`left-container flex flex-col items-center justify-start h-full lg:overflow-y-auto scrollbar-custom ${isMobile ? 'min-w-0 max-w-full w-full' : 'md:min-w-[190px] lg:min-w-[260px] max-w-[700px] w-4/7'}`}
 			>
 				<Dropdown
 					title='_infos-personnelles'
 					isLabel={true}
+					isOpen={true}
 					className=''
-					isOpen={!isDesktopLg}
 				>
 					<Dropdown
 						title='_bio'
 						iconColor='text-rose-400'
-						isOpen={isDesktopLg}
+						isOpen={true}
 					>
 						<DropdownItem
 							id='bio-1'
@@ -157,7 +156,6 @@ export default function AboutClient({ className }) {
 					<Dropdown
 						title='_centres-interet'
 						iconColor='text-teal-400'
-						isOpen={isDesktopLg}
 					>
 						<DropdownItem
 							id='interests-1'
@@ -184,7 +182,6 @@ export default function AboutClient({ className }) {
 					<Dropdown
 						title='_etudes'
 						iconColor='text-indigo-500'
-						isOpen={isDesktopLg}
 					>
 						<DropdownItem
 							id='studies-1'
@@ -202,7 +199,7 @@ export default function AboutClient({ className }) {
 						/>
 					</Dropdown>
 				</Dropdown>
-				{isDesktopLg && (
+				{!isMobile && (
 					<Dropdown
 						title='_contacts'
 						isLabel={true}
@@ -227,7 +224,7 @@ export default function AboutClient({ className }) {
 			{/* Colonne centrale : affichage du contenu sélectionné */}
 			<div
 				className={`right-left-container flex flex-col items-start justify-start w-full ${
-					isMobile ? 'min-w-0' : 'min-w-[600px]'
+					isMobile ? 'min-w-0' : 'md:min-w-[250px] lg:min-w-[360px]'
 				} h-full`}
 			>
 				{selectedId && !isMobile && (
@@ -282,7 +279,7 @@ export default function AboutClient({ className }) {
 					)}
 				</div>
 			</div>
-			{!isMobile && (
+			{isDesktopLg && (
 				<span className='right-between-container flex items-start mt-[38px] pt-[10px] justify-center min-w-[40px] bg-transparent border-t-2 border-l-2 h-[calc(100%-40px)] border-slate-800 pt-5=3'>
 					<div className='bg-slate-500 w-[26px] h-[6px]' />
 				</span>

@@ -2,33 +2,40 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 export default function Header() {
 	// Header principal du site avec navigation dynamique
 	const pathname = usePathname()
 	const isAbout = pathname === '/about'
-	const focusStyle = `text-slate-50 lg:border-b-3 lg:border-b-orange-300`
+	const focusStyle = `text-slate-50 md:border-b-3 md:border-b-orange-300`
 	const borderXClass = isAbout ? 'border-x-transparent' : 'border-x'
 	const [menuOpen, setMenuOpen] = useState(false)
+	const [isClient, setIsClient] = useState(false)
+	const [isMounted, setIsMounted] = useState(false)
+
+	useEffect(() => {
+		setIsClient(true)
+		setIsMounted(true)
+	}, [])
 
 	return (
 		// Barre d'en-tête avec nom et navigation
-		<header className='flex flex-col w-full text-slate-400 select-none z-10 border-b-2 border-slate-800 lg:flex-row'>
-			<div className='flex flex-col items-stretch w-full lg:flex-row lg:items-center lg:justify-between lg:w-full lg:h-12'>
+		<header className='flex flex-col w-full text-slate-400 select-none z-10 border-b-2 border-slate-800 md:flex-row'>
+			<div className='flex flex-col items-stretch w-full md:flex-row md:items-center md:justify-between md:w-full md:h-12'>
 				{/* Logo ou nom à gauche + burger */}
 				<div
-					className={`flex items-center w-full h-14 px-4 border-b-2 border-slate-800 text-lg text-left lg:w-1/5 lg:max-w-[300px] lg:min-w-[165px] lg:h-full lg:px-6 lg:${borderXClass} lg:border-b-0`}
+					className={`flex items-center w-full h-14 px-4 border-b-2 border-slate-800 text-lg text-left md:w-1/5 md:max-w-[300px] md:min-w-[165px] md:h-full md:px-6 md:${borderXClass} md:border-b-0`}
 				>
 					<button
 						onClick={() => setMenuOpen((v) => !v)}
-						className='flex items-center w-full h-full focus:outline-none lg:cursor-default lg:pointer-events-none bg-transparent'
+						className='flex items-center w-full h-full focus:outline-none md:cursor-default md:pointer-events-none bg-transparent'
 						aria-label='Ouvrir le menu'
 					>
 						<span className='flex-1 text-left'>noam-guez</span>
 						{/* Icône burger visible seulement en mobile */}
-						<span className='lg:hidden ml-2'>
-							{!menuOpen && (
+						<span className='md:hidden ml-2'>
+								{isClient && !menuOpen && (
 								<svg
 									width='28'
 									height='28'
@@ -59,7 +66,7 @@ export default function Header() {
 									/>
 								</svg>
 							)}
-							{menuOpen && (
+								{isClient && menuOpen && (
 								<svg
 									xmlns='http://www.w3.org/2000/svg'
 									viewBox='0 0 24 24'
@@ -76,25 +83,22 @@ export default function Header() {
 				</div>
 				{/* Navigation principale */}
 				<nav
-					className={`flex flex-col w-full text-sm lg:flex-row lg:flex-1 lg:w-[66.6667%] lg:h-full ${
-						menuOpen ? '' : 'hidden'
-					} lg:flex`}
+					className={`flex flex-col w-full text-sm md:flex-row md:flex-1 md:w-[66.6667%] md:h-full md:flex ${
+						menuOpen && isMounted ? '' : 'hidden md:flex'
+					}`}
 				>
-					<ul className='flex flex-col w-full divide-y divide-slate-800 border-slate-800 lg:flex-row lg:items-center lg:h-full lg:divide-y-0 lg:divide-x lg:w-full'>
+					<ul className='flex flex-col w-full divide-y divide-slate-800 border-slate-800 md:flex-row md:items-center md:h-full md:divide-y-0 md:divide-x md:w-full'>
 						{/* Lien _accueil */}
 						<li
-							className={`py-4 px-4 w-full flex items-center border-b-2 border-slate-800 cursor-pointer transition-colors lg:px-8 lg:py-0 lg:w-auto lg:h-full lg:${borderXClass} lg:border-b-0 ${
+							className={`py-4 px-4 w-full flex items-center border-b-2 border-slate-800 cursor-pointer transition-colors md:px-8 md:py-0 md:w-auto md:h-full md:${borderXClass} md:border-b-0 ${
 								pathname === '/' ? focusStyle : ''
 							}`}
-							onMouseEnter={(e) =>
-								e.currentTarget.classList.add('text-slate-50')
-							}
-							onMouseLeave={(e) => {
+							onMouseEnter={isClient ? (e) =>
+								e.currentTarget.classList.add('text-slate-50') : undefined}
+							onMouseLeave={isClient ? (e) => {
 								if (pathname !== '/')
-									e.currentTarget.classList.remove(
-										'text-slate-50'
-									)
-							}}
+									e.currentTarget.classList.remove('text-slate-50')
+							} : undefined}
 						>
 							<Link
 								href='/'
@@ -105,18 +109,15 @@ export default function Header() {
 						</li>
 						{/* Lien _a-propos */}
 						<li
-							className={`py-4 px-4 w-full flex items-center border-b-2 border-slate-800 cursor-pointer transition-colors lg:px-8 lg:py-0 lg:w-auto lg:h-full lg:${borderXClass} lg:border-b-0 ${
+							className={`py-4 px-4 w-full flex items-center border-b-2 border-slate-800 cursor-pointer transition-colors md:px-8 md:py-0 md:w-auto md:h-full md:${borderXClass} md:border-b-0 ${
 								pathname === '/about' ? focusStyle : ''
 							}`}
-							onMouseEnter={(e) =>
-								e.currentTarget.classList.add('text-slate-50')
-							}
-							onMouseLeave={(e) => {
+							onMouseEnter={isClient ? (e) =>
+								e.currentTarget.classList.add('text-slate-50') : undefined}
+							onMouseLeave={isClient ? (e) => {
 								if (pathname !== '/about')
-									e.currentTarget.classList.remove(
-										'text-slate-50'
-									)
-							}}
+									e.currentTarget.classList.remove('text-slate-50')
+							} : undefined}
 						>
 							<Link
 								href='/about'
@@ -127,22 +128,19 @@ export default function Header() {
 						</li>
 						{/* Lien _projets */}
 						<li
-							className={`py-4 px-4 w-full flex items-center border-b-2 border-slate-800 cursor-pointer transition-colors lg:px-8 lg:py-0 lg:w-auto lg:h-full lg:${
+							className={`py-4 px-4 w-full flex items-center border-b-2 border-slate-800 cursor-pointer transition-colors md:px-8 md:py-0 md:w-auto md:h-full md:${
 								isAbout
 									? 'border-x-transparent'
 									: 'border-x border-slate-800'
-							} lg:border-b-0 ${
+							} md:border-b-0 ${
 								pathname === '/projects' ? focusStyle : ''
 							}`}
-							onMouseEnter={(e) =>
-								e.currentTarget.classList.add('text-slate-50')
-							}
-							onMouseLeave={(e) => {
+							onMouseEnter={isClient ? (e) =>
+								e.currentTarget.classList.add('text-slate-50') : undefined}
+							onMouseLeave={isClient ? (e) => {
 								if (pathname !== '/projects')
-									e.currentTarget.classList.remove(
-										'text-slate-50'
-									)
-							}}
+									e.currentTarget.classList.remove('text-slate-50')
+							} : undefined}
 						>
 							<Link
 								href='/projects'
@@ -153,7 +151,7 @@ export default function Header() {
 						</li>
 					</ul>
 					<div
-						className={`py-4 px-4 w-full flex items-center border-b-2 border-slate-800 cursor-pointer text-sm hover:text-slate-50 transition-colors lg:px-6 lg:py-0 lg:w-auto lg:h-full lg:border-l-2 lg:border-b-0 ${
+						className={`py-4 px-4 w-full flex items-center border-b-2 border-slate-800 cursor-pointer text-sm hover:text-slate-50 transition-colors md:px-6 md:py-0 md:w-auto md:h-full md:border-l-2 md:border-b-0 ${
 							pathname === '/contact' ? focusStyle : ''
 						}`}
 					>

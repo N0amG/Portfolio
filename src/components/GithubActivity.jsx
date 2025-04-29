@@ -1,4 +1,4 @@
-export default function GithubActivity({ events = [], titre }) {
+export default function GithubActivity({ events = [], titre, className }) {
 	if (!events.length) return <div>Aucune activité récente trouvée.</div>
 
 	// Fonction pour extraire le premier mot du message (avant espace ou symbole)
@@ -65,7 +65,7 @@ export default function GithubActivity({ events = [], titre }) {
 	}
 
 	return (
-		<div>
+		<div className={className}>
 			{titre && <h2 className='text-base font-bold mb-2'>{titre}</h2>}
 			<ul className='github-activity-list flex flex-1 flex-col gap-4 p-2 h-full '>
 				{events.map((event) => {
