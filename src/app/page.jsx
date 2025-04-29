@@ -23,7 +23,7 @@ export default function Home() {
 					</h2>
 				</div>
 				{/* Avatar à droite du texte */}
-				<TiltWrapper intensity={25} className='hidden md:block md:w-[200px] md:h-[200px] mr-10 hover:scale-[1.3] '>
+				<TiltWrapper intensity={25} className='hidden md:block md:w-[200px] md:h-[200px] mr-10 transition-transform duration-1000 hover:scale-[1.3] '>
 					<Avatar className={'border-slate-400'} />
 				</TiltWrapper>
 			</div>

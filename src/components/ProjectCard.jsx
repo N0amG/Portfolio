@@ -13,7 +13,7 @@ export default function ProjectCard({
 	const slug = title ? title.toLowerCase().replace(/\s+/g, '-') : ''
 	return (
 		<TiltWrapper
-			className={`flex flex-col shadow-md p-0 h-fit w-full lg:w-auto overflow-hidden ${className} cursor-pointer lg:hover:scale-[1.1] transition-transform`}
+			className={`flex flex-col shadow-md p-0 h-fit w-full md:w-[45%] lg:w-auto overflow-hidden ${className} cursor-pointer lg:hover:scale-[1.1] transition-transform`}
 		>
 			{/* Titre au-dessus de la carte, sans background */}
 			<div className='w-full flex pt-3 pb-1'>

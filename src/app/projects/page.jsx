@@ -67,8 +67,8 @@ export default function Project() {
 
 	return (
 		// Conteneur principal de la page projets
-		<div id='projects' className='flex flex-col lg:flex-row w-full lg:h-screen overflow-hidden'>
-			<div className='left-container flex w-full lg:w-1/5 min-w-[165px] h-full flex-col'>
+		<div id='projects' className='flex flex-col md:h-full lg:flex-row w-full lg:h-screen overflow-hidden'>
+			<div className='left-container flex  w-full lg:w-1/5 min-w-[165px] lg:h-full flex-col'>
 				<Dropdown title='projets' isLabel={true}>
 					{languages.map((lang, idx) => (
 						<div
