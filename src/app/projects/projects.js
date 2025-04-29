@@ -69,7 +69,10 @@ const projects = [
 			"",
 			`Un collègue souhaitait réaliser un site de référencement et de notation de livres pour une chaîne de librairie nommée "Mon vieux grimoire". J'ai accepté de m'occuper de la partie Backend qui devait être réalisée avec le framework Express de Nodejs, en communiquant avec une base de données MongoDB.`,
 			"",
-			"J'ai tout d'abord réalisé les méthodes qui permettent aux utilisateurs de s'inscrire et de se connecter. J'ai ensuite réalisé les routes API qui servent à créer, modifier ou supprimer des livres. Les images des livres sont stockées avec Multer et compressées avec Sharp. J'ai finis par coder les routes qui permettent aux utilisateurs de noter les livres postés sur le site. Les 3 livres les mieux notés apparaissent sur chaque page."
+			"J'ai tout d'abord réalisé les méthodes qui permettent aux utilisateurs de s'inscrire et de se connecter. J'ai ensuite réalisé les routes API qui servent à créer, modifier ou supprimer des livres. Les images des livres sont stockées avec Multer et compressées avec Sharp. J'ai finis par coder les routes qui permettent aux utilisateurs de noter les livres postés sur le site. Les 3 livres les mieux notés apparaissent sur chaque page.",
+			"",
+			"Difficultés rencontrées :",
+			"J’ai bloqué au début du projet. Après avoir installé les packages MongoDB avec npm, je ne comprenais pas pourquoi j’avais une erreur de connexion à la base de données, peu importe ce que je faisais. Rien ne fonctionnait, jusqu’à ce que, désespéré, je désinstalle complètement Node.js de mon PC pour le réinstaller… et c’était bien ça ! Node était corrompu, tout comme certains packages installés, mais aucune erreur ne remontait en console."
 		],
 		languages: ['Node', 'Javascript', 'CSS', 'Express', 'MongoDB', 'Multer', 'Sharp'],
 		imgCount : 4
@@ -85,7 +88,10 @@ const projects = [
 			"",
 			"Le site permet aux restaurateurs de créer un menu de restaurant personnalisé afin de l'utiliser comme ils le souhaitent.",
 			"",
-			"J'ai tout d'abord effectué une veille technologique organisée afin de sélectionner les outils du projet. J'ai ensuite créé le document qui liste les détails des spécifications techniques. J'ai alors réparti les tâches au sein d'un tableau Kanban sur Notion afin d'organiser le projet. J'ai finis par préparer la présentation au Product Owner afin de le briefer."
+			"J'ai tout d'abord effectué une veille technologique organisée afin de sélectionner les outils du projet. J'ai ensuite créé le document qui liste les détails des spécifications techniques. J'ai alors réparti les tâches au sein d'un tableau Kanban sur Notion afin d'organiser le projet. J'ai finis par préparer la présentation au Product Owner afin de le briefer.",
+			"",
+			"Difficultés rencontrées :",
+			"J’ai rencontré quelques difficultés, car organiser un projet est très différent de le réaliser. Étant plus habitué à exécuter des sprints plutôt qu’à les planifier, j’ai été un peu dépaysé au début."
 			],
 		languages:["Feedly", "Notion"],
 		imgCount : 5
