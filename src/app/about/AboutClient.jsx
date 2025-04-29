@@ -132,7 +132,7 @@ export default function AboutClient({ className }) {
 		>
 			{/* Colonne de gauche : menu déroulant (Dropdown) */}
 			<div
-				className={`left-container flex flex-col items-center justify-start h-full overflow-y-auto scrollbar-custom ${isMobile ? 'min-w-0 max-w-full w-full' : 'min-w-[260px] max-w-[700px] w-4/7'}`}
+				className={`left-container flex flex-col items-center justify-start h-full lg:overflow-y-auto scrollbar-custom ${isMobile ? 'min-w-0 max-w-full w-full' : 'min-w-[260px] max-w-[700px] w-4/7'}`}
 			>
 				<Dropdown
 					title='_infos-personnelles'
@@ -251,7 +251,7 @@ export default function AboutClient({ className }) {
 							</button>
 						</h3>
 						)}
-						<div className={`flex flex-col text-justify text-lg text-slate-400 py-5 px-2 border-t-2 border-slate-800 h-full w-full overflow-y-auto scrollbar-custom`}>
+						<div className={`flex flex-col text-justify text-lg text-slate-400 py-5 px-2 border-t-2 border-slate-800 lg:h-full w-full lg:overflow-y-auto scrollbar-custom`}>
 							{isDesktopLg ? (
 								<>
 									<span className='flex items-start pl-2 indent-0 tabular-nums'>
