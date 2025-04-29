@@ -13,7 +13,7 @@ export default function ProjectCard({
 	const slug = title ? title.toLowerCase().replace(/\s+/g, '-') : ''
 	return (
 		<TiltWrapper
-			className={`flex flex-col shadow-md p-0 h-fit overflow-hidden ${className} cursor-pointer hover:scale-[1.1] transition-transform`}
+			className={`flex flex-col shadow-md p-0 h-fit w-full lg:w-auto overflow-hidden ${className} cursor-pointer lg:hover:scale-[1.1] transition-transform`}
 		>
 			{/* Titre au-dessus de la carte, sans background */}
 			<div className='w-full flex pt-3 pb-1'>
@@ -31,7 +31,7 @@ export default function ProjectCard({
 				href={`/projects/${slug}`}
 				className='no-underline rounded-2xl border-2 border-slate-800'
 			>
-				<div className='rounded-2xl p-0 overflow-hidden h-[240px] w-[320px]'>
+				<div className='rounded-2xl p-0 overflow-hidden h-[240px] w-full lg:w-[320px]'>
 					{/* Image juste après le titre */}
 
 					<div className='relative w-full h-[110px] bg-slate-800 flex items-center justify-center'>

@@ -5,8 +5,11 @@ import Dropdown from '@/components/Dropdown'
 import Icon from '@/components/Icon'
 import ProjectCard from '@/components/ProjectCard'
 import projects from '@/app/projects/projects'
+import { useViewport } from '@/utils/ViewportContext'
 
 export default function Project() {
+
+	const { isMobile, isDesktopLg } = useViewport()
 
 	const languages = [
 		'HTML',
@@ -64,8 +67,8 @@ export default function Project() {
 
 	return (
 		// Conteneur principal de la page projets
-		<div id='projects' className='flex w-full h-screen overflow-hidden'>
-			<div className='left-container flex w-1/5 min-w-[165px] h-full flex-col'>
+		<div id='projects' className='flex flex-col lg:flex-row w-full lg:h-screen overflow-hidden'>
+			<div className='left-container flex w-full lg:w-1/5 min-w-[165px] h-full flex-col'>
 				<Dropdown title='projets' isLabel={true}>
 					{languages.map((lang, idx) => (
 						<div
@@ -88,7 +91,7 @@ export default function Project() {
 				</Dropdown>
 			</div>
 			<div className='right-container flex flex-col flex-1 w-full'>
-				{selectedTab && (
+				{isDesktopLg && selectedTab && (
 					<h3 className='title flex items-center gap-2 min-w-[150px] max-w-[300px] h-[40px] px-3 py-[10px] transition-colors select-none justify-between border-slate-800 border-r-2 text-md'>
 						<span
 							className='truncate font-mono ml-3 max-w-[400px] inline-block align-middle overflow-hidden text-ellipsis whitespace-nowrap'
