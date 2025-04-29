@@ -40,8 +40,8 @@ export default async function ProjectDetail({ params }) {
 					</svg>
 				</Link>
 			</div>
-			<div className='container flex h-full ml-20 max-w-[calc(100%-80px)] max-h-[calc(100%-60px)]'>
-				<Carousel className='min-w-[400px] w-full h-[calc(100%-40px)] mb-10 mr-10 '>
+			<div className='container flex flex-col md:flex-row h-full md:ml-20 md:max-w-[calc(100%-80px)] md:max-h-[calc(100%-60px)] w-full'>
+				<Carousel className='min-w-0 w-full h-[30%]  lg:h-[calc(100%-40px)] mb-6 md:mb-10 md:mr-10'>
 					{images.map((src, index) => (
 						<img
 							key={index}
@@ -53,7 +53,7 @@ export default async function ProjectDetail({ params }) {
 				</Carousel>
 				<div
 					id='desciption'
-					className='flex flex-col w-[calc(100%-120px)] items-start overflow-y-auto scrollbar-custom pr-3'
+					className='flex flex-col w-full lg:w-[calc(100%-120px)] items-start overflow-y-auto scrollbar-custom pr-0 md:pr-3'
 				>
 					<div className='flex flex-wrap gap-2 mb-4'>
 						{project.languages.map((tag) => (
