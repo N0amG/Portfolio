@@ -58,8 +58,8 @@ export default function Dropdown({
 	isOpen = false,
 	isLabel = false,
 }) {
-	// État d'ouverture du dropdown (toujours ouvert si isLabel)
-	const [open, setOpen] = isOpen || isLabel ? useState(true) : useState(false);
+	// État d'ouverture du dropdown : ouvert si isOpen true, sinon fermé (labels fermés par défaut en mobile)
+	const [open, setOpen] = useState(isOpen);
 
 	return ( // Met un border basse et droite au dropdown label sauf si c'est le label contacts, enleve le border-bottom
 		// Conteneur principal du dropdown, applique les bordures selon le type

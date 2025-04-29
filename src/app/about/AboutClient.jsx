@@ -2,13 +2,14 @@
 import Dropdown from '@/components/Dropdown'
 import DropdownItem from '@/components/DropdownItem'
 import Icon from '@/components/Icon'
-import {useRouter} from 'next/navigation'
+import { useRouter } from 'next/navigation'
+import { useViewport } from '@/utils/ViewportContext'
 
 import { useState } from 'react'
 
-export default function AboutClient({className}) {
-	const router = useRouter();
-
+export default function AboutClient({ className }) {
+	const router = useRouter()
+	const { isMobile, isDesktopLg } = useViewport()
 	const [selectedId, setSelectedId] = useState('bio-1')
 
 	const itemContents = {
@@ -126,19 +127,23 @@ export default function AboutClient({className}) {
 	}
 
 	return (
-		// Conteneur principal de la colonne gauche et centrale
-		<div className={`flex items-start w-full h-full ${className} text-sm`}>
+		<div
+			className={`flex ${isMobile ? 'flex-col' : 'items-start'} w-full h-full ${className} text-sm`}
+		>
 			{/* Colonne de gauche : menu déroulant (Dropdown) */}
-			<div className='left-container flex flex-col items-center justify-start h-full overflow-y-auto scrollbar-custom min-w-[260px] max-w-[700px] w-4/7'>
+			<div
+				className={`left-container flex flex-col items-center justify-start h-full overflow-y-auto scrollbar-custom ${isMobile ? 'min-w-0 max-w-full w-full' : 'min-w-[260px] max-w-[700px] w-4/7'}`}
+			>
 				<Dropdown
 					title='_infos-personnelles'
 					isLabel={true}
 					className=''
+					isOpen={!isDesktopLg}
 				>
 					<Dropdown
 						title='_bio'
 						iconColor='text-rose-400'
-						isOpen={true}
+						isOpen={isDesktopLg}
 					>
 						<DropdownItem
 							id='bio-1'
@@ -151,6 +156,7 @@ export default function AboutClient({className}) {
 					<Dropdown
 						title='_centres-interet'
 						iconColor='text-teal-400'
+						isOpen={isDesktopLg}
 					>
 						<DropdownItem
 							id='interests-1'
@@ -174,7 +180,11 @@ export default function AboutClient({className}) {
 							onClick={setSelectedId}
 						/>
 					</Dropdown>
-					<Dropdown title='_etudes' iconColor='text-indigo-500'>
+					<Dropdown
+						title='_etudes'
+						iconColor='text-indigo-500'
+						isOpen={isDesktopLg}
+					>
 						<DropdownItem
 							id='studies-1'
 							title='_lycee'
@@ -191,27 +201,38 @@ export default function AboutClient({className}) {
 						/>
 					</Dropdown>
 				</Dropdown>
-				<Dropdown title='_contacts' isLabel={true} className='h-full'>
-					<DropdownItem
-						id='contacts-1'
-						title='noamguez0@gmail.com'
-						iconPath='M3 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3ZM12.0606 11.6829L5.64722 6.2377L4.35278 7.7623L12.0731 14.3171L19.6544 7.75616L18.3456 6.24384L12.0606 11.6829Z'
-						onClick={() => router.push('/contact/')}
-					/>
-					<DropdownItem
-						id='contacts-2'
-						title='+33611918062'
-						iconPath='M21 16.42V19.9561C21 20.4811 20.5941 20.9167 20.0705 20.9537C19.6331 20.9846 19.2763 21 19 21C10.1634 21 3 13.8366 3 5C3 4.72371 3.01545 4.36687 3.04635 3.9295C3.08337 3.40588 3.51894 3 4.04386 3H7.5801C7.83678 3 8.05176 3.19442 8.07753 3.4498C8.10067 3.67907 8.12218 3.86314 8.14207 4.00202C8.34435 5.41472 8.75753 6.75936 9.3487 8.00303C9.44359 8.20265 9.38171 8.44159 9.20185 8.57006L7.04355 10.1118C8.35752 13.1811 10.8189 15.6425 13.8882 16.9565L15.4271 14.8019C15.5572 14.6199 15.799 14.5573 16.001 14.6532C17.2446 15.2439 18.5891 15.6566 20.0016 15.8584C20.1396 15.8782 20.3225 15.8995 20.5502 15.9225C20.8056 15.9483 21 16.1633 21 16.42Z'
-						onClick={() => router.push('/contact/')}
-					/>
-				</Dropdown>
+				{isDesktopLg && (
+					<Dropdown
+						title='_contacts'
+						isLabel={true}
+						className='flex h-full'
+						isOpen={true}
+					>
+						<DropdownItem
+							id='contacts-1'
+							title='noamguez0@gmail.com'
+							iconPath='M3 3H21C21.5523 3 22 3.44772 22 4V20C22 20.5523 21.5523 21 21 21H3C2.44772 21 2 20.5523 2 20V4C2 3.44772 2.44772 3 3 3ZM12.0606 11.6829L5.64722 6.2377L4.35278 7.7623L12.0731 14.3171L19.6544 7.75616L18.3456 6.24384L12.0606 11.6829Z'
+							onClick={() => router.push('/contact/')}
+						/>
+						<DropdownItem
+							id='contacts-2'
+							title='+33611918062'
+							iconPath='M21 16.42V19.9561C21 20.4811 20.5941 20.9167 20.0705 20.9537C19.6331 20.9846 19.2763 21 19 21C10.1634 21 3 13.8366 3 5C3 4.72371 3.01545 4.36687 3.04635 3.9295C3.08337 3.40588 3.51894 3 4.04386 3H7.5801C7.83678 3 8.05176 3.19442 8.07753 3.4498C8.10067 3.67907 8.12218 3.86314 8.14207 4.00202C8.34435 5.41472 8.75753 6.75936 9.3487 8.00303C9.44359 8.20265 9.38171 8.44159 9.20185 8.57006L7.04355 10.1118C8.35752 13.1811 10.8189 15.6425 13.8882 16.9565L15.4271 14.8019C15.5572 14.6199 15.799 14.5573 16.001 14.6532C17.2446 15.2439 18.5891 15.6566 20.0016 15.8584C20.1396 15.8782 20.3225 15.8995 20.5502 15.9225C20.8056 15.9483 21 16.1633 21 16.42Z'
+							onClick={() => router.push('/contact/')}
+						/>
+					</Dropdown>
+				)}
 			</div>
 			{/* Colonne centrale : affichage du contenu sélectionné */}
-			<div className='right-left-container flex flex-col items-start justify-start w-full min-w-[600px] h-full'>
-				{selectedId && (
-					<h3 className='title flex items-center gap-2 max-w-[300px] h-[40px] px-3 py-[10px] transition-colors select-none justify-between border-slate-800 border-r-2 text-md'>
-						{
-							[
+			{selectedId && (
+				<div
+					className={`right-left-container flex flex-col items-start justify-start w-full ${
+						isMobile ? 'min-w-0' : 'min-w-[600px]'
+					} h-full`}
+				>
+					{!isMobile && (
+						<h3 className='title flex items-center gap-2 max-w-[300px] h-[40px] px-3 py-[10px] transition-colors select-none justify-between border-slate-800 border-r-2 text-md'>
+							{[
 								{ id: 'bio-1', title: '_a-propos' },
 								{ id: 'interests-1', title: '_jeux-video' },
 								{ id: 'interests-2', title: '_code' },
@@ -221,52 +242,47 @@ export default function AboutClient({className}) {
 									title: '_etudes-superieures',
 								},
 								{ id: 'studies-2', title: '_lycee' },
-							].find((item) => item.id === selectedId)?.title
-						}
-						<button
-							onClick={() => setSelectedId(null)}
-							className='ml-3'
-						>
-							<Icon path='M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z' />
-						</button>
-					</h3>
-				)}
-				{selectedId && (
-					<div className='flex flex-col text-justify text-lg text-slate-400 py-5 px-2 border-t-2 border-slate-800 h-full w-full  overflow-y-auto scrollbar-custom'>
-						<div className='flex flex-col font-mono text-base bg-none p-0 m-0 break-words gap-0'>
-							<span className='flex items-start pl-2 indent-0 tabular-nums'>
-								<span className='inline-block w-[2.2em] min-w-[2.2em] text-right text-slate-400 mr-[30px] select-none'>
-									1
-								</span>
-								<span className='mr-2.5'>/**</span>
-							</span>
-							{itemContents[selectedId].map((line, idx) => (
-								<span
-									className='flex items-start pl-2 indent-0 tabular-nums'
-									key={idx}
-								>
-									<span className='inline-block w-[2.2em] min-w-[2.2em] text-right text-slate-400 mr-[30px] select-none'>
-										{String(idx + 2)}
+							].find((item) => item.id === selectedId)?.title}
+							<button
+								onClick={() => setSelectedId(null)}
+								className='ml-3'
+							>
+								<Icon path='M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z' />
+							</button>
+						</h3>
+						)}
+						<div className={`flex flex-col text-justify text-lg text-slate-400 py-5 px-2 border-t-2 border-slate-800 h-full w-full overflow-y-auto scrollbar-custom`}>
+							{isDesktopLg ? (
+								<>
+									<span className='flex items-start pl-2 indent-0 tabular-nums'>
+										<span className='inline-block w-[2.2em] min-w-[2.2em] text-right text-slate-400 mr-[30px] select-none'>1</span>
+										<span className='mr-2.5'>/**</span>
 									</span>
-									<span className='mr-2.5'>*</span>
-									<span className='flex-1 text-left break-words text-sm'>
-										{line}
+									{itemContents[selectedId].map((line, idx) => (
+										<span className='flex items-start pl-2 indent-0 tabular-nums' key={idx}>
+											<span className='inline-block w-[2.2em] min-w-[2.2em] text-right text-slate-400 mr-[30px] select-none'>{String(idx + 2)}</span>
+											<span className='mr-2.5'>*</span>
+											<span className='flex-1 text-left break-words text-sm'>{line}</span>
+										</span>
+									))}
+									<span className='flex items-start pl-2 indent-0 tabular-nums'>
+										<span className='inline-block w-[2.2em] min-w-[2.2em] text-right text-slate-400 mr-[30px] select-none'>{itemContents[selectedId].length + 2}</span>
+										<span className='mr-2.5'>*/</span>
 									</span>
-								</span>
-							))}
-							<span className='flex items-start pl-2 indent-0 tabular-nums'>
-								<span className='inline-block w-[2.2em] min-w-[2.2em] text-right text-slate-400 mr-[30px] select-none'>
-									{itemContents[selectedId].length + 2}
-								</span>
-								<span className='mr-2.5'>*/</span>
-							</span>
+								</>
+							) : (
+								<div className='font-mono text-base'>
+									{itemContents[selectedId].join(' ').replace(/  +/g, ' ').trim()}
+								</div>
+							)}
 						</div>
-					</div>
-				)}
-			</div>
-			<span className='right-between-container flex items-start mt-[40px] pt-[10px] justify-center min-w-[40px] bg-transparent border-t-2 border-l-2 h-[calc(100%-40px)] border-slate-800 pt-5=3'>
-				<div className='bg-slate-500 w-[26px] h-[6px]' />
-			</span>
+				</div>
+			)}
+			{!isMobile && (
+				<span className='right-between-container flex items-start mt-[40px] pt-[10px] justify-center min-w-[40px] bg-transparent border-t-2 border-l-2 h-[calc(100%-40px)] border-slate-800 pt-5=3'>
+					<div className='bg-slate-500 w-[26px] h-[6px]' />
+				</span>
+			)}
 		</div>
 	)
 }
