@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useViewport } from '@/utils/ViewportContext'
 
 import { useState } from 'react'
+import { Sedgwick_Ave } from 'next/font/google'
 
 export default function AboutClient({ className }) {
 	const router = useRouter()
@@ -224,62 +225,65 @@ export default function AboutClient({ className }) {
 				)}
 			</div>
 			{/* Colonne centrale : affichage du contenu sélectionné */}
-			{selectedId && (
-				<div
-					className={`right-left-container flex flex-col items-start justify-start w-full ${
-						isMobile ? 'min-w-0' : 'min-w-[600px]'
-					} h-full`}
-				>
-					{!isMobile && (
-						<h3 className='title flex items-center gap-2 max-w-[300px] h-[40px] px-3 py-[10px] transition-colors select-none justify-between border-slate-800 border-r-2 text-md'>
-							{[
-								{ id: 'bio-1', title: '_a-propos' },
-								{ id: 'interests-1', title: '_jeux-video' },
-								{ id: 'interests-2', title: '_code' },
-								{ id: 'interests-3', title: '_sciences' },
-								{
-									id: 'studies-1',
-									title: '_etudes-superieures',
-								},
-								{ id: 'studies-2', title: '_lycee' },
-							].find((item) => item.id === selectedId)?.title}
-							<button
-								onClick={() => setSelectedId(null)}
-								className='ml-3'
-							>
-								<Icon path='M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z' />
-							</button>
-						</h3>
-						)}
-						<div className={`flex flex-col text-justify text-lg text-slate-400 py-5 px-4 border-t-2 border-slate-800 lg:h-full w-full lg:overflow-y-auto scrollbar-custom`}>
-							{isDesktopLg ? (
-								<>
-									<span className='flex items-start pl-2 indent-0 tabular-nums'>
-										<span className='inline-block w-[2.2em] min-w-[2.2em] text-right text-slate-400 mr-[30px] select-none'>1</span>
-										<span className='mr-2.5'>/**</span>
+			<div
+				className={`right-left-container flex flex-col items-start justify-start w-full ${
+					isMobile ? 'min-w-0' : 'min-w-[600px]'
+				} h-full`}
+			>
+				{selectedId && !isMobile && (
+					<h3 className='title flex items-center gap-2 max-w-[300px] h-[38px] px-3 py-[10px] transition-colors select-none justify-between border-slate-800 border-r-2 text-md'>
+						{[
+							{ id: 'bio-1', title: '_a-propos' },
+							{ id: 'interests-1', title: '_jeux-video' },
+							{ id: 'interests-2', title: '_code' },
+							{ id: 'interests-3', title: '_sciences' },
+							{
+								id: 'studies-1',
+								title: '_etudes-superieures',
+							},
+							{ id: 'studies-2', title: '_lycee' },
+						].find((item) => item.id === selectedId)?.title}
+						<button
+							onClick={() => setSelectedId(null)}
+							className='ml-3'
+						>
+							<Icon path='M11.9997 10.5865L16.9495 5.63672L18.3637 7.05093L13.4139 12.0007L18.3637 16.9504L16.9495 18.3646L11.9997 13.4149L7.04996 18.3646L5.63574 16.9504L10.5855 12.0007L5.63574 7.05093L7.04996 5.63672L11.9997 10.5865Z' />
+						</button>
+					</h3>
+				)}
+				<div className={`flex flex-col text-justify text-lg text-slate-400 ${!selectedId && isDesktopLg ? 'lg:mt-[38px]' :''} py-5 px-4 border-t-2 border-slate-800 lg:h-full w-full lg:overflow-y-auto scrollbar-custom`}>
+					{selectedId ? (
+						isDesktopLg ? (
+							<>
+								<span className='flex items-start pl-2 indent-0 tabular-nums'>
+									<span className='inline-block w-[2.2em] min-w-[2.2em] text-right text-slate-400 mr-[30px] select-none'>1</span>
+									<span className='mr-2.5'>/**</span>
+								</span>
+								{itemContents[selectedId].map((line, idx) => (
+									<span className='flex items-start pl-2 indent-0 tabular-nums' key={idx}>
+										<span className='inline-block w-[2.2em] min-w-[2.2em] text-right text-slate-400 mr-[30px] select-none'>{String(idx + 2)}</span>
+										<span className='mr-2.5'>*</span>
+										<span className='flex-1 text-left break-words text-sm'>{line}</span>
 									</span>
-									{itemContents[selectedId].map((line, idx) => (
-										<span className='flex items-start pl-2 indent-0 tabular-nums' key={idx}>
-											<span className='inline-block w-[2.2em] min-w-[2.2em] text-right text-slate-400 mr-[30px] select-none'>{String(idx + 2)}</span>
-											<span className='mr-2.5'>*</span>
-											<span className='flex-1 text-left break-words text-sm'>{line}</span>
-										</span>
-									))}
-									<span className='flex items-start pl-2 indent-0 tabular-nums'>
-										<span className='inline-block w-[2.2em] min-w-[2.2em] text-right text-slate-400 mr-[30px] select-none'>{itemContents[selectedId].length + 2}</span>
-										<span className='mr-2.5'>*/</span>
-									</span>
-								</>
-							) : (
-								<div className='font-mono text-base'>
-									{itemContents[selectedId].join(' ').replace(/  +/g, ' ').trim()}
-								</div>
-							)}
-						</div>
+								))}
+								<span className='flex items-start pl-2 indent-0 tabular-nums'>
+									<span className='inline-block w-[2.2em] min-w-[2.2em] text-right text-slate-400 mr-[30px] select-none'>{itemContents[selectedId].length + 2}</span>
+									<span className='mr-2.5'>*/</span>
+								</span>
+							</>
+						) : (
+							<div className='font-mono text-base'>
+								{itemContents[selectedId].join(' ').replace(/  +/g, ' ').trim()}
+							</div>
+						)
+					) : (
+						// Affiche un espace vide pour garder la taille
+						<div className='w-full h-full' />
+					)}
 				</div>
-			)}
+			</div>
 			{!isMobile && (
-				<span className='right-between-container flex items-start mt-[40px] pt-[10px] justify-center min-w-[40px] bg-transparent border-t-2 border-l-2 h-[calc(100%-40px)] border-slate-800 pt-5=3'>
+				<span className='right-between-container flex items-start mt-[38px] pt-[10px] justify-center min-w-[40px] bg-transparent border-t-2 border-l-2 h-[calc(100%-40px)] border-slate-800 pt-5=3'>
 					<div className='bg-slate-500 w-[26px] h-[6px]' />
 				</span>
 			)}
