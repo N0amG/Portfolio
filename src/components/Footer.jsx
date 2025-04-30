@@ -3,7 +3,7 @@ import Icon from '@/components/Icon'
 export default function Footer() {
 	// Barre de pied de page avec deux sections : réseaux sociaux et pseudo
 	return (
-		<footer className='flex w-full h-11 items-center justify-between text-slate-400 select-none z-10 border-t-2 border-slate-800'>
+		<footer className='flex bg-slate-900 w-full h-11 items-center justify-between text-slate-400 select-none z-10 border-t-2 border-slate-800'>
 			<div className='flex items-center h-full'>
 				{/* Section LinkedIn */}
 				<div className='flex items-center h-full px-6 border-slate-800 text-sm text-left border-r'>

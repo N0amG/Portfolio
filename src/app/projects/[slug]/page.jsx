@@ -54,7 +54,7 @@ export default async function ProjectDetail({ params }) {
 				</Carousel>
 				<div
 					id='desciption'
-					className='flex flex-col w-full lg:w-[calc(100%-120px)] items-start overflow-y-auto scrollbar-custom pr-0 lg:pr-3'
+					className='flex flex-col w-full lg:w-[calc(100%-120px)] pb-3 items-start overflow-y-auto scrollbar-custom pr-0 lg:pr-3'
 				>
 					<div className='flex flex-wrap gap-2 mb-4'>
 						{project.languages.map((tag) => (

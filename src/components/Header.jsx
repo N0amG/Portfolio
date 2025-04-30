@@ -21,7 +21,7 @@ export default function Header() {
 
 	return (
 		// Barre d'en-tête avec nom et navigation
-		<header className='flex flex-col w-full text-slate-400 select-none z-10 border-b-2 border-slate-800 md:flex-row'>
+		<header className='flex bg-slate-900 flex-col w-full text-slate-400 select-none z-10 border-b-2 border-slate-800 md:flex-row'>
 			<div className='flex flex-col items-stretch w-full md:flex-row md:items-center md:justify-between md:w-full md:h-12'>
 				{/* Logo ou nom à gauche + burger */}
 				<div
