@@ -6,7 +6,7 @@ export default function Home() {
 	// Conteneur principal centré verticalement et horizontalement
 	return (
 		<div
-			className='flex flex-col items-start h-full justify-center bg-transparent text-foreground b z-1 select-none md:px-10'
+			className='flex flex-col items-start h-full justify-center bg-transparent text-foreground b z-1 md:px-10'
 			id='home'
 		>
 			{/* Section présentation avec nom, titre et avatar */}
@@ -16,7 +16,7 @@ export default function Home() {
 						Boujour à tous. Je suis 
 					</span>
 					<h1 className='text-left w-full text-8xl text-slate-50 px-4 rounded-xl z-0'>
-						Noam Guez
+						<span className='inline-block animate-[slide-up_.5s_ease-out_forwards]'>Noam</span> <span className="inline-block animate-[slide-up_.8s_ease-out_forwards]">Guez</span>
 					</h1>
 					<h2 className='text-left nowrap w-full text-xl md:text-4xl text-indigo-500 p-4 rounded-xl z-0'>
 						{'>'} Développeur Full Stack

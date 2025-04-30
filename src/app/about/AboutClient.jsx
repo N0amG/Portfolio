@@ -248,7 +248,7 @@ export default function AboutClient({ className }) {
 						</button>
 					</h3>
 				)}
-				<div className={`flex flex-col text-justify text-lg text-slate-400 ${!selectedId && isDesktopLg ? 'lg:mt-[38px]' :''} py-5 px-4 border-t-2 border-slate-800 lg:h-full w-full lg:overflow-y-auto scrollbar-custom`}>
+				<div className={`flex flex-col text-justify text-lg text-slate-400 ${!selectedId && !isMobile ? 'md:mt-[38px]' :''} py-5 px-4 border-t-2 border-slate-800 lg:h-full w-full lg:overflow-y-auto scrollbar-custom`}>
 					{selectedId ? (
 						isDesktopLg ? (
 							<>
