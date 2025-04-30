@@ -13,7 +13,7 @@ export default function Home() {
 			<div className='flex items-center justify-center h-1/2 bg-transparent text-foreground z-1 gap-[60px]'>
 				<div>
 					<span className='flex w-full text-left px-4 text-slate-400'>
-						{'Boujour à tous. Je suis'.split('').map((char, i) => (
+						{'Bonjour à tous. Je suis'.split('').map((char, i) => (
 							<span
 								key={i}
 								className='inline-block animate-[slide-down-cascade_0.5s_ease-out_forwards]'
