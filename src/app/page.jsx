@@ -38,7 +38,7 @@ export default function Home() {
 							className='inline-block animate-[slide-up_.9s_ease-out_forwards]'
 							style={{
 								animationDelay: `1.5s`,
-								transform: 'translateY(-100%)',
+								transform: 'translateY(-200%)',
 							}}
 						>
 							Guez
