@@ -25,7 +25,7 @@ export default function AboutClient({ className }) {
 			'je souhaite poursuivre mon apprentissage en intégrant',
 			'le monde professionnel, afin de gagner en expérience',
 			'et en rigueur, et pouvoir découvrir toujours plus de',
-			'nouvelles technos et les façons',
+			'nouvelles techno et les façons',
 			'de penser qui les accompagnent :)',
 		],
 		'interests-1': [
