@@ -25,13 +25,22 @@ export default function Home() {
 					</span>
 
 					<h1 className='text-left w-full text-8xl text-slate-50 px-4 rounded-xl z-0 overflow-hidden'>
-						<span className='inline-block animate-[slide-up_.5s_ease-out_forwards]'
-						style={{ animationDelay: `1s`, transform: 'translateY(-100%)' }}>
+						<span
+							className='inline-block animate-[slide-up_.5s_ease-out_forwards]'
+							style={{
+								animationDelay: `1.3s`,
+								transform: 'translateY(-100%)',
+							}}
+						>
 							Noam
 						</span>{' '}
-						<span className='inline-block animate-[slide-up_.9s_ease-out_forwards]'
-						style={{ animationDelay: `1.2s`, transform: 'translateY(-100%)'}}>
-							
+						<span
+							className='inline-block animate-[slide-up_.9s_ease-out_forwards]'
+							style={{
+								animationDelay: `1.5s`,
+								transform: 'translateY(-100%)',
+							}}
+						>
 							Guez
 						</span>
 					</h1>
@@ -39,10 +48,18 @@ export default function Home() {
 						{'> Développeur Full Stack'.split('').map((char, i) => (
 							<span
 								key={i}
-								className='inline-block overflow-hidden animate-[slide-to-right_1s_ease-out_forwards]'
-								style={{ animationDelay: `${2+i * 0.8}s`, transform: 'translateX(-100%)' }}
+								className='inline-block overflow-hidden' // conteneur de masquage
 							>
-								{char === ' ' ? '\u00A0' : char}
+								<span
+									className='inline-block animate-[slide-to-right_0.5s_ease-out_forwards]'
+									style={{
+										animationDelay: `${2.5 +i * 0.05}s`,
+										display: 'inline-block',
+										transform: 'translateX(-100%)',
+									}}
+								>
+									{char === ' ' ? '\u00A0' : char}
+								</span>
 							</span>
 						))}
 					</h2>

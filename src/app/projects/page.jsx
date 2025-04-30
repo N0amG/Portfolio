@@ -90,7 +90,7 @@ export default function Project() {
 					))}
 				</Dropdown>
 			</div>
-			<div className='right-container flex flex-col flex-1 w-full'>
+			<div className='right-container flex flex-col flex-1 w-full '>
 				{isDesktopLg && selectedTab && (
 					<h3 className='title flex items-center gap-2 min-w-[150px] max-w-[300px] h-[40px] px-3 py-[10px] transition-colors select-none justify-between border-slate-800 border-r-2 text-md'>
 						<span
@@ -110,7 +110,7 @@ export default function Project() {
 				{selectedTab && (
 					<div
 						id='projects-list'
-						className='flex flex-wrap gap-4 p-2 pt-5 justify-around h-full overflow-y-auto scrollbar-custom border-t-2 border-slate-800'
+						className='flex flex-wrap gap-4 p-2 px-5 pt-5 justify-around h-full overflow-y-auto scrollbar-custom border-t-2 border-slate-800'
 					>
 						{filteredProjects.length === 0 ? (
 							<p className='text-slate-400'>
