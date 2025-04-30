@@ -13,17 +13,42 @@ export default function Home() {
 			<div className='flex items-center justify-center h-1/2 bg-transparent text-foreground z-1 gap-[60px]'>
 				<div>
 					<span className='flex w-full text-left px-4 text-slate-400'>
-						Boujour à tous. Je suis 
+						{'Boujour à tous. Je suis'.split('').map((char, i) => (
+							<span
+								key={i}
+								className='inline-block animate-[slide-down-cascade_0.5s_ease-out_forwards]'
+								style={{ animationDelay: `${i * 0.03}s` }}
+							>
+								{char === ' ' ? '\u00A0' : char}
+							</span>
+						))}
 					</span>
-					<h1 className='text-left w-full text-8xl text-slate-50 px-4 rounded-xl z-0'>
-						<span className='inline-block animate-[slide-up_.5s_ease-out_forwards]'>Noam</span> <span className="inline-block animate-[slide-up_.8s_ease-out_forwards]">Guez</span>
+
+					<h1 className='text-left w-full text-8xl text-slate-50 px-4 rounded-xl z-0 overflow-hidden'>
+						<span className='inline-block animate-[slide-up_.5s_ease-out_forwards]'>
+							Noam
+						</span>{' '}
+						<span className='inline-block animate-[slide-up_.9s_ease-out_forwards]'>
+							Guez
+						</span>
 					</h1>
-					<h2 className='text-left nowrap w-full text-xl md:text-4xl text-indigo-500 p-4 rounded-xl z-0'>
-						{'>'} Développeur Full Stack
+					<h2 className='text-left nowrap w-full text-xl md:text-4xl text-indigo-500 p-4 rounded-xl z-0 overflow-hidden'>
+						{'> Développeur Full Stack'.split('').map((char, i) => (
+							<span
+								key={i}
+								className='inline-block animate-[slide-to-right_1s_ease-out_forwards]'
+								style={{ animationDelay: `${i * 0.05}s` }}
+							>
+								{char === ' ' ? '\u00A0' : char}
+							</span>
+						))}
 					</h2>
 				</div>
 				{/* Avatar à droite du texte */}
-				<TiltWrapper intensity={25} className='hidden md:block md:w-[200px] md:h-[200px] mr-10 transition-transform duration-1000 hover:scale-[1.3] '>
+				<TiltWrapper
+					intensity={25}
+					className='hidden md:block md:w-[200px] md:h-[200px] mr-10 transition-transform duration-1000 hover:scale-[1.3] '
+				>
 					<Avatar className={'border-slate-400'} />
 				</TiltWrapper>
 			</div>

@@ -19,6 +19,9 @@ export default function Header() {
 		setIsMounted(true)
 	}, [])
 
+	// Afficher la navigation seulement après le montage côté client pour éviter l'hydration error
+	if (!isMounted) return null;
+
 	return (
 		// Barre d'en-tête avec nom et navigation
 		<header className='flex bg-slate-900 flex-col w-full text-slate-400 select-none z-10 border-b-2 border-slate-800 md:flex-row'>
