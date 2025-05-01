@@ -44,7 +44,6 @@ export default function Contact({ className }) {
 			setIsFormError(false)
 			setIsSuccess(true)
 		} else {
-			const data = await res.json()
 			if (res.status === 429) {
 				setRateLimitError(true)
 			}

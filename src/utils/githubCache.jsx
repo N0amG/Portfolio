@@ -10,7 +10,7 @@ let cache = {
 };
 
 // Fonction qui récupère les données depuis l'API GitHub
-async function fetchGithubData(repoNum = 6, commitPerRepo = 1) {
+async function fetchGithubData(repoNum = 6, commitPerRepo = 2) {
   const token = process.env.GITHUB_TOKEN;
   const headers = {
     Accept: 'application/vnd.github.v3+json',
@@ -62,13 +62,13 @@ async function updateCache(repoNum, commitPerRepo) {
 }
 
 // Lance l'actualisation automatique du cache toutes les 5 minutes
-function startCacheUpdater(repoNum = 6, commitPerRepo = 1) {
+function startCacheUpdater(repoNum = 6, commitPerRepo = 2) {
   updateCache(repoNum, commitPerRepo);
   setInterval(() => updateCache(repoNum, commitPerRepo), CACHE_DURATION);
 }
 
 // Fonction à utiliser pour récupérer les données en cache
-export async function getGithubEvents(repoNum = 6, commitPerRepo = 1) {
+export async function getGithubEvents(repoNum = 6, commitPerRepo = 2) {
   // Si le cache est trop vieux ou vide, on attend la mise à jour
   if ((Date.now() - cache.lastFetch > CACHE_DURATION || cache.events.length === 0) && !cache.loading) {
     await updateCache(repoNum, commitPerRepo);
