@@ -4,13 +4,35 @@ import { createContext, useContext, useEffect, useState } from 'react';
 
 const GithubContext = createContext();
 
+const CACHE_KEY = 'github_activity_cache';
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
+
 export function GithubProvider({ children }) {
 	const [events, setEvents] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const username = 'N0amG';
 
 	useEffect(() => {
-		// Fetch se lance dès le chargement de l'application
+		// 1. Vérifier le localStorage d'abord
+		const cachedData = localStorage.getItem(CACHE_KEY);
+		if (cachedData) {
+			try {
+				const { events: cachedEvents, timestamp } = JSON.parse(cachedData);
+				setEvents(cachedEvents);
+				setLoading(false);
+				
+				// Si le cache a moins de 5 minutes, on ne refetch pas
+				if (Date.now() - timestamp < CACHE_DURATION) {
+					console.log('Utilisation du cache (moins de 5 minutes)');
+					return;
+				}
+				console.log('Cache expiré, refetch des données...');
+			} catch (error) {
+				console.error('Erreur lors de la lecture du cache:', error);
+			}
+		}
+
+		// 2. Fetch se lance seulement si pas de cache ou cache expiré
 		async function fetchGithubActivity() {
 			try {
 				// Récupère la liste des repos publics
@@ -54,7 +76,16 @@ export function GithubProvider({ children }) {
 				// Trie les commits par date décroissante
 				allCommits.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 				// Limite à 12 commits
-				setEvents(allCommits.slice(0, 12));
+				const finalEvents = allCommits.slice(0, 12);
+				
+				// 3. Sauvegarder dans localStorage avec timestamp
+				localStorage.setItem(CACHE_KEY, JSON.stringify({
+					events: finalEvents,
+					timestamp: Date.now()
+				}));
+				console.log('Données sauvegardées dans le cache');
+				
+				setEvents(finalEvents);
 			} catch (error) {
 				console.error("Erreur lors de la récupération de l'activité GitHub : ", error);
 			} finally {
