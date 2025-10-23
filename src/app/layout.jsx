@@ -3,6 +3,7 @@ import './globals.css'
 import MainWrapper from '@/components/MainWrapper'
 import { Analytics } from '@vercel/analytics/react'
 import { SpeedInsights } from "@vercel/speed-insights/next"
+import { GithubProvider } from '@/utils/GithubContext'
 
 // Définition des polices Google Fonts utilisées dans tout le site
 const geistSans = Geist({
@@ -48,7 +49,9 @@ export default function RootLayout({ children }) {
 				// Application des polices et du fond global
 				className={`${geistSans.variable} ${geistMono.variable} lg:py-[30px] lg:px-[40px] w-full lg:h-screen h-auto min-h-screen bg-slate-700 antialiased py-[15px] px-[10px]`}
 			>
+				<GithubProvider>
 					<MainWrapper>{children}</MainWrapper>
+				</GithubProvider>
 				<Analytics />
 				<SpeedInsights />
 			</body>

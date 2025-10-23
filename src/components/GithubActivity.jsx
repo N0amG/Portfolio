@@ -1,5 +1,18 @@
-export default function GithubActivity({ events = [], titre, className }) {
-	if (!events.length) return <div>Aucune activité récente trouvée.</div>
+'use client';
+
+import { useGithub } from '@/utils/GithubContext';
+
+export default function GithubActivity({ titre, className }) {
+	const { events, loading } = useGithub();
+
+	// N'affiche "Chargement..." que si on charge ET qu'il n'y a pas encore de données
+	if (loading && !events.length) {
+		return <div className={className}><p className="text-center">Chargement de l'activité GitHub...</p></div>;
+	}
+	
+	if (!events.length) {
+		return <div className={className}>Aucune activité récente trouvée.</div>;
+	}
 
 	// Fonction pour extraire le premier mot du message (avant espace ou symbole)
 	function getFirstWord(message) {
