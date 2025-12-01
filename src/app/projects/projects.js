@@ -43,7 +43,7 @@ const projects = [
 			"",
 			"J'ai aussi rendu le code plus clair et j'ai ajouté des balises afin d'améliorer son référencement par les navigateurs de recherche ( SEO ).",
 		],
-		languages: ['HTML', 'CSS', 'Javascript', 'SEO', 'Performances', 'Accessibilité'],
+		languages: ['HTML', 'CSS', 'Javascript', 'SEO', 'Performances', 'Accessibilité', 'Performance'],
 		imgCount: 3
 	},
 	{
@@ -74,7 +74,7 @@ const projects = [
 			"Difficultés rencontrées :",
 			"J’ai bloqué au début du projet. Après avoir installé les packages MongoDB avec npm, je ne comprenais pas pourquoi j’avais une erreur de connexion à la base de données, peu importe ce que je faisais. Rien ne fonctionnait, jusqu’à ce que, désespéré, je désinstalle complètement Node.js de mon PC pour le réinstaller… et c’était bien ça ! Node était corrompu, tout comme certains packages installés, mais aucune erreur ne remontait en console."
 		],
-		languages: ['Node', 'Javascript', 'CSS', 'Express', 'MongoDB', 'Multer', 'Sharp'],
+		languages: ['Database', 'Node', 'Javascript', 'CSS', 'Express', 'MongoDB', 'Multer', 'Sharp'],
 		imgCount: 4
 	},
 	{
@@ -108,7 +108,7 @@ const projects = [
 			"De plus, une page de contact vous permet de me joindre facilement pour toute question ou collaboration."
 
 		],
-		languages: ['NextJS', 'Tailwind', 'Responsive', 'Hébergement'],
+		languages: ['NextJS', 'Tailwind', 'Node', 'Responsive', 'Hébergement'],
 		imgCount: 1
 	},
 	{
@@ -122,7 +122,7 @@ const projects = [
 			"",
 			"L'architecture est optimisée pour la performance (via des sessions HTTP réutilisées) et la maintenabilité."
 		],
-		languages: ['Python', 'BeautifulSoup', 'Requests', 'CSV', 'Scraping', 'ETL'],
+		languages: ['Python', 'BeautifulSoup', 'Requests', 'CSV', 'Scraping', 'Database', 'Performance'],
 		imgCount: 5
 	},
 	{
@@ -136,7 +136,7 @@ const projects = [
 			"",
 			"Les données des joueurs et des tournois sont persistées dans des fichiers JSON avec un système de stockage optimisé. Le code respecte les normes PEP 8, validé via Flake8 pour garantir sa qualité et sa maintenabilité."
 		],
-		languages: ['Python', 'MVC', 'JSON', 'Rich', 'Flake8'],
+		languages: ['Python', 'MVC', 'JSON', 'Rich', 'Flake8', 'Database'],
 		imgCount: 3
 	},
 	{
