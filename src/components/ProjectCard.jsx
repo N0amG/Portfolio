@@ -10,7 +10,14 @@ export default function ProjectCard({
 	tag = '', // Ajout d'un tag technique optionnel
 	onView = null, // Callback pour le bouton view-project
 }) {
-	const slug = title ? title.toLowerCase().replace(/\s+/g, '-') : ''
+	const slug = title
+		? title
+				.toLowerCase()
+				.replace(/&/g, '') // Enlève les esperluettes
+				.replace(/[^\w\s-]/g, '') // Enlève les caractères spéciaux sauf espaces et tirets
+				.trim()
+				.replace(/\s+/g, '-') // Remplace les espaces par des tirets
+		: ''
 	return (
 		<TiltWrapper
 			className={`flex flex-col shadow-md p-0 h-fit w-full md:w-[45%] lg:w-auto overflow-hidden ${className} cursor-pointer lg:hover:scale-[1.1] transition-transform`}

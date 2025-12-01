@@ -113,7 +113,7 @@ export default function AboutClient({ className }) {
 			'Cette expérience a été extrêmement enrichissante et épanouissante.',
 			'',
 			'J’ai poursuivi au BTS des Chartreux, mais après quelques mois,',
-			'je me suis rendu compte que le cadre scolaire n’était vraiment pas adapté pour moi.',
+			'je me suis rendu compte que le cadre trop scolaire n’était vraiment pas adapté pour moi.',
 			'',
 			'Ayant adoré l’expérience à 42, où l’autonomie était primordiale,',
 			'j’ai décidé de me lancer dans une formation diplômante chez OpenClassrooms en développement web.',
@@ -121,8 +121,8 @@ export default function AboutClient({ className }) {
 			'Ce parcours m’a permis de m’épanouir pleinement grâce à son approche autonome et pratique,',
 			'entièrement basée sur des projets concrets, qui simulent en permanence des situations d’entreprise.',
 			'',
-			'J’ai obtenu mon Bac +2 en 2025, et je souhaite désormais poursuivre avec une formation OpenClassrooms',
-			'en Bac +3/4 en alternance, afin de gagner en expérience et d’apprendre directement sur le terrain.',
+			'J’ai obtenu mon Bac +2 en 2025, et je poursuis désormais une formation OpenClassrooms',
+			'en Bac +3/4 en développement backend, afin d’approfondir mes compétences',
 		],
 	}
 

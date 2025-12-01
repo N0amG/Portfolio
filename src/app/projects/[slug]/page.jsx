@@ -7,7 +7,14 @@ import Icon from '@/components/Icon'
 export default async function ProjectDetail({ params }) {
 	const { slug } = await params
 
-	const toSlug = (str) => str.toLowerCase().replace(/\s+/g, '-')
+	const toSlug = (str) =>
+		str
+			.toLowerCase()
+			.replace(/&/g, '')
+			.replace(/[^\w\s-]/g, '')
+			.trim()
+			.replace(/\s+/g, '-')
+
 	const project = projects.find((p) => toSlug(p.title) === slug)
 
 	if (!project) return notFound()

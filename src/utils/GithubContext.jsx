@@ -26,6 +26,13 @@ export function GithubProvider({ children }) {
 					console.log('Utilisation du cache (moins de 5 minutes)');
 					return;
 				}
+
+				// En développement, on évite de refetch si on a déjà des données (même expirées)
+				if (process.env.NODE_ENV === 'development') {
+					console.log('Mode DEV : Utilisation du cache existant (même expiré) pour limiter les requêtes API');
+					return;
+				}
+
 				console.log('Cache expiré, refetch des données...');
 			} catch (error) {
 				console.error('Erreur lors de la lecture du cache:', error);
