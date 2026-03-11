@@ -153,6 +153,38 @@ const projects = [
 		languages: ['Python', 'Algorithmique', 'Performance', 'CSV'],
 		imgCount: 3
 	},
+	{
+		title: 'LITRevu',
+		subtitle: "Application web de partage et de critique de livres",
+		url: "https://github.com/N0amG/OC_LITRevu",
+		description: [
+			"(scénario fictif)",
+			"",
+			"LITRevu est une application web développée avec le framework Django permettant aux utilisateurs de partager des critiques de livres et d'articles. Les utilisateurs peuvent créer des tickets pour demander l'avis de la communauté sur une œuvre, ou rédiger librement une critique complète.",
+			"",
+			"Un système de flux personnalisé affiche les tickets et critiques des personnes suivies, ainsi que ses propres publications. Un espace d'abonnements permet de suivre d'autres utilisateurs par nom d'utilisateur et de consulter ses abonnés.",
+			"",
+			"L'application gère l'authentification complète (inscription, connexion) et l'ensemble des fonctionnalités CRUD pour les tickets, critiques et relations entre utilisateurs. Les données sont persistées dans une base SQLite via l'ORM de Django."
+		],
+		languages: ['Python', 'Django', 'SQLite', 'Database', 'HTML'],
+		imgCount: 4
+	},
+	{
+		title: 'Epic Events',
+		subtitle: "Application CRM en ligne de commande pour la gestion d'événements",
+		url: "https://github.com/N0amG/OC_Epic_Events",
+		description: [
+			"(scénario fictif)",
+			"",
+			"Epic Events CRM est une application de gestion de la relation client (CRM) entièrement en ligne de commande, développée en Python pour une entreprise événementielle. Elle permet aux équipes de vente, de support et de management de collaborer efficacement sur la gestion des clients, contrats et événements.",
+			"",
+			"L'application repose sur une architecture en couches (Models, Controllers, CLI) avec SQLAlchemy comme ORM et une base de données PostgreSQL. Un système de permissions par rôle contrôle strictement les accès : les commerciaux gèrent leurs propres clients et contrats, le support modifie uniquement ses événements assignés, et le management a accès à toutes les ressources.",
+			"",
+			"La sécurité est au cœur du projet : les mots de passe sont hachés avec bcrypt, l'authentification repose sur des tokens JWT, et les événements critiques (création de collaborateur, signature de contrat) sont journalisés via Sentry pour le suivi en production."
+		],
+		languages: ['Python', 'PostgreSQL', 'SQLAlchemy', 'JWT', 'Sentry', 'bcrypt', 'Typer', 'Database'],
+		imgCount: 5
+	},
 ];
 
 export default projects;
