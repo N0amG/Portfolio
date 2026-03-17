@@ -15,10 +15,6 @@ export const metadata: Metadata = {
   title: "Noam Guez | Développeur Web",
   description:
     "Portfolio de Noam Guez – Développeur Web passionné par la création d'applications web modernes avec React, Next.js, Python et Django.",
-  icons: {
-    icon: "/img/avatar.webp",
-    apple: "/img/avatar.webp",
-  },
 };
 
 const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t==='winter'||t==='night'){document.documentElement.setAttribute('data-theme',t)}else{document.documentElement.setAttribute('data-theme','night')}}catch(e){document.documentElement.setAttribute('data-theme','night')}})()`;
