@@ -5,14 +5,14 @@ import AnimatedSection from "@/components/AnimatedSection";
 import GithubActivity from "@/components/GithubActivity";
 
 const skills = [
-  { name: "React & Next.js", icon: "code" },
-  { name: "TypeScript", icon: "code" },
-  { name: "Python & Django", icon: "python" },
-  { name: "PostgreSQL & MongoDB", icon: "database" },
-  { name: "Docker & CI/CD", icon: "cloud" },
-  { name: "Tailwind CSS", icon: "palette" },
-  { name: "NestJS & Node.js", icon: "hub" },
-  { name: "Git & Tests", icon: "security" },
+  { name: "React & Next.js", icon: "code", color: "text-primary" },
+  { name: "TypeScript", icon: "code", color: "text-primary" },
+  { name: "Python & Django", icon: "python", color: "text-secondary" },
+  { name: "PostgreSQL & MongoDB", icon: "database", color: "text-secondary" },
+  { name: "Docker & CI/CD", icon: "cloud", color: "text-accent" },
+  { name: "Tailwind CSS", icon: "palette", color: "text-accent" },
+  { name: "NestJS & Node.js", icon: "hub", color: "text-secondary" },
+  { name: "Git & Tests", icon: "security", color: "text-accent" },
 ];
 
 const experiences = [
@@ -124,7 +124,7 @@ export default function AboutPage() {
         <AnimatedSection>
           <section>
             <div className="flex items-center gap-3 mb-8">
-              <div className="h-8 w-1 bg-primary rounded-full" />
+              <div className="h-8 w-1 bg-secondary rounded-full" />
               <h2 className="text-2xl font-bold text-base-content">Expertise Technique</h2>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-6">
@@ -139,12 +139,12 @@ export default function AboutPage() {
                   className="flex flex-col items-center p-6 rounded-xl bg-base-200/50 border border-base-content/10 transition-colors group"
                 >
                   {skill.icon === "python" ? (
-                    <svg className="h-10 w-10 text-primary mb-3 group-hover:scale-110 transition-transform" viewBox="0 0 256 255" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                    <svg className={`h-10 w-10 ${skill.color} mb-3 group-hover:scale-110 transition-transform`} viewBox="0 0 256 255" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
                       <path d="M126.916.072c-64.832 0-60.784 28.115-60.784 28.115l.072 29.128h61.868v8.745H41.631S.145 61.355.145 126.77c0 65.417 36.21 63.097 36.21 63.097h21.61v-30.356s-1.165-36.21 35.632-36.21h61.362s34.475.557 34.475-33.319V33.97S194.67.072 126.916.072zM92.802 19.66a11.12 11.12 0 0 1 11.13 11.13 11.12 11.12 0 0 1-11.13 11.13 11.12 11.12 0 0 1-11.13-11.13 11.12 11.12 0 0 1 11.13-11.13z" />
                       <path d="M128.757 254.126c64.832 0 60.784-28.115 60.784-28.115l-.072-29.127H127.6v-8.745h86.441s41.486 4.705 41.486-60.712c0-65.416-36.21-63.096-36.21-63.096h-21.61v30.355s1.165 36.21-35.632 36.21h-61.362s-34.475-.557-34.475 33.32v56.013s-5.235 33.897 62.519 33.897zm34.114-19.586a11.12 11.12 0 0 1-11.13-11.13 11.12 11.12 0 0 1 11.13-11.131 11.12 11.12 0 0 1 11.13 11.13 11.12 11.12 0 0 1-11.13 11.13z" />
                     </svg>
                   ) : (
-                  <svg className="h-10 w-10 text-primary mb-3 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className={`h-10 w-10 ${skill.color} mb-3 group-hover:scale-110 transition-transform`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     {skill.icon === "code" && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.25 6.75L22.5 12l-5.25 5.25m-10.5 0L1.5 12l5.25-5.25m7.5-3l-4.5 16.5" />}
                     {skill.icon === "database" && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.25 6.375c0 2.278-3.694 4.125-8.25 4.125S3.75 8.653 3.75 6.375m16.5 0c0-2.278-3.694-4.125-8.25-4.125S3.75 4.097 3.75 6.375m16.5 0v11.25c0 2.278-3.694 4.125-8.25 4.125s-8.25-1.847-8.25-4.125V6.375" />}
                     {skill.icon === "cloud" && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.25 15a4.5 4.5 0 004.5 4.5H18a3.75 3.75 0 001.332-7.257 3 3 0 00-3.758-3.848 5.25 5.25 0 00-10.233 2.33A4.502 4.502 0 002.25 15z" />}
@@ -164,10 +164,10 @@ export default function AboutPage() {
         <AnimatedSection>
           <section>
             <div className="flex items-center gap-3 mb-10">
-              <div className="h-8 w-1 bg-primary rounded-full" />
+              <div className="h-8 w-1 bg-accent rounded-full" />
               <h2 className="text-2xl font-bold text-base-content">Expérience</h2>
             </div>
-            <div className="relative border-l-2 border-primary/20 ml-4 space-y-12">
+            <div className="relative border-l-2 border-accent/20 ml-4 space-y-12">
               {experiences.map((exp, i) => (
                 <motion.div
                   key={i}
@@ -179,13 +179,13 @@ export default function AboutPage() {
                 >
                   <motion.div
                     className={`absolute -left-[11px] top-0 h-5 w-5 rounded-full border-4 border-base-100 shadow-md ${
-                      exp.active ? "bg-primary" : "bg-base-300"
+                      exp.active ? "bg-accent" : "bg-base-300"
                     }`}
                     whileInView={exp.active ? { scale: [1, 1.4, 1] } : {}}
                     viewport={{ once: true }}
                     transition={{ duration: 0.5, delay: i * 0.12 + 0.3 }}
                   />
-                  <span className="text-primary font-bold text-sm tracking-widest uppercase mb-1 block">
+                  <span className="text-accent font-bold text-sm tracking-widest uppercase mb-1 block">
                     {exp.period}
                   </span>
                   <h3 className="text-xl font-bold text-base-content">{exp.title}</h3>
@@ -201,7 +201,7 @@ export default function AboutPage() {
         <AnimatedSection animation="fade-right">
           <section>
             <div className="flex items-center gap-3 mb-8">
-              <div className="h-8 w-1 bg-primary rounded-full" />
+              <div className="h-8 w-1 bg-secondary rounded-full" />
               <h2 className="text-2xl font-bold text-base-content">Activité GitHub récente</h2>
             </div>
             <GithubActivity />
@@ -239,7 +239,7 @@ export default function AboutPage() {
             </div>
             <div>
               <div className="flex items-center gap-3 mb-6">
-                <div className="h-8 w-1 bg-primary rounded-full" />
+                <div className="h-8 w-1 bg-accent rounded-full" />
                 <h2 className="text-2xl font-bold text-base-content">Certifications</h2>
               </div>
               <div className="space-y-4">
@@ -255,7 +255,7 @@ export default function AboutPage() {
                     transition={{ delay: i * 0.1 }}
                     className="flex items-center gap-4 p-4 rounded-xl border border-base-content/10"
                   >
-                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center text-accent">
                       <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.746 3.746 0 011.043 3.296A3.745 3.745 0 0121 12z" />
                       </svg>
