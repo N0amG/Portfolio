@@ -3,9 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "generate-images": "node scripts/generate-image-map.mjs",
     "dev": "next dev",
-    "prebuild": "node scripts/generate-image-map.mjs",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"
