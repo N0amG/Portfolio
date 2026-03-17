@@ -68,7 +68,7 @@ export default function Navbar() {
             href="/contact"
             className="btn btn-primary btn-sm rounded-full px-6 text-sm font-bold"
           >
-            Hire Me
+            Me contacter
           </Link>
         </nav>
 

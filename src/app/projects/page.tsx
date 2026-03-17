@@ -23,7 +23,7 @@ export default function ProjectsPage() {
         {/* Hero */}
         <AnimatedSection className="mb-16" animation="blur">
           <h2 className="text-5xl md:text-6xl font-black mb-6 tracking-tight text-base-content">
-            Projects <span className="text-accent">Gallery</span>
+            Galerie de <span className="text-accent">Projets</span>
           </h2>
           <p className="text-base-content/50 text-lg max-w-2xl leading-relaxed">
             Une sélection de mes réalisations en développement web, mobile et

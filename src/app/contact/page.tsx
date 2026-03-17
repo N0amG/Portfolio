@@ -50,9 +50,9 @@ export default function ContactPage() {
             <AnimatedSection animation="fade-right">
               <div className="max-w-md">
                 <h2 className="text-5xl lg:text-6xl font-black tracking-tighter mb-6 leading-[1.1] text-base-content">
-                  Let&apos;s build{" "}
-                  <span className="text-primary">something</span> great
-                  together.
+                  Construisons quelque chose{" "}
+                  <span className="text-primary">d&apos;extraordinaire</span>{" "}
+                  ensemble.
                 </h2>
                 <p className="text-base-content/60 text-lg leading-relaxed">
                   Je suis actuellement disponible pour du freelance et des
@@ -144,14 +144,6 @@ export default function ContactPage() {
                     </div>
                   </div>
                 </motion.div>
-              </div>
-            </AnimatedSection>
-
-            <AnimatedSection delay={0.2} animation="blur">
-              <div className="pt-8 border-t border-base-content/10">
-                <div className="w-full h-48 rounded-xl bg-base-200 overflow-hidden grayscale opacity-70 hover:opacity-100 transition-opacity">
-                  <div className="h-full w-full bg-gradient-to-br from-base-200 to-base-300" />
-                </div>
               </div>
             </AnimatedSection>
           </div>
