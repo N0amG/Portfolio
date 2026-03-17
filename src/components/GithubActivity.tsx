@@ -37,11 +37,11 @@ const CATEGORY_KEYWORDS: Record<string, CommitCategory> = {
 };
 
 const CATEGORY_STYLES: Record<CommitCategory, { bg: string; text: string; border: string; label: string }> = {
-  add: { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/20", label: "Added" },
-  fix: { bg: "bg-orange-500/10", text: "text-orange-400", border: "border-orange-500/20", label: "Fix" },
-  remove: { bg: "bg-red-500/10", text: "text-red-400", border: "border-red-500/20", label: "Removed" },
-  update: { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/20", label: "Updated" },
-  merge: { bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-500/20", label: "Merge" },
+  add: { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/20", label: "Ajout" },
+  fix: { bg: "bg-orange-500/10", text: "text-orange-400", border: "border-orange-500/20", label: "Correction" },
+  remove: { bg: "bg-red-500/10", text: "text-red-400", border: "border-red-500/20", label: "Suppression" },
+  update: { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/20", label: "Mise à jour" },
+  merge: { bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-500/20", label: "Fusion" },
   version: { bg: "bg-base-300/50", text: "text-base-content/80", border: "border-base-content/10", label: "" },
   default: { bg: "bg-base-300/30", text: "text-base-content/50", border: "border-base-content/10", label: "" },
 };

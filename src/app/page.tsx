@@ -18,7 +18,10 @@ const letterPull = {
 
 export default function Home() {
   const featuredProjects = projects.slice(0, 3);
-  const nameParts = ["N", "o", "a", "m", "\u00A0", "G", "u", "e", "z"];
+  const nameParts = [
+    ["N", "o", "a", "m"],
+    ["G", "u", "e", "z"],
+  ];
 
   return (
     <>
@@ -49,15 +52,19 @@ export default function Home() {
           </motion.span>
 
           <motion.h1
-            className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter text-base-content mb-6 flex justify-center flex-wrap"
+            className="text-6xl md:text-8xl lg:text-9xl font-black tracking-tighter text-base-content mb-6 flex justify-center flex-wrap gap-x-6"
             variants={staggerContainer}
             initial="hidden"
             animate="visible"
           >
-            {nameParts.map((char, i) => (
-              <motion.span key={i} variants={letterPull} className="inline-block">
-                {char}
-              </motion.span>
+            {nameParts.map((word, wi) => (
+              <span key={wi} className="inline-flex whitespace-nowrap">
+                {word.map((char, i) => (
+                  <motion.span key={i} variants={letterPull} className="inline-block">
+                    {char}
+                  </motion.span>
+                ))}
+              </span>
             ))}
           </motion.h1>
 
