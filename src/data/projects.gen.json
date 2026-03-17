@@ -1,0 +1,394 @@
+[
+  {
+    "slug": "booki",
+    "title": "Booki",
+    "category": "Frontend",
+    "categoryLabel": "Intégration Web/Mobile",
+    "description": "Application web/mobile de réservation hôtelière permettant aux usagers de trouver des hébergements et activités.",
+    "tags": [
+      "HTML",
+      "CSS",
+      "Responsive"
+    ],
+    "overview": [
+      "(Scénario fictif)",
+      "La start-up Booki souhaitait réaliser leur site internet et m'ont chargé d'intégrer son interface. Il permet aux usagers de trouver des hébergements et des activités dans la ville de leur choix. J'ai utilisé les langages HTML et CSS afin de reproduire la maquette qui m'était fournie.",
+      "Le site est responsive, ce qui signifie que le contenu s'adapte selon la taille d'écran. Le site a une version tablette ainsi qu'une version mobile."
+    ],
+    "role": "Développeur Frontend",
+    "challenges": [
+      {
+        "title": "Intégration responsive",
+        "description": "Reproduction fidèle de la maquette sur desktop, tablette et mobile en CSS pur, sans framework."
+      }
+    ],
+    "liveUrl": "https://n0amg.github.io/OC_Booki/",
+    "codeUrl": "https://github.com/N0amG/OC_Booki",
+    "imgCount": 4
+  },
+  {
+    "slug": "sophie-bluel",
+    "title": "Sophie Bluel",
+    "category": "Frontend",
+    "categoryLabel": "Portfolio Dynamique",
+    "description": "Portfolio d'une architecte d'intérieur avec gestion dynamique des projets et authentification.",
+    "tags": [
+      "HTML",
+      "CSS",
+      "JavaScript"
+    ],
+    "overview": [
+      "(Scénario fictif)",
+      "Une équipe travaillant sur le portfolio d'une architecte d'intérieur m'a recruté pour que je m'occupe de la partie Frontend. J'ai utilisé le langage JavaScript mêlé au HTML/CSS afin de rendre la page dynamique et faire des requêtes à l'API.",
+      "Le site est composé d'une présentation professionnelle ainsi que d'un formulaire de contact. Il possède une page de connexion qui permet à l'architecte de s'identifier. En mode connecté, il est possible d'ajouter ou de supprimer des projets dynamiquement via une modale. Les projets peuvent être triés par catégorie dans la page principale."
+    ],
+    "role": "Développeur Frontend",
+    "challenges": [
+      {
+        "title": "Manipulation du DOM",
+        "description": "Gestion dynamique de l'ajout et de la suppression de projets via une modale, sans rechargement de page."
+      },
+      {
+        "title": "Communication avec l'API",
+        "description": "Requêtes fetch pour l'authentification, la récupération et la modification des données côté serveur."
+      }
+    ],
+    "codeUrl": "https://github.com/N0amG/OC_Sophie_Bluel",
+    "imgCount": 3
+  },
+  {
+    "slug": "nina-carducci",
+    "title": "Nina Carducci",
+    "category": "Frontend",
+    "categoryLabel": "Optimisation & SEO",
+    "description": "Optimisation des performances, de l'accessibilité et du SEO du site web d'une photographe.",
+    "tags": [
+      "HTML",
+      "CSS",
+      "JavaScript",
+      "SEO",
+      "Performances",
+      "Accessibilité"
+    ],
+    "overview": [
+      "(Scénario fictif)",
+      "Après avoir remarqué de nombreux problèmes sur le site de la photographe Nina Carducci, je l'ai contactée afin de lui proposer mes services.",
+      "J'ai tout d'abord réglé quelques erreurs de code qui faisaient dysfonctionner le site. J'ai ensuite réalisé un audit et un rapport d'intervention afin de lister les modifications apportées.",
+      "Les performances du site ont été nettement améliorées, en grande partie grâce à la compression des images. Le site a été restructuré et adapté afin d'être accessible par tout type d'utilisateur (notamment les personnes en situation de handicap).",
+      "J'ai aussi rendu le code plus clair et j'ai ajouté des balises afin d'améliorer son référencement par les moteurs de recherche (SEO)."
+    ],
+    "role": "Développeur Frontend / SEO",
+    "challenges": [
+      {
+        "title": "Optimisation des performances",
+        "description": "Compression d'images, lazy loading et minification pour atteindre un score Lighthouse de 99 en Performances."
+      },
+      {
+        "title": "Accessibilité WCAG",
+        "description": "Restructuration sémantique du HTML et ajout d'attributs ARIA pour un score Accessibilité de 100."
+      },
+      {
+        "title": "Référencement SEO",
+        "description": "Ajout des balises meta, Schema.org et Open Graph pour un score SEO de 100."
+      }
+    ],
+    "liveUrl": "https://n0amg.github.io/OC_Nina_Carducci/",
+    "codeUrl": "https://github.com/N0amG/OC_Nina_Carducci",
+    "imgCount": 3
+  },
+  {
+    "slug": "kasa",
+    "title": "Kasa",
+    "category": "Frontend",
+    "categoryLabel": "Application React",
+    "description": "Site de location d'appartements entre particuliers développé avec React et Sass.",
+    "tags": [
+      "React",
+      "CSS",
+      "SASS",
+      "Responsive"
+    ],
+    "overview": [
+      "(Scénario fictif)",
+      "L'entreprise de location immobilière Kasa entamait la refonte de son site internet. En tant que développeur Frontend freelance, j'ai été chargé de recoder le site en utilisant le framework JavaScript React. Le site permet aux utilisateurs de trouver un appartement à louer et de se renseigner sur celui-ci.",
+      "J'ai donc reproduit la maquette en créant les composants React nécessaires. Le style du site a été réalisé avec le langage Sass qui permet de rendre l'utilisation du CSS plus pratique. Quelques petites animations ont été réalisées, par exemple lors de l'ouverture des collapses. Le site est responsive et donc adapté pour les utilisateurs sur mobile."
+    ],
+    "role": "Développeur Frontend",
+    "challenges": [
+      {
+        "title": "Architecture en composants",
+        "description": "Création de composants React réutilisables (Collapse, Carousel, Card) selon la maquette Figma."
+      },
+      {
+        "title": "Routing & Navigation",
+        "description": "Mise en place du routage avec React Router pour la navigation entre les différentes pages et les fiches logements."
+      }
+    ],
+    "codeUrl": "https://github.com/N0amG/OC_Kasa",
+    "imgCount": 4
+  },
+  {
+    "slug": "mon-vieux-grimoire",
+    "title": "Mon Vieux Grimoire",
+    "category": "Backend",
+    "categoryLabel": "API REST Node.js",
+    "description": "Site de référencement et de notation de livres avec une API Express et une base MongoDB.",
+    "tags": [
+      "Node.js",
+      "Express",
+      "MongoDB",
+      "Multer",
+      "Sharp"
+    ],
+    "overview": [
+      "(Scénario fictif)",
+      "Un collègue souhaitait réaliser un site de référencement et de notation de livres pour une chaîne de librairie nommée \"Mon vieux grimoire\". J'ai accepté de m'occuper de la partie Backend qui devait être réalisée avec le framework Express de Node.js, en communiquant avec une base de données MongoDB.",
+      "J'ai tout d'abord réalisé les méthodes qui permettent aux utilisateurs de s'inscrire et de se connecter. J'ai ensuite réalisé les routes API qui servent à créer, modifier ou supprimer des livres. Les images des livres sont stockées avec Multer et compressées avec Sharp. J'ai fini par coder les routes qui permettent aux utilisateurs de noter les livres postés sur le site. Les 3 livres les mieux notés apparaissent sur chaque page."
+    ],
+    "role": "Développeur Backend",
+    "challenges": [
+      {
+        "title": "Authentification sécurisée",
+        "description": "Mise en place d'un système d'inscription/connexion avec hachage bcrypt et tokens JWT."
+      },
+      {
+        "title": "Gestion des images",
+        "description": "Upload avec Multer et compression automatique avec Sharp pour optimiser le stockage."
+      },
+      {
+        "title": "Débogage de l'environnement",
+        "description": "Node.js corrompu causant des erreurs silencieuses de connexion à MongoDB — résolu par réinstallation complète."
+      }
+    ],
+    "codeUrl": "https://github.com/N0amG/OC_Mon_Vieux_Grimoire",
+    "imgCount": 4
+  },
+  {
+    "slug": "qwenta",
+    "title": "Qwenta",
+    "category": "Gestion de projet",
+    "categoryLabel": "Planification & Spécifications",
+    "description": "Planification du projet \"Menu Maker\" : veille technologique, spécifications techniques et organisation Kanban.",
+    "tags": [
+      "Feedly",
+      "Notion"
+    ],
+    "overview": [
+      "(Scénario fictif)",
+      "En tant que développeur de l'agence Webgencia, j'ai été choisi afin de planifier notre prochain projet. Il s'agissait du nouveau site internet \"Menu Maker\" de l'entreprise Qwenta.",
+      "Le site permet aux restaurateurs de créer un menu de restaurant personnalisé afin de l'utiliser comme ils le souhaitent.",
+      "J'ai tout d'abord effectué une veille technologique organisée afin de sélectionner les outils du projet. J'ai ensuite créé le document qui liste les détails des spécifications techniques. J'ai alors réparti les tâches au sein d'un tableau Kanban sur Notion afin d'organiser le projet. J'ai fini par préparer la présentation au Product Owner afin de le briefer."
+    ],
+    "role": "Chef de projet technique",
+    "challenges": [
+      {
+        "title": "Veille technologique",
+        "description": "Sélection rigoureuse des outils et frameworks adaptés aux besoins du projet via une veille structurée."
+      },
+      {
+        "title": "Passage de l'exécution à la planification",
+        "description": "Adaptation à un rôle de planification plutôt que d'exécution, étant plus habitué à développer qu'à organiser des sprints."
+      }
+    ],
+    "codeUrl": "https://github.com/N0amG/OC_Qwenta",
+    "imgCount": 5
+  },
+  {
+    "slug": "portfolio",
+    "title": "Portfolio",
+    "category": "Fullstack",
+    "categoryLabel": "Next.js & Tailwind",
+    "description": "Portfolio personnel conçu avec Next.js et Tailwind CSS, hébergé sur Vercel.",
+    "tags": [
+      "Next.js",
+      "Tailwind",
+      "Node.js",
+      "Responsive"
+    ],
+    "overview": [
+      "Le portfolio que vous consultez est le résultat de mon dernier projet de formation bac +2. J'ai choisi de le concevoir avec Next.js pour sa flexibilité et ses performances, et Tailwind CSS pour son approche utilitaire qui me permet de créer des interfaces propres et réactives rapidement.",
+      "Entièrement responsive, il s'adapte à tous les types d'appareils, et il est hébergé sur Vercel pour garantir des temps de chargement rapides et une gestion fluide. À travers ce site, vous pouvez explorer mon parcours, découvrir mes compétences techniques et créatives, et consulter mes projets les plus récents.",
+      "De plus, une page de contact vous permet de me joindre facilement pour toute question ou collaboration."
+    ],
+    "role": "Développeur Fullstack",
+    "challenges": [
+      {
+        "title": "Architecture Next.js",
+        "description": "Mise en place d'une application Next.js avec App Router, rendu dynamique des projets via des routes dynamiques [slug]."
+      }
+    ],
+    "liveUrl": "http://localhost:3000/",
+    "codeUrl": "https://github.com/N0amG/Portfolio",
+    "imgCount": 1
+  },
+  {
+    "slug": "books-online-scraper",
+    "title": "Books Online Scraper",
+    "category": "Python",
+    "categoryLabel": "Pipeline ETL / Scraping",
+    "description": "Pipeline ETL complet pour collecter, nettoyer et organiser les données de 1000 livres depuis Books to Scrape.",
+    "tags": [
+      "Python",
+      "BeautifulSoup",
+      "Requests",
+      "CSV",
+      "Scraping"
+    ],
+    "overview": [
+      "Ce projet met en œuvre un pipeline ETL (Extract, Transform, Load) complet pour collecter des données depuis le site Books to Scrape. L'étape d'extraction parcourt récursivement les catégories et produits, récupérant informations et images sur un millier de livres.",
+      "La phase de transformation assure le nettoyage des données (encodage, formatage des prix, gestion des caractères spéciaux), garantissant leur qualité. Enfin, le chargement organise les résultats dans une structure de fichiers CSV et dossiers d'images cohérente.",
+      "L'architecture est optimisée pour la performance (via des sessions HTTP réutilisées) et la maintenabilité."
+    ],
+    "role": "Développeur Python",
+    "challenges": [
+      {
+        "title": "Extraction récursive",
+        "description": "Parcours automatisé de 50 catégories et 1000 pages produits avec gestion de la pagination."
+      },
+      {
+        "title": "Nettoyage des données",
+        "description": "Gestion de l'encodage, formatage des prix en float et traitement des caractères spéciaux pour des CSV propres."
+      },
+      {
+        "title": "Performance réseau",
+        "description": "Optimisation via la réutilisation de sessions HTTP pour réduire le temps d'exécution global."
+      }
+    ],
+    "codeUrl": "https://github.com/N0amG/OC_Books_Online",
+    "imgCount": 5
+  },
+  {
+    "slug": "manager-de-tournois",
+    "title": "Manager de Tournois",
+    "category": "Python",
+    "categoryLabel": "Application Console MVC",
+    "description": "Logiciel de gestion de tournois d'échecs en console avec architecture MVC et persistance JSON.",
+    "tags": [
+      "Python",
+      "MVC",
+      "JSON",
+      "Rich",
+      "Flake8"
+    ],
+    "overview": [
+      "Application de gestion de tournois d'échecs développée en Python, utilisant le système suisse pour l'organisation des matchs.",
+      "Conçue avec une architecture MVC (Modèle-Vue-Contrôleur), elle sépare strictement la logique métier, l'interface utilisateur et la gestion des données. L'interface en ligne de commande est enrichie grâce à la librairie Rich pour une meilleure expérience utilisateur.",
+      "Les données des joueurs et des tournois sont persistées dans des fichiers JSON avec un système de stockage optimisé. Le code respecte les normes PEP 8, validé via Flake8 pour garantir sa qualité et sa maintenabilité."
+    ],
+    "role": "Développeur Python",
+    "challenges": [
+      {
+        "title": "Architecture MVC",
+        "description": "Séparation stricte des responsabilités entre modèles, vues et contrôleurs pour une maintenabilité optimale."
+      },
+      {
+        "title": "Système suisse de tournoi",
+        "description": "Implémentation de l'algorithme d'appariement du système suisse, évitant les confrontations redondantes."
+      }
+    ],
+    "codeUrl": "https://github.com/N0amG/OC_ChessTournament",
+    "imgCount": 3
+  },
+  {
+    "slug": "algoinvest-trade",
+    "title": "AlgoInvest & Trade",
+    "category": "Python",
+    "categoryLabel": "Algorithmique & Optimisation",
+    "description": "Algorithme d'optimisation de portefeuille financier comparant force brute et algorithme glouton.",
+    "tags": [
+      "Python",
+      "Algorithmique",
+      "Performance",
+      "CSV"
+    ],
+    "overview": [
+      "Application Python conçue pour résoudre le problème du sac à dos (Knapsack Problem) appliqué à l'investissement financier. L'objectif est de sélectionner la meilleure combinaison d'actions pour maximiser le profit au bout de 2 ans, avec un budget limité à 500€.",
+      "Le projet compare deux approches : un algorithme de force brute (Brute Force) qui teste toutes les combinaisons possibles, et un algorithme glouton (Greedy) optimisé pour la performance.",
+      "L'algorithme glouton permet de traiter des fichiers contenant des milliers d'actions en une fraction de seconde (complexité O(n log n)), offrant un compromis idéal entre rapidité d'exécution et précision du résultat."
+    ],
+    "role": "Développeur Python",
+    "challenges": [
+      {
+        "title": "Complexité algorithmique",
+        "description": "Passage d'une complexité O(2^n) en force brute à O(n·log(n)) avec l'algorithme glouton, rendant le traitement de milliers d'actions instantané."
+      },
+      {
+        "title": "Comparaison des approches",
+        "description": "Analyse rigoureuse des compromis entre précision (force brute) et performance (glouton) sur différents jeux de données."
+      }
+    ],
+    "codeUrl": "https://github.com/N0amG/OC_Algorithmie",
+    "imgCount": 3
+  },
+  {
+    "slug": "litrevu",
+    "title": "LITRevu",
+    "category": "Fullstack",
+    "categoryLabel": "Application Django",
+    "description": "Application web Django de partage et de critique de livres avec système d'abonnements.",
+    "tags": [
+      "Python",
+      "Django",
+      "SQLite",
+      "HTML"
+    ],
+    "overview": [
+      "(Scénario fictif)",
+      "LITRevu est une application web développée avec le framework Django permettant aux utilisateurs de partager des critiques de livres et d'articles. Les utilisateurs peuvent créer des tickets pour demander l'avis de la communauté sur une œuvre, ou rédiger librement une critique complète.",
+      "Un système de flux personnalisé affiche les tickets et critiques des personnes suivies, ainsi que ses propres publications. Un espace d'abonnements permet de suivre d'autres utilisateurs par nom d'utilisateur et de consulter ses abonnés.",
+      "L'application gère l'authentification complète (inscription, connexion) et l'ensemble des fonctionnalités CRUD pour les tickets, critiques et relations entre utilisateurs. Les données sont persistées dans une base SQLite via l'ORM de Django."
+    ],
+    "role": "Développeur Fullstack Python",
+    "challenges": [
+      {
+        "title": "Système de flux personnalisé",
+        "description": "Affichage dynamique des tickets et critiques en fonction des abonnements de l'utilisateur connecté."
+      },
+      {
+        "title": "Relations utilisateurs",
+        "description": "Gestion complète du système d'abonnements avec suivi/désabonnement et listing des abonnés."
+      }
+    ],
+    "codeUrl": "https://github.com/N0amG/OC_LITRevu",
+    "imgCount": 4
+  },
+  {
+    "slug": "epic-events",
+    "title": "Epic Events",
+    "category": "Python",
+    "categoryLabel": "CRM en ligne de commande",
+    "description": "Application CRM en ligne de commande pour la gestion de clients, contrats et événements avec permissions par rôle.",
+    "tags": [
+      "Python",
+      "PostgreSQL",
+      "SQLAlchemy",
+      "JWT",
+      "Sentry",
+      "bcrypt",
+      "Typer"
+    ],
+    "overview": [
+      "(Scénario fictif)",
+      "Epic Events CRM est une application de gestion de la relation client (CRM) entièrement en ligne de commande, développée en Python pour une entreprise événementielle. Elle permet aux équipes de vente, de support et de management de collaborer efficacement sur la gestion des clients, contrats et événements.",
+      "L'application repose sur une architecture en couches (Models, Controllers, CLI) avec SQLAlchemy comme ORM et une base de données PostgreSQL. Un système de permissions par rôle contrôle strictement les accès : les commerciaux gèrent leurs propres clients et contrats, le support modifie uniquement ses événements assignés, et le management a accès à toutes les ressources.",
+      "La sécurité est au cœur du projet : les mots de passe sont hachés avec bcrypt, l'authentification repose sur des tokens JWT, et les événements critiques (création de collaborateur, signature de contrat) sont journalisés via Sentry pour le suivi en production."
+    ],
+    "role": "Développeur Backend Python",
+    "challenges": [
+      {
+        "title": "Permissions par rôle",
+        "description": "Contrôle d'accès granulaire : les commerciaux, le support et le management ont chacun des droits spécifiques sur les ressources."
+      },
+      {
+        "title": "Sécurité renforcée",
+        "description": "Hachage bcrypt des mots de passe, authentification JWT et journalisation Sentry des événements critiques."
+      },
+      {
+        "title": "Architecture en couches",
+        "description": "Séparation stricte Models / Controllers / CLI avec SQLAlchemy ORM et PostgreSQL pour la persistance."
+      }
+    ],
+    "codeUrl": "https://github.com/N0amG/OC_Epic_Events",
+    "imgCount": 5
+  }
+]
