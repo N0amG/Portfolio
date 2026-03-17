@@ -23,7 +23,7 @@ export default function ProjectsPage() {
         {/* Hero */}
         <AnimatedSection className="mb-16" animation="blur">
           <h2 className="text-5xl md:text-6xl font-black mb-6 tracking-tight text-base-content">
-            Projects <span className="text-primary">Gallery</span>
+            Projects <span className="text-accent">Gallery</span>
           </h2>
           <p className="text-base-content/50 text-lg max-w-2xl leading-relaxed">
             Une sélection de mes réalisations en développement web, mobile et
@@ -69,7 +69,7 @@ export default function ProjectsPage() {
 
         {/* CTA */}
         <AnimatedSection className="mt-24 mb-12" animation="scale">
-          <div className="p-12 rounded-2xl bg-primary/5 border border-primary/20 flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="p-12 rounded-2xl bg-secondary/5 border border-secondary/20 flex flex-col md:flex-row items-center justify-between gap-8">
             <div className="max-w-xl text-center md:text-left">
               <h3 className="text-3xl font-black mb-4 tracking-tight text-base-content">
                 Un projet unique en tête ?
@@ -83,7 +83,7 @@ export default function ProjectsPage() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
                 href="/contact"
-                className="flex items-center gap-3 btn btn-primary py-4 px-8 rounded-xl font-bold shadow-xl shadow-primary/30"
+                className="flex items-center gap-3 btn btn-secondary py-4 px-8 rounded-xl font-bold shadow-xl shadow-secondary/30"
               >
                 Démarrer une conversation
                 <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

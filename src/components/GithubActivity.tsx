@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useState, useRef } from "react";
+import { motion, useInView } from "framer-motion";
 
 interface GithubEvent {
   id: string;
@@ -18,7 +18,7 @@ const CATEGORY_KEYWORDS: Record<string, CommitCategory> = {
   added: "add",
   create: "add",
   created: "add",
-  feat: "add", 
+  feat: "add",
   fix: "fix",
   fixed: "fix",
   fixes: "fix",
@@ -37,13 +37,13 @@ const CATEGORY_KEYWORDS: Record<string, CommitCategory> = {
 };
 
 const CATEGORY_STYLES: Record<CommitCategory, { bg: string; text: string; border: string; label: string }> = {
-  add:     { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/20", label: "Added" },
-  fix:     { bg: "bg-orange-500/10",  text: "text-orange-400",  border: "border-orange-500/20",  label: "Fix" },
-  remove:  { bg: "bg-red-500/10",     text: "text-red-400",     border: "border-red-500/20",     label: "Removed" },
-  update:  { bg: "bg-blue-500/10",    text: "text-blue-400",    border: "border-blue-500/20",    label: "Updated" },
-  merge:   { bg: "bg-purple-500/10",  text: "text-purple-400",  border: "border-purple-500/20",  label: "Merge" },
-  version: { bg: "bg-slate-700/50",   text: "text-slate-200",   border: "border-slate-600/30",   label: "" },
-  default: { bg: "bg-slate-700/30",   text: "text-slate-400",   border: "border-slate-700/30",   label: "" },
+  add: { bg: "bg-emerald-500/10", text: "text-emerald-400", border: "border-emerald-500/20", label: "Added" },
+  fix: { bg: "bg-orange-500/10", text: "text-orange-400", border: "border-orange-500/20", label: "Fix" },
+  remove: { bg: "bg-red-500/10", text: "text-red-400", border: "border-red-500/20", label: "Removed" },
+  update: { bg: "bg-blue-500/10", text: "text-blue-400", border: "border-blue-500/20", label: "Updated" },
+  merge: { bg: "bg-purple-500/10", text: "text-purple-400", border: "border-purple-500/20", label: "Merge" },
+  version: { bg: "bg-base-300/50", text: "text-base-content/80", border: "border-base-content/10", label: "" },
+  default: { bg: "bg-base-300/30", text: "text-base-content/50", border: "border-base-content/10", label: "" },
 };
 
 function parseCommitMessage(raw: string): { category: CommitCategory; label: string; message: string } {
@@ -102,6 +102,8 @@ function formatRelativeDate(dateStr: string): string {
 export default function GithubActivity() {
   const [events, setEvents] = useState<GithubEvent[]>([]);
   const [loading, setLoading] = useState(true);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(containerRef, { once: true, margin: "-60px" });
 
   useEffect(() => {
     fetch("/api/github")
@@ -133,7 +135,7 @@ export default function GithubActivity() {
   }
 
   return (
-    <div className="grid grid-cols-1 gap-4">
+    <div ref={containerRef} className="grid grid-cols-1 gap-4">
       {events.map((event, i) => {
         const { category, label, message } = parseCommitMessage(event.message);
         const style = CATEGORY_STYLES[category];
@@ -141,10 +143,10 @@ export default function GithubActivity() {
         return (
           <motion.div
             key={event.id}
-            initial={{ opacity: 0, x: -30, filter: "blur(4px)" }}
-            whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
-            viewport={{ once: false }}
-            transition={{ duration: 0.5, delay: i * 0.08, ease: [0.22, 1, 0.36, 1] }}
+            initial={{ x: 40 }}
+            whileInView={{ x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5, delay: i * 0.1 }}
             className="relative p-6 rounded-xl bg-base-200 border border-base-content/10 hover:border-primary/50 transition-all flex flex-col gap-3"
           >
             {/* Étiquette (pin) en haut à droite */}
