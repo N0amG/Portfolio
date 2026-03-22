@@ -5,7 +5,7 @@ import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import AnimatedSection from "@/components/AnimatedSection";
 import Lightbox from "@/components/Lightbox";
-import { Project } from "@/data/projects";
+import { Project } from "@/data/portfolio/projects";
 
 interface Props {
   project: Project;

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import AnimatedSection from "@/components/AnimatedSection";
 import ProjectCard from "@/components/ProjectCard";
-import { projects } from "@/data/projects";
+import { projects } from "@/data/portfolio/projects";
 
 const staggerContainer = {
   hidden: {},

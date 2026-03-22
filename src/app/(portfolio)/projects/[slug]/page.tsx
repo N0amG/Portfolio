@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { projects, getProjectBySlug, getAdjacentProjects } from "@/data/projects";
+import { projects, getProjectBySlug, getAdjacentProjects } from "@/data/portfolio/projects";
 import ProjectDetailClient from "./ProjectDetailClient";
 
 export function generateStaticParams() {

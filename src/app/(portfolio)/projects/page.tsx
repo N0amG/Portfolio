@@ -4,7 +4,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProjectCard from "@/components/ProjectCard";
 import AnimatedSection from "@/components/AnimatedSection";
-import { projects } from "@/data/projects";
+import { projects } from "@/data/portfolio/projects";
 import Link from "next/link";
 
 const categories = ["Tous", "Frontend", "Backend", "Fullstack", "Python", "Gestion de projet"];

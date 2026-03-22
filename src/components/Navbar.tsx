@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import ThemeToggle from "./ThemeToggle";
 
 const navLinks = [
@@ -15,6 +15,41 @@ const navLinks = [
 export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+  const clickCount = useRef(0);
+
+  // Easter egg — dev uniquement
+  const isDev = process.env.NODE_ENV === "development";
+
+  const resetCount = useCallback(() => { clickCount.current = 0; }, []);
+
+  useEffect(() => {
+    resetCount();
+  }, [pathname, resetCount]);
+
+  useEffect(() => {
+    if (!isDev) return;
+    const reset = () => resetCount();
+    window.addEventListener("keydown", reset);
+    window.addEventListener("scroll", reset, { passive: true });
+    return () => {
+      window.removeEventListener("keydown", reset);
+      window.removeEventListener("scroll", reset);
+    };
+  }, [isDev, resetCount]);
+
+  function handleLogoClick(e: React.MouseEvent) {
+    if (pathname === "/") {
+      e.preventDefault();
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+    if (!isDev) return;
+    clickCount.current += 1;
+    if (clickCount.current >= 5) {
+      clickCount.current = 0;
+      router.push("/minigames");
+    }
+  }
 
   return (
     <header className="fixed top-0 z-50 w-full border-b border-base-content/5 bg-base-100/80 backdrop-blur-md px-6 lg:px-20 py-4">
@@ -22,12 +57,7 @@ export default function Navbar() {
         <Link
           href="/"
           className="flex items-center gap-3"
-          onClick={(e) => {
-            if (pathname === "/") {
-              e.preventDefault();
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            }
-          }}
+          onClick={handleLogoClick}
         >
           <motion.div
             className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary"
