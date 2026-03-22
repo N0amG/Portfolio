@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Project } from "@/data/projects";
+import { Project } from "@/data/portfolio/projects";
 
 interface Props {
   project: Project;
