@@ -36,6 +36,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# minigames
+src/app/minigames/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts
