@@ -217,7 +217,7 @@
         "description": "Mise en place d'une application Next.js avec App Router, rendu dynamique des projets via des routes dynamiques [slug]."
       }
     ],
-    "liveUrl": "http://localhost:3000/",
+    "liveUrl": "https://www.noam-guez.com/",
     "codeUrl": "https://github.com/N0amG/Portfolio",
     "imgCount": 1
   },
