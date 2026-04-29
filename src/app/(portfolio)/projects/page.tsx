@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import ProjectCard from "@/components/ProjectCard";
 import AnimatedSection from "@/components/AnimatedSection";
@@ -11,11 +11,21 @@ const categories = ["Tous", "Frontend", "Backend", "Fullstack", "Python", "Gesti
 
 export default function ProjectsPage() {
   const [activeFilter, setActiveFilter] = useState("Tous");
+  const [sortAsc, setSortAsc] = useState(false); // false = décroissant (défaut)
 
-  const filteredProjects =
-    activeFilter === "Tous"
-      ? projects
-      : projects.filter((p) => p.categories.includes(activeFilter));
+  const filteredProjects = useMemo(() => {
+    const filtered =
+      activeFilter === "Tous"
+        ? [...projects]
+        : projects.filter((p) => p.categories.includes(activeFilter));
+
+    filtered.sort((a, b) => {
+      const cmp = a.date.localeCompare(b.date);
+      return sortAsc ? cmp : -cmp;
+    });
+
+    return filtered;
+  }, [activeFilter, sortAsc]);
 
   return (
     <div className="pt-24">
@@ -32,7 +42,7 @@ export default function ProjectsPage() {
           </p>
         </AnimatedSection>
 
-        {/* Filters */}
+        {/* Filters + Sort */}
         <div className="flex flex-wrap items-center gap-3 mb-12 border-b border-base-content/10 pb-8">
           {categories.map((cat) => (
             <motion.button
@@ -49,12 +59,38 @@ export default function ProjectsPage() {
               {cat}
             </motion.button>
           ))}
+
+          {/* Séparateur */}
+          <div className="hidden sm:block h-6 w-px bg-base-content/15 mx-1" />
+
+          {/* Bouton tri date */}
+          <motion.button
+            onClick={() => setSortAsc((v) => !v)}
+            whileTap={{ scale: 0.92 }}
+            whileHover={{ y: -2 }}
+            title={sortAsc ? "Plus ancien en premier" : "Plus récent en premier"}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold bg-base-200 text-base-content/60 hover:bg-base-300 transition-all"
+          >
+            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h10M4 14h6M4 18h3" />
+            </svg>
+            <motion.svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              animate={{ rotate: sortAsc ? 180 : 0 }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </motion.svg>
+          </motion.button>
         </div>
 
         {/* Projects Grid */}
         <AnimatePresence mode="wait">
           <motion.div
-            key={activeFilter}
+            key={`${activeFilter}-${sortAsc}`}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}

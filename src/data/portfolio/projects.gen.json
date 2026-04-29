@@ -2,7 +2,10 @@
   {
     "slug": "booki",
     "title": "Booki",
-    "categories": ["Frontend"],
+    "date": "2024-02",
+    "categories": [
+      "Frontend"
+    ],
     "categoryLabel": "Intégration Web/Mobile",
     "description": "Application web/mobile de réservation hôtelière permettant aux usagers de trouver des hébergements et activités.",
     "tags": [
@@ -29,7 +32,10 @@
   {
     "slug": "sophie-bluel",
     "title": "Sophie Bluel",
-    "categories": ["Frontend"],
+    "date": "2024-04",
+    "categories": [
+      "Frontend"
+    ],
     "categoryLabel": "Portfolio Dynamique",
     "description": "Portfolio d'une architecte d'intérieur avec gestion dynamique des projets et authentification.",
     "tags": [
@@ -59,7 +65,10 @@
   {
     "slug": "nina-carducci",
     "title": "Nina Carducci",
-    "categories": ["Frontend"],
+    "date": "2024-06",
+    "categories": [
+      "Frontend"
+    ],
     "categoryLabel": "Optimisation & SEO",
     "description": "Optimisation des performances, de l'accessibilité et du SEO du site web d'une photographe.",
     "tags": [
@@ -99,7 +108,10 @@
   {
     "slug": "kasa",
     "title": "Kasa",
-    "categories": ["Frontend"],
+    "date": "2024-09",
+    "categories": [
+      "Frontend"
+    ],
     "categoryLabel": "Application React",
     "description": "Site de location d'appartements entre particuliers développé avec React et Sass.",
     "tags": [
@@ -130,7 +142,11 @@
   {
     "slug": "mon-vieux-grimoire",
     "title": "Mon Vieux Grimoire",
-    "categories": ["Backend", "Fullstack"],
+    "date": "2024-11",
+    "categories": [
+      "Backend",
+      "Fullstack"
+    ],
     "categoryLabel": "API REST Node.js",
     "description": "Site de référencement et de notation de livres avec une API Express et une base MongoDB.",
     "tags": [
@@ -166,7 +182,10 @@
   {
     "slug": "qwenta",
     "title": "Qwenta",
-    "categories": ["Gestion de projet"],
+    "date": "2025-01",
+    "categories": [
+      "Gestion de projet"
+    ],
     "categoryLabel": "Planification & Spécifications",
     "description": "Planification du projet \"Menu Maker\" : veille technologique, spécifications techniques et organisation Kanban.",
     "tags": [
@@ -196,7 +215,11 @@
   {
     "slug": "portfolio",
     "title": "Portfolio",
-    "categories": ["Fullstack", "Frontend"],
+    "date": "2026-03",
+    "categories": [
+      "Fullstack",
+      "Frontend"
+    ],
     "categoryLabel": "Next.js & Tailwind",
     "description": "Portfolio personnel conçu avec Next.js et Tailwind CSS, hébergé sur Vercel.",
     "tags": [
@@ -224,7 +247,11 @@
   {
     "slug": "books-online-scraper",
     "title": "Books Online Scraper",
-    "categories": ["Python", "Backend"],
+    "date": "2025-11",
+    "categories": [
+      "Python",
+      "Backend"
+    ],
     "categoryLabel": "Pipeline ETL / Scraping",
     "description": "Pipeline ETL complet pour collecter, nettoyer et organiser les données de 1000 livres depuis Books to Scrape.",
     "tags": [
@@ -260,7 +287,10 @@
   {
     "slug": "manager-de-tournois",
     "title": "Manager de Tournois",
-    "categories": ["Python"],
+    "date": "2026-01",
+    "categories": [
+      "Python"
+    ],
     "categoryLabel": "Application Console MVC",
     "description": "Logiciel de gestion de tournois d'échecs en console avec architecture MVC et persistance JSON.",
     "tags": [
@@ -292,7 +322,10 @@
   {
     "slug": "algoinvest-trade",
     "title": "AlgoInvest & Trade",
-    "categories": ["Python"],
+    "date": "2026-02",
+    "categories": [
+      "Python"
+    ],
     "categoryLabel": "Algorithmique & Optimisation",
     "description": "Algorithme d'optimisation de portefeuille financier comparant force brute et algorithme glouton.",
     "tags": [
@@ -323,7 +356,12 @@
   {
     "slug": "litrevu",
     "title": "LITRevu",
-    "categories": ["Python", "Fullstack", "Backend"],
+    "date": "2025-11",
+    "categories": [
+      "Python",
+      "Fullstack",
+      "Backend"
+    ],
     "categoryLabel": "Application Django",
     "description": "Application web Django de partage et de critique de livres avec système d'abonnements.",
     "tags": [
@@ -355,7 +393,11 @@
   {
     "slug": "epic-events",
     "title": "Epic Events",
-    "categories": ["Python", "Backend"],
+    "date": "2026-03",
+    "categories": [
+      "Python",
+      "Backend"
+    ],
     "categoryLabel": "CRM en ligne de commande",
     "description": "Application CRM en ligne de commande pour la gestion de clients, contrats et événements avec permissions par rôle.",
     "tags": [
@@ -390,5 +432,51 @@
     ],
     "codeUrl": "https://github.com/N0amG/OC_Epic_Events",
     "imgCount": 5
+  },
+  {
+    "slug": "pixelguessr",
+    "title": "PixelGuessr",
+    "date": "2026-04",
+    "categories": [
+      "Fullstack",
+      "Frontend",
+      "Backend"
+    ],
+    "categoryLabel": "Mini-jeu Temps Réel",
+    "description": "Mini-jeu multijoueur de pop culture en temps réel : devinez des œuvres à partir d'images progressivement dépixélisées le plus rapidement, et gagnez un maximum de points pour être le gagnant !",
+    "tags": [
+      "Next.js",
+      "React",
+      "TypeScript",
+      "Tailwind",
+      "Framer Motion",
+      "PartyKit",
+      "WebSocket",
+      "Node.js"
+    ],
+    "overview": [
+      "PixelGuessr est un mini-jeu de pop culture multijoueur en temps réel où les joueurs doivent identifier des œuvres (films, jeux vidéo, séries) à partir d'images progressivement dépixélisées.",
+      "L'architecture repose sur un serveur WebSocket Node.js orchestré via PartyKit, une librairie dédiée à la gestion de rooms et à la synchronisation d'état en temps réel. Le serveur gère le floutage/défloutage progressif des images et les diffuse à tous les clients connectés, image par image, à la manière d'un flux vidéo.",
+      "Le frontend est développé avec Next.js, TypeScript, Tailwind CSS et Framer Motion pour les animations. Une API Next.js fait le pont entre le client et le serveur PartyKit, gérant la création des rooms et la communication bidirectionnelle.",
+      "( /!\\ toujours en développement)"
+    ],
+    "role": "Développeur Fullstack",
+    "challenges": [
+      {
+        "title": "Streaming d'images progressif",
+        "description": "Envoi en temps réel des images dépixélisées étape par étape à tous les clients via WebSocket, simulant un flux continu fluide."
+      },
+      {
+        "title": "Synchronisation des rooms multijoueurs",
+        "description": "Gestion de l'état partagé (scores, réponses, progression) entre tous les participants avec PartyKit pour une expérience cohérente."
+      },
+      {
+        "title": "Architecture hybride Next.js + PartyKit",
+        "description": "Pont entre les routes API Next.js et le serveur WebSocket PartyKit pour une communication en temps réel fiable et scalable."
+      }
+    ],
+    "codeUrl": "https://github.com/N0amG/PixelGuessr",
+    "liveUrl": "https://pixelguessr.com",
+    "imgCount": 4
   }
 ]
