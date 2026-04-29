@@ -50,11 +50,10 @@ export default function ProjectsPage() {
               onClick={() => setActiveFilter(cat)}
               whileTap={{ scale: 0.92 }}
               whileHover={{ y: -2 }}
-              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all ${
-                activeFilter === cat
+              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all ${activeFilter === cat
                   ? "btn-primary bg-primary text-primary-content shadow-lg shadow-primary/20"
                   : "bg-base-200 text-base-content/60 hover:bg-base-300"
-              }`}
+                }`}
             >
               {cat}
             </motion.button>
