@@ -113,8 +113,8 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
                     {project.challenges.map((ch, i) => (
                       <motion.div
                         key={i}
-                        initial={{ opacity: 0, x: -20, filter: "blur(4px)" }}
-                        whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                        initial={{ opacity: 0, x: -20 }}
+                        whileInView={{ opacity: 1, x: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.4, delay: i * 0.1 }}
                         className="flex gap-4"
@@ -191,14 +191,14 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
         {project.screenshots && project.screenshots.length > 0 && (
           <AnimatedSection className="mb-20">
             <h2 className="text-3xl font-bold tracking-tight text-base-content mb-8">
-              Screenshots & Design System
+              Captures d&apos;écran
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {project.screenshots.map((src, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, scale: 0.95, filter: "blur(4px)" }}
-                  whileInView={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.4, delay: i * 0.1 }}
                   whileHover={{ y: -6 }}

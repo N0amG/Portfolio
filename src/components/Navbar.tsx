@@ -17,6 +17,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const clickCount = useRef(0);
+  const headerRef = useRef<HTMLElement>(null);
 
   // Easter egg — dev uniquement
   const isDev = process.env.NODE_ENV === "development";
@@ -38,6 +39,29 @@ export default function Navbar() {
     };
   }, [isDev, resetCount]);
 
+  // Fermer le menu si clic en dehors ou scroll
+  useEffect(() => {
+    if (!mobileOpen) return;
+
+    const handleOutsideClick = (e: MouseEvent | TouchEvent) => {
+      if (headerRef.current && !headerRef.current.contains(e.target as Node)) {
+        setMobileOpen(false);
+      }
+    };
+
+    const handleScroll = () => setMobileOpen(false);
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("touchstart", handleOutsideClick, { passive: true });
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("touchstart", handleOutsideClick);
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, [mobileOpen]);
+
   function handleLogoClick(e: React.MouseEvent) {
     if (pathname === "/") {
       e.preventDefault();
@@ -52,7 +76,7 @@ export default function Navbar() {
   }
 
   return (
-    <header className="fixed top-0 z-50 w-full border-b border-base-content/5 bg-base-100/80 backdrop-blur-md px-6 lg:px-20 py-4">
+    <header ref={headerRef} className="fixed top-0 z-50 w-full border-b border-base-content/5 bg-base-100/80 backdrop-blur-md px-6 lg:px-20 py-4">
       <div className="mx-auto flex max-w-7xl items-center justify-between">
         <Link
           href="/"
@@ -158,7 +182,7 @@ export default function Navbar() {
                   onClick={() => setMobileOpen(false)}
                   className="btn btn-primary btn-sm rounded-full text-sm font-bold text-center mt-2"
                 >
-                  Hire Me
+                  Me contacter
                 </Link>
               </motion.div>
             </div>

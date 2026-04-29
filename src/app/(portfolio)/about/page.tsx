@@ -171,8 +171,8 @@ export default function AboutPage() {
               {experiences.map((exp, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, x: -30, filter: "blur(4px)" }}
-                  whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
+                  initial={{ opacity: 0, x: -30 }}
+                  whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                   transition={{ duration: 0.6, delay: i * 0.12, ease: [0.22, 1, 0.36, 1] }}
                   className="relative pl-10"

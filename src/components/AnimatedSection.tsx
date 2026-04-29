@@ -6,19 +6,19 @@ import { useRef } from "react";
 type AnimationType = "fade-up" | "fade-left" | "fade-right" | "scale" | "blur";
 
 const hiddenVariants: Record<AnimationType, TargetAndTransition> = {
-  "fade-up": { opacity: 0, y: 50, filter: "blur(4px)" },
-  "fade-left": { opacity: 0, x: -60 },
-  "fade-right": { opacity: 0, x: 60 },
-  scale: { opacity: 0, scale: 0.85 },
-  blur: { opacity: 0, filter: "blur(12px)" },
+  "fade-up": { opacity: 0, y: 40 },
+  "fade-left": { opacity: 0, x: -50 },
+  "fade-right": { opacity: 0, x: 50 },
+  scale: { opacity: 0, scale: 0.88 },
+  blur: { opacity: 0, y: 20 },
 };
 
 const visibleVariants: Record<AnimationType, TargetAndTransition> = {
-  "fade-up": { opacity: 1, y: 0, filter: "blur(0px)" },
+  "fade-up": { opacity: 1, y: 0 },
   "fade-left": { opacity: 1, x: 0 },
   "fade-right": { opacity: 1, x: 0 },
   scale: { opacity: 1, scale: 1 },
-  blur: { opacity: 1, filter: "blur(0px)" },
+  blur: { opacity: 1, y: 0 },
 };
 
 interface Props {

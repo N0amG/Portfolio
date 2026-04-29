@@ -23,9 +23,13 @@ export default function ProjectCard({ project, index }: Props) {
         className="group glass-card overflow-hidden rounded-2xl flex flex-col h-full block"
       >
         <div className="aspect-video overflow-hidden relative bg-base-200">
-          <div className="absolute top-4 right-4 z-10 badge badge-primary font-bold">
-            {project.category}
-          </div>
+        <div className="absolute top-3 right-3 z-10 flex flex-col items-end gap-1">
+          {project.categories.map((cat) => (
+            <span key={cat} className="badge badge-primary font-bold text-xs">
+              {cat}
+            </span>
+          ))}
+        </div>
           {project.thumbnail ? (
             <img
               src={project.thumbnail}

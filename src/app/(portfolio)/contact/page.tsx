@@ -55,9 +55,7 @@ export default function ContactPage() {
                   ensemble.
                 </h2>
                 <p className="text-base-content/60 text-lg leading-relaxed">
-                  Je suis actuellement disponible pour du freelance et des
-                  opportunités à temps plein. Si vous avez un projet en tête, ou
-                  simplement envie de discuter, n&apos;hésitez pas.
+                  Je suis actuellement en recherche d&apos;une alternance. Si mon profil vous intéresse et que vous souhaitez échanger, n&apos;hésitez pas à me contacter.
                 </p>
               </div>
             </AnimatedSection>
@@ -196,9 +194,8 @@ export default function ContactPage() {
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className={`btn btn-primary w-full shadow-xl shadow-primary/20 group ${
-                    isLoading || rateLimitError ? "btn-disabled" : ""
-                  }`}
+                  className={`btn btn-primary w-full shadow-xl shadow-primary/20 group ${isLoading || rateLimitError ? "btn-disabled" : ""
+                    }`}
                   type="submit"
                   disabled={isLoading || rateLimitError}
                 >
