@@ -8,6 +8,7 @@ export interface Project {
   description: string;
   thumbnail: string;
   tags: string[];
+  date: string; // format "YYYY-MM"
   overview?: string[];
   role?: string;
   challenges?: { title: string; description: string }[];
