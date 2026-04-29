@@ -29,22 +29,14 @@ export default function Home() {
       <section className="relative flex min-h-screen items-center justify-center px-6 pt-20">
         <div className="absolute inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-transparent to-transparent" />
-          <motion.div
-            className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-primary/20 blur-[120px]"
-            animate={{ scale: [1, 1.2, 1], opacity: [0.6, 1, 0.6] }}
-            transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-          />
-          <motion.div
-            className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-secondary/10 blur-[150px]"
-            animate={{ scale: [1.2, 1, 1.2], opacity: [0.4, 0.8, 0.4] }}
-            transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-          />
+          <div className="absolute top-1/4 left-1/4 h-64 w-64 rounded-full bg-primary/20 blur-[100px] animate-blob" />
+          <div className="absolute bottom-1/4 right-1/4 h-96 w-96 rounded-full bg-secondary/10 blur-[130px] animate-blob animation-delay-3000" />
         </div>
 
         <div className="relative z-10 text-center max-w-4xl mx-auto" style={{ perspective: "800px" }}>
           <motion.span
-            initial={{ opacity: 0, scale: 0.8, filter: "blur(10px)" }}
-            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             className="inline-block rounded-full border border-accent/30 bg-accent/10 px-4 py-1.5 text-xs font-semibold tracking-widest text-accent uppercase mb-8"
           >
@@ -69,8 +61,8 @@ export default function Home() {
           </motion.h1>
 
           <motion.p
-            initial={{ opacity: 0, y: 20, filter: "blur(6px)" }}
-            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 1 }}
             className="text-xl md:text-3xl font-light text-base-content/50 max-w-2xl mx-auto leading-relaxed"
           >
@@ -138,7 +130,7 @@ export default function Home() {
                   className="h-full w-full object-cover"
                   initial={{ scale: 1.15 }}
                   whileInView={{ scale: 1 }}
-                  viewport={{ once: false }}
+                  viewport={{ once: true }}
                   transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1] as const }}
                 />
                 <div className="absolute inset-0 bg-accent/10 mix-blend-overlay" />
@@ -160,7 +152,7 @@ export default function Home() {
                   une rigueur technique backend.
                 </p>
                 <p>
-                  Formé chez OpenClassrooms et passé par l&apos;École 42 et un stage
+                  Formé chez OpenClassrooms et passé par la piscine de l&apos;École 42, ainsi qu'un stage
                   de 6 mois en agence web, je maîtrise React, Next.js, TypeScript,
                   Python, Django et NestJS.
                 </p>

@@ -2,7 +2,7 @@
   {
     "slug": "booki",
     "title": "Booki",
-    "category": "Frontend",
+    "categories": ["Frontend"],
     "categoryLabel": "Intégration Web/Mobile",
     "description": "Application web/mobile de réservation hôtelière permettant aux usagers de trouver des hébergements et activités.",
     "tags": [
@@ -29,7 +29,7 @@
   {
     "slug": "sophie-bluel",
     "title": "Sophie Bluel",
-    "category": "Frontend",
+    "categories": ["Frontend"],
     "categoryLabel": "Portfolio Dynamique",
     "description": "Portfolio d'une architecte d'intérieur avec gestion dynamique des projets et authentification.",
     "tags": [
@@ -59,7 +59,7 @@
   {
     "slug": "nina-carducci",
     "title": "Nina Carducci",
-    "category": "Frontend",
+    "categories": ["Frontend"],
     "categoryLabel": "Optimisation & SEO",
     "description": "Optimisation des performances, de l'accessibilité et du SEO du site web d'une photographe.",
     "tags": [
@@ -99,7 +99,7 @@
   {
     "slug": "kasa",
     "title": "Kasa",
-    "category": "Frontend",
+    "categories": ["Frontend"],
     "categoryLabel": "Application React",
     "description": "Site de location d'appartements entre particuliers développé avec React et Sass.",
     "tags": [
@@ -130,7 +130,7 @@
   {
     "slug": "mon-vieux-grimoire",
     "title": "Mon Vieux Grimoire",
-    "category": "Backend",
+    "categories": ["Backend", "Fullstack"],
     "categoryLabel": "API REST Node.js",
     "description": "Site de référencement et de notation de livres avec une API Express et une base MongoDB.",
     "tags": [
@@ -166,7 +166,7 @@
   {
     "slug": "qwenta",
     "title": "Qwenta",
-    "category": "Gestion de projet",
+    "categories": ["Gestion de projet"],
     "categoryLabel": "Planification & Spécifications",
     "description": "Planification du projet \"Menu Maker\" : veille technologique, spécifications techniques et organisation Kanban.",
     "tags": [
@@ -196,7 +196,7 @@
   {
     "slug": "portfolio",
     "title": "Portfolio",
-    "category": "Fullstack",
+    "categories": ["Fullstack", "Frontend"],
     "categoryLabel": "Next.js & Tailwind",
     "description": "Portfolio personnel conçu avec Next.js et Tailwind CSS, hébergé sur Vercel.",
     "tags": [
@@ -224,7 +224,7 @@
   {
     "slug": "books-online-scraper",
     "title": "Books Online Scraper",
-    "category": "Python",
+    "categories": ["Python", "Backend"],
     "categoryLabel": "Pipeline ETL / Scraping",
     "description": "Pipeline ETL complet pour collecter, nettoyer et organiser les données de 1000 livres depuis Books to Scrape.",
     "tags": [
@@ -260,7 +260,7 @@
   {
     "slug": "manager-de-tournois",
     "title": "Manager de Tournois",
-    "category": "Python",
+    "categories": ["Python"],
     "categoryLabel": "Application Console MVC",
     "description": "Logiciel de gestion de tournois d'échecs en console avec architecture MVC et persistance JSON.",
     "tags": [
@@ -292,7 +292,7 @@
   {
     "slug": "algoinvest-trade",
     "title": "AlgoInvest & Trade",
-    "category": "Python",
+    "categories": ["Python"],
     "categoryLabel": "Algorithmique & Optimisation",
     "description": "Algorithme d'optimisation de portefeuille financier comparant force brute et algorithme glouton.",
     "tags": [
@@ -323,7 +323,7 @@
   {
     "slug": "litrevu",
     "title": "LITRevu",
-    "category": "Fullstack",
+    "categories": ["Python", "Fullstack", "Backend"],
     "categoryLabel": "Application Django",
     "description": "Application web Django de partage et de critique de livres avec système d'abonnements.",
     "tags": [
@@ -355,7 +355,7 @@
   {
     "slug": "epic-events",
     "title": "Epic Events",
-    "category": "Python",
+    "categories": ["Python", "Backend"],
     "categoryLabel": "CRM en ligne de commande",
     "description": "Application CRM en ligne de commande pour la gestion de clients, contrats et événements avec permissions par rôle.",
     "tags": [

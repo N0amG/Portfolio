@@ -27,6 +27,7 @@ export default function PortfolioLayout({
           <Footer />
         </div>
       </ThemeProvider>
+      <SpeedInsights />
     </>
   );
 }

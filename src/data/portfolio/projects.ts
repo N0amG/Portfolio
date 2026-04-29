@@ -3,7 +3,7 @@ import generatedProjects from "./projects.gen.json";
 export interface Project {
   slug: string;
   title: string;
-  category: string;
+  categories: string[];
   categoryLabel: string;
   description: string;
   thumbnail: string;
