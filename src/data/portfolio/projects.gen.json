@@ -475,7 +475,6 @@
         "description": "Pont entre les routes API Next.js et le serveur WebSocket PartyKit pour une communication en temps réel fiable et scalable."
       }
     ],
-    "codeUrl": "https://github.com/N0amG/PixelGuessr",
     "liveUrl": "https://pixelguessr.com",
     "imgCount": 4
   }

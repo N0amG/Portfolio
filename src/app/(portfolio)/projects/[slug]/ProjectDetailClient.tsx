@@ -22,7 +22,7 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
         {/* Hero Banner */}
         <AnimatedSection className="mb-12">
           <div
-            className="relative group overflow-hidden rounded-xl aspect-[21/9] bg-base-200 shadow-2xl cursor-pointer"
+            className="relative group overflow-hidden rounded-xl min-h-[300px] md:aspect-[21/10] bg-base-200 shadow-2xl cursor-pointer"
             onClick={() => setLightboxIndex(0)}
           >
             {project.thumbnail ? (
@@ -36,7 +36,7 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
                 className="absolute inset-0 bg-gradient-to-br from-base-200 via-base-300 to-base-100 transition-transform duration-700 group-hover:scale-105"
               />
             )}
-            <div className="absolute inset-0 bg-gradient-to-t from-base-100/90 via-base-100/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-base-100/95 via-base-100/60 to-transparent" />
             <div className="absolute bottom-0 left-0 p-8 md:p-12 w-full flex flex-col md:flex-row md:items-end justify-between gap-6">
               <div className="max-w-2xl">
                 <span className="inline-block px-3 py-1 rounded-full bg-primary/20 text-primary text-xs font-bold uppercase tracking-widest mb-4">
@@ -45,7 +45,7 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
                 <h1 className="text-4xl md:text-6xl font-black text-base-content leading-tight mb-4 tracking-tight">
                   {project.title}
                 </h1>
-                <p className="text-base-content/70 text-lg md:text-xl max-w-xl font-light leading-relaxed">
+                <p className="hidden md:block text-base-content/70 text-lg md:text-xl max-w-xl font-light leading-relaxed">
                   {project.description}
                 </p>
               </div>
