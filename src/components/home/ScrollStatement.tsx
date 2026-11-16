@@ -16,9 +16,11 @@ function Word({
 }) {
   const opacity = useTransform(progress, range, [0.14, 1]);
   return (
-    <motion.span style={{ opacity }} className={`mr-[0.24em] inline-block ${accent ? "opal-text" : ""}`}>
-      {children}
-    </motion.span>
+    <>
+      <motion.span style={{ opacity }} className={`inline-block ${accent ? "opal-text" : ""}`}>
+        {children}
+      </motion.span>{" "}
+    </>
   );
 }
 

@@ -112,7 +112,7 @@ export default function Home() {
           <div className="col-span-4 md:col-span-10 md:col-start-3">
             <ScrollStatement
               className="f-display text-[clamp(2rem,4.6vw,4.6rem)] leading-[1.06] [--wdth:96] [--wght:560]"
-              text="Je travaille en direct avec vous : pas d'intermédiaire, pas de jargon. React et Next.js pour l'interface, Node.js ou Django pour le serveur, et une *obsession* *du* *détail* qui se voit à l'usage."
+              text="Je travaille en direct avec vous, du premier échange à la mise en ligne. React et Next.js pour l'interface, Node.js ou Django pour le serveur, et un code *pensé* *pour* *durer.*"
             />
           </div>
         </div>
