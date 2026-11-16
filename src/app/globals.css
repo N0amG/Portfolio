@@ -407,21 +407,22 @@ img {
 /* Champs de formulaire : un seul trait, pas de boîte */
 .field {
   width: 100%;
-  background: transparent;
-  border: 0;
-  border-bottom: 1px solid var(--line);
-  padding: 0.75rem 0 1rem;
-  font-size: clamp(1.25rem, 2vw, 1.75rem);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  font-size: 1.0625rem;
+  line-height: 1.5;
   color: var(--ink);
-  border-radius: 0;
-  transition: border-color 0.3s;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
 .field::placeholder {
-  color: color-mix(in oklab, var(--muted) 70%, transparent);
+  color: var(--muted);
 }
 .field:focus {
   outline: none;
-  border-bottom-color: var(--signal);
+  border-color: var(--accent-ink);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent-ink) 22%, transparent);
 }
 
 /* Transition de page */

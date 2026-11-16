@@ -1,225 +1,108 @@
 import type { Metadata } from "next";
-import GithubActivity from "@/components/GithubActivity";
-import { FadeIn, MaskLines, SectionHead } from "@/components/Reveal";
+import Link from "next/link";
+import { ArrowRightIcon } from "@phosphor-icons/react/dist/ssr";
 import AboutPortrait from "@/components/about/AboutPortrait";
+import Assemble from "@/components/scroll/Assemble";
+import SectionIntro from "@/components/SectionIntro";
+import { FadeIn } from "@/components/Reveal";
+import { ctaClass } from "@/components/Navbar";
 
 export const metadata: Metadata = {
   title: "À propos | Noam Guez",
   description:
-    "Noam Guez, développeur web freelance à Lyon : parcours en entreprise, Master DevOps à l'EPSI, outils et activité GitHub.",
+    "Noam Guez, développeur web freelance à Lyon : des sites simples et soignés pour les commerçants, une expérience en entreprise et en agence.",
 };
 
-const experiences = [
+const milestones = [
   {
-    period: "2026 — aujourd'hui",
-    title: "Développeur web",
-    company: "Elissar",
-    description: "Modernisation complète d'un logiciel professionnel vendu à des entreprises (React, Node.js).",
+    when: "2026 — aujourd'hui",
+    title: "Développeur web chez Elissar",
+    text: "Je modernise un logiciel professionnel vendu à des entreprises : le genre de projet où la fiabilité n'est pas une option.",
   },
   {
-    period: "2026 — aujourd'hui",
-    title: "Master DevOps (Bac +5)",
-    company: "EPSI",
-    description: "Hébergement, mise en ligne et automatisation : faire tourner des applications de façon fiable.",
+    when: "2025",
+    title: "Agence web JVAIS",
+    text: "Des applications web et mobiles construites en équipe pour des clients, dont des fonctionnalités d'intelligence artificielle.",
   },
   {
-    period: "Aujourd'hui",
-    title: "Développeur web freelance",
-    company: "Indépendant",
-    description: "Sites internet et applications web pour particuliers et entreprises.",
-  },
-  {
-    period: "2025",
-    title: "Développeur web & mobile",
-    company: "JVAIS Agence Web",
-    description:
-      "Applications web et mobiles au sein de l'équipe technique, dont des fonctionnalités d'intelligence artificielle (React Native, TypeScript, NestJS).",
-  },
-  {
-    period: "2025 — 2026",
-    title: "Développeur Web (Bac +3)",
-    company: "OpenClassrooms — Python / Django",
-    description:
-      "Formation diplômante centrée sur la partie serveur des applications (Python, Django), à travers des projets concrets.",
-  },
-  {
-    period: "2024 — 2025",
-    title: "Développeur Web (Bac +2)",
-    company: "OpenClassrooms — React / Node.js",
-    description: "Formation diplômante : créer des sites et des applications web complets (React, Node.js).",
-  },
-  {
-    period: "Juil. 2024",
-    title: "Piscine de développement",
-    company: "École 42 Lyon",
-    description: "Un mois d'immersion intensive en programmation (langage C), avec des projets en équipe à rendre en temps limité.",
+    when: "2024 — 2028",
+    title: "Bac +3, Master en cours",
+    text: "Diplômé développeur web (Bac +3), en Master à l'EPSI : hébergement, mise en ligne et sites qui tiennent dans la durée.",
   },
 ];
-
-const stack = [
-  { domain: "Ce que vous voyez", items: ["React", "Next.js", "TypeScript", "Tailwind CSS", "React Native"] },
-  { domain: "En coulisses", items: ["Node.js", "NestJS", "Express", "Python", "Django"] },
-  { domain: "Données", items: ["PostgreSQL", "MongoDB", "SQLite", "SQLAlchemy"] },
-  { domain: "Qualité & mise en ligne", items: ["Git", "Docker", "CI/CD", "Tests", "Sentry"] },
-];
-
-const education = [
-  { title: "Master DevOps (Bac +5)", sub: "EPSI", date: "2026 — 2028", current: true },
-  { title: "Bac +3 Développeur Web", sub: "OpenClassrooms — Python / Django", date: "2025 — 2026" },
-  { title: "Bac +2 Développeur Web", sub: "OpenClassrooms — React / Node.js", date: "2024 — 2025" },
-  { title: "Baccalauréat, mention Bien", sub: "Lycée Déborde, Lyon — spécialités Maths et Informatique", date: "2021 — 2023" },
-];
-
-const certifications = [
-  { title: "Python Essentials 1", sub: "Cisco NetAcad" },
-  { title: "Piscine 42 Lyon", sub: "École 42 — juillet 2024" },
-];
-
-const interests = ["Intelligence artificielle", "Cybersécurité", "Culture japonaise", "Jeux vidéo", "Physique"];
 
 export default function AboutPage() {
   return (
-    <div className="pb-24 pt-28 md:pb-36 md:pt-40">
+    <div className="pb-24 pt-32 md:pb-36 md:pt-40">
       {/* En-tête */}
-      <section className="shell">
-        <div className="grid-12 gap-y-10">
-          <MaskLines
-            as="h1"
-            className="f-display col-span-4 text-[clamp(3rem,9.4vw,10rem)] uppercase md:col-span-9"
-            lineClassName="[--wght:860]"
-            lines={[
-              <span key="1" style={{ "--wdth": 130 } as React.CSSProperties} className="f-display">
-                Un site
-              </span>,
-              <span key="2" style={{ "--wdth": 70 } as React.CSSProperties} className="f-display">
-                à votre
-              </span>,
-              <span key="3" style={{ "--wdth": 130 } as React.CSSProperties} className="f-display opal-text">
+      <section className="shell grid items-center gap-12 md:grid-cols-[1.3fr_1fr] md:gap-16">
+        <div>
+          <p className="hero-up f-label flex items-center gap-2 text-accent-ink" style={{ animationDelay: "0.05s" }}>
+            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />À propos
+          </p>
+          <h1 className="f-display mt-6 text-[clamp(3rem,7.4vw,7rem)] leading-[1] tracking-[-0.03em] [--wght:390]">
+            {[
+              <>Un site</>,
+              <>à votre</>,
+              <em key="i" className="text-accent">
                 image.
-              </span>,
-            ]}
-          />
-          <AboutPortrait />
+              </em>,
+            ].map((line, i) => (
+              <span key={i} className={`-my-[0.1em] block overflow-hidden py-[0.1em] ${i === 1 ? "pl-[12%]" : ""}`}>
+                <span className="hero-rise block" style={{ animationDelay: `${0.06 + i * 0.09}s` }}>
+                  {line}
+                </span>
+                {i < 2 && " "}
+              </span>
+            ))}
+          </h1>
+          <div className="hero-up mt-10 max-w-[48ch] space-y-5" style={{ animationDelay: "0.3s" }}>
+            <p className="text-pretty text-[clamp(1.2rem,1.7vw,1.45rem)] leading-[1.45]">
+              Je suis Noam, développeur web freelance à Lyon. Je crée des sites et des applications web de A à Z : ce que
+              vous voyez à l&apos;écran comme ce qui tourne en coulisses.
+            </p>
+            <p className="leading-relaxed text-muted">
+              Mon idée est simple : un site doit ressembler au commerce qu&apos;il présente, s&apos;afficher vite sur un
+              téléphone, et être facile à faire vivre. Vous avez un seul interlocuteur, du premier échange à la mise en ligne.
+            </p>
+          </div>
         </div>
-
-        <div className="grid-12 mt-16 gap-y-8 md:mt-24">
-          <FadeIn className="col-span-4 space-y-5 md:col-span-5 md:col-start-5">
-            <p className="text-pretty text-[clamp(1.25rem,1.9vw,1.6rem)] leading-[1.35]">
-              Je suis Noam, développeur web freelance à Lyon. Je crée des sites et des applications web de A à Z : ce
-              que vous voyez à l&apos;écran comme ce qui tourne en coulisses.
-            </p>
-            <p className="text-pretty text-[clamp(1.25rem,1.9vw,1.6rem)] leading-[1.35]">
-              Je ne pars pas de zéro : chez Elissar, je modernise un logiciel professionnel utilisé par des entreprises.
-              Avant ça, j&apos;ai travaillé dans une agence web, JVAIS, sur des applications web et mobiles. Côté
-              formation : un Bac +3 en développement web, et un Master (Bac +5) en cours à l&apos;EPSI.
-            </p>
-          </FadeIn>
-          <FadeIn delay={0.1} className="col-span-4 md:col-span-3">
-            <p className="text-[17px] leading-relaxed text-muted">
-              Ce qui m&apos;intéresse : les interfaces soignées, les projets simples à faire évoluer, et l&apos;IA quand
-              elle est vraiment utile. En dehors du travail : culture japonaise, jeux vidéo, physique.
-            </p>
-            <ul className="mt-6 flex flex-wrap gap-1.5">
-              {interests.map((it) => (
-                <li key={it} className="f-label border border-line px-2 py-1">
-                  {it}
-                </li>
-              ))}
-            </ul>
-          </FadeIn>
-        </div>
+        <AboutPortrait />
       </section>
 
-      {/* Parcours */}
+      {/* Repères */}
       <section className="shell mt-28 md:mt-40">
-        <SectionHead title="Parcours" meta="2024 → aujourd'hui" />
-        <ol>
-          {experiences.map((e, i) => (
-            <li key={e.title} className="group border-b border-line py-8 md:py-10">
-              <FadeIn delay={Math.min(i, 3) * 0.05} className="grid-12 gap-y-2">
-                <span className="f-label col-span-4 text-signal md:col-span-2">{e.period}</span>
-                <div className="col-span-4 md:col-span-5">
-                  <h3 className="f-display text-[clamp(1.8rem,3vw,3rem)] uppercase transition-[font-variation-settings] duration-700 ease-[var(--ease-expo)] [--wdth:84] [--wght:720] group-hover:[--wdth:110]">
-                    {e.title}
-                  </h3>
-                  <p className="f-label mt-3 text-muted">{e.company}</p>
+        <SectionIntro eyebrow="Pourquoi me faire confiance" title="Une expérience en entreprise et en agence." />
+        <ol className="mt-12 grid gap-6 md:grid-cols-3">
+          {milestones.map((m, i) => (
+            <li key={m.title}>
+              <Assemble from={{ y: 120, rotate: i === 1 ? 0 : i === 0 ? -3 : 3, opacity: 0.1 }} end="start 0.55" className="h-full">
+                <div className="flex h-full flex-col rounded-card bg-card p-7 shadow-card md:p-8">
+                  <span className="f-display text-[1.375rem] italic text-accent [--wght:360]">{m.when}</span>
+                  <h3 className="f-display mt-6 text-[clamp(1.6rem,2.3vw,2rem)] leading-[1.1] [--wght:460]">{m.title}</h3>
+                  <p className="mt-3 leading-relaxed text-muted">{m.text}</p>
                 </div>
-                <p className="col-span-4 text-[17px] leading-relaxed text-muted md:col-span-4 md:col-start-9">
-                  {e.description}
-                </p>
-              </FadeIn>
+              </Assemble>
             </li>
           ))}
         </ol>
       </section>
 
-      {/* Outils */}
+      {/* Hors travail + appel */}
       <section className="shell mt-28 md:mt-40">
-        <SectionHead title="Outils" meta="Les technologies que j'utilise" />
-        <div className="grid grid-cols-2 md:grid-cols-4">
-          {stack.map((s, i) => (
-            <FadeIn
-              key={s.domain}
-              delay={i * 0.07}
-              className={`border-b border-line py-8 pr-4 md:border-b-0 md:px-6 ${i > 0 ? "md:border-l" : "md:pl-0"}`}
-            >
-              <p className="f-label text-muted">{s.domain}</p>
-              <ul className="mt-6 space-y-1">
-                {s.items.map((it) => (
-                  <li key={it} className="f-display text-[clamp(1.4rem,2.2vw,2.1rem)] uppercase [--wdth:78] [--wght:640]">
-                    {it}
-                  </li>
-                ))}
-              </ul>
-            </FadeIn>
-          ))}
-        </div>
-      </section>
-
-      {/* Activité */}
-      <section className="shell mt-28 md:mt-40">
-        <SectionHead title="Activité GitHub" meta="Mes dernières modifications de code" />
-        <div className="grid-12 mt-10">
-          <FadeIn className="col-span-4 md:col-span-10 md:col-start-3">
-            <GithubActivity />
+        <div className="grid items-end gap-10 border-t border-line pt-12 md:grid-cols-[1.4fr_1fr]">
+          <FadeIn>
+            <p className="f-label text-muted">En dehors du travail</p>
+            <p className="f-display mt-4 max-w-[26ch] text-[clamp(1.6rem,2.8vw,2.4rem)] leading-[1.2] [--wght:400]">
+              Culture japonaise, jeux vidéo, physique, et l&apos;IA <em className="text-accent">quand elle est vraiment utile.</em>
+            </p>
           </FadeIn>
-        </div>
-      </section>
-
-      {/* Formation */}
-      <section className="shell mt-28 md:mt-40">
-        <SectionHead title="Formation & certifications" />
-        <div className="grid-12 gap-y-12 pt-4">
-          <div className="col-span-4 md:col-span-7">
-            {education.map((e, i) => (
-              <FadeIn key={e.title} delay={i * 0.05}>
-                <div className="flex items-baseline justify-between gap-6 border-b border-line py-6">
-                  <div>
-                    <p className="flex flex-wrap items-center gap-3 text-xl font-medium md:text-2xl">
-                      {e.title}
-                      {e.current && <span className="f-label opal-fill px-2 py-1 text-on-signal">En cours</span>}
-                    </p>
-                    <p className="mt-1 text-[15px] text-muted">{e.sub}</p>
-                  </div>
-                  <span className="f-label shrink-0 text-muted">{e.date}</span>
-                </div>
-              </FadeIn>
-            ))}
-          </div>
-          <div className="col-span-4 md:col-span-4 md:col-start-9">
-            <p className="f-label pt-6 text-muted">Certifications</p>
-            {certifications.map((c, i) => (
-              <FadeIn key={c.title} delay={i * 0.05}>
-                <div className="mt-4 flex items-start gap-3 border border-line p-4">
-                  <span className="opal-fill mt-1.5 block h-2 w-2 shrink-0" />
-                  <div>
-                    <p className="font-medium">{c.title}</p>
-                    <p className="f-label mt-1 text-muted">{c.sub}</p>
-                  </div>
-                </div>
-              </FadeIn>
-            ))}
-          </div>
+          <FadeIn delay={0.1} className="md:justify-self-end">
+            <Link href="/projects" className={ctaClass}>
+              Voir mes réalisations
+              <ArrowRightIcon size={16} weight="bold" className="transition-transform duration-500 ease-[var(--ease-expo)] group-hover:translate-x-1" />
+            </Link>
+          </FadeIn>
         </div>
       </section>
     </div>

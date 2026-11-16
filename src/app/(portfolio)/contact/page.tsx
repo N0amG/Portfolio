@@ -3,31 +3,38 @@
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { toast } from "sonner";
-import { ArrowUpRightIcon, CopyIcon, ArrowRightIcon } from "@phosphor-icons/react";
-import { FadeIn, MaskLines, DrawRule } from "@/components/Reveal";
-import LocalTime from "@/components/LocalTime";
+import { ArrowRightIcon, ArrowUpRightIcon, CopyIcon, PhoneIcon, WhatsappLogoIcon } from "@phosphor-icons/react";
+import { FadeIn } from "@/components/Reveal";
+import { ctaClass } from "@/components/Navbar";
 import { copyEmail } from "@/lib/copyEmail";
 import { site } from "@/lib/site";
 
 type Status = "idle" | "loading" | "success" | "error" | "ratelimit";
 
-function Field({ label, children }: { label: string; children: React.ReactNode }) {
+function Field({ label, htmlFor, children }: { label: string; htmlFor: string; children: React.ReactNode }) {
   return (
-    <label className="group block">
-      <span className="f-label flex items-center gap-3 text-muted transition-colors group-focus-within:text-signal">
-        <span className="h-px w-6 bg-current" />
-        <span>{label}</span>
-      </span>
+    <div>
+      <label htmlFor={htmlFor} className="mb-2 block text-[0.9375rem] font-semibold">
+        {label}
+      </label>
       {children}
-    </label>
+    </div>
   );
 }
+
+const reassurances = [
+  "Je vous réponds personnellement.",
+  "Premier échange et devis sans engagement.",
+  "Vous n'avez pas besoin de connaître la technique.",
+];
 
 export default function ContactPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [status, setStatus] = useState<Status>("idle");
+  const phone = site.phone.trim();
+  const phoneDigits = phone.replace(/[^\d+]/g, "");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,70 +67,99 @@ export default function ContactPage() {
   const disabled = status === "loading" || status === "ratelimit";
 
   return (
-    <div className="shell pb-24 pt-28 md:pb-36 md:pt-40">
-      <MaskLines
-        as="h1"
-        className="f-display text-[clamp(3.4rem,13vw,14rem)] uppercase [--wght:880]"
-        joiner=""
-        lines={[
-          <span key="1" className="f-display" style={{ "--wdth": 64 } as React.CSSProperties}>
-            Écrivez-
-          </span>,
-          <span key="2" className="f-display flex items-baseline" style={{ "--wdth": 140 } as React.CSSProperties}>
-<span className="opal-text">moi.</span>
-          </span>,
-        ]}
-      />
-
-      <div className="grid-12 mt-16 gap-y-16 md:mt-24">
+    <div className="shell pb-24 pt-32 md:pb-36 md:pt-40">
+      <div className="grid gap-14 md:grid-cols-12 md:gap-12">
         {/* Colonne infos */}
-        <aside className="col-span-4 md:col-span-4">
-          <FadeIn>
-            <p className="text-pretty max-w-[38ch] text-lg leading-snug">
-              Un site à créer, une application à développer, un existant à améliorer ? Décrivez votre projet en quelques
-              lignes : je reviens vers vous avec mes questions ou une première estimation.
-            </p>
-          </FadeIn>
-          <FadeIn delay={0.1} className="mt-12">
-            <DrawRule />
-            <dl className="f-label divide-y divide-line">
-              <div className="flex items-center justify-between gap-4 py-4">
-                <dt className="text-muted">Email</dt>
-                <dd className="flex items-center gap-3 normal-case">
-                  <a href={`mailto:${site.email}`} className="u-link">
-                    {site.email}
+        <aside className="md:col-span-5">
+          <p className="hero-up f-label flex items-center gap-2 text-accent-ink" style={{ animationDelay: "0.05s" }}>
+            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
+            Contact
+          </p>
+          <h1 className="f-display mt-6 text-[clamp(3rem,5.2vw,4.75rem)] leading-[1] tracking-[-0.03em] [--wght:390]">
+            {[
+              <>Parlons de</>,
+              <>
+                votre <em className="text-accent">projet.</em>
+              </>,
+            ].map((line, i) => (
+              <span key={i} className="-my-[0.1em] block overflow-hidden py-[0.1em]">
+                <span className="hero-rise block" style={{ animationDelay: `${0.06 + i * 0.09}s` }}>
+                  {line}
+                </span>
+                {i === 0 && " "}
+              </span>
+            ))}
+          </h1>
+          <p className="hero-up mt-8 max-w-[40ch] text-lg leading-relaxed text-muted" style={{ animationDelay: "0.3s" }}>
+            Un site à créer, une réservation en ligne, un site existant à améliorer ? Décrivez votre besoin en quelques
+            lignes : je reviens vers vous avec mes questions ou une première estimation.
+          </p>
+
+          <ul className="hero-up mt-8 space-y-3" style={{ animationDelay: "0.38s" }}>
+            {reassurances.map((r) => (
+              <li key={r} className="flex items-start gap-3">
+                <span aria-hidden className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                {r}
+              </li>
+            ))}
+          </ul>
+
+          <FadeIn delay={0.2} className="mt-12 space-y-1 border-t border-line pt-6">
+            <div className="flex flex-wrap items-center justify-between gap-3 py-2">
+              <span className="text-muted">Email</span>
+              <span className="flex items-center gap-1">
+                <a href={`mailto:${site.email}`} className="u-link font-medium">
+                  {site.email}
+                </a>
+                <button
+                  type="button"
+                  onClick={copyEmail}
+                  aria-label="Copier l'adresse email"
+                  className="grid h-11 w-11 place-items-center rounded-full text-muted transition-colors hover:bg-alt hover:text-ink"
+                >
+                  <CopyIcon size={16} />
+                </button>
+              </span>
+            </div>
+            {phone && (
+              <div className="flex flex-wrap items-center justify-between gap-3 py-2">
+                <span className="text-muted">Téléphone</span>
+                <span className="flex items-center gap-4">
+                  <a href={`tel:${phoneDigits}`} className="u-link inline-flex items-center gap-2 font-medium">
+                    <PhoneIcon size={16} /> {phone}
                   </a>
-                  <button type="button" onClick={copyEmail} aria-label="Copier l'adresse email" className="text-muted hover:text-signal">
-                    <CopyIcon size={14} />
-                  </button>
-                </dd>
+                  <a
+                    href={`https://wa.me/${phoneDigits.replace("+", "")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="u-link inline-flex items-center gap-1.5 font-medium"
+                  >
+                    <WhatsappLogoIcon size={16} /> WhatsApp
+                  </a>
+                </span>
               </div>
-              {site.socials.map((s) => (
-                <div key={s.href} className="flex items-center justify-between gap-4 py-4">
-                  <dt className="text-muted">{s.label}</dt>
-                  <dd>
-                    <a href={s.href} target="_blank" rel="noopener noreferrer" className="u-link inline-flex items-center gap-1 normal-case">
-                      {s.handle} <ArrowUpRightIcon size={11} />
-                    </a>
-                  </dd>
-                </div>
-              ))}
-              <div className="flex items-center justify-between gap-4 py-4">
-                <dt className="text-muted">{site.city}</dt>
-                <dd>
-                  <LocalTime />
-                </dd>
+            )}
+            {site.socials.map((s) => (
+              <div key={s.href} className="flex items-center justify-between gap-3 py-2">
+                <span className="text-muted">{s.label}</span>
+                <a href={s.href} target="_blank" rel="noopener noreferrer" className="u-link inline-flex items-center gap-1 font-medium">
+                  {s.handle} <ArrowUpRightIcon size={12} />
+                </a>
               </div>
-            </dl>
+            ))}
           </FadeIn>
         </aside>
 
         {/* Formulaire */}
-        <FadeIn delay={0.15} className="col-span-4 md:col-span-7 md:col-start-6">
-          <form onSubmit={handleSubmit} className="space-y-12">
-            <div className="grid gap-12 md:grid-cols-2 md:gap-[var(--gutter)]">
-              <Field label="Votre nom">
+        <FadeIn delay={0.15} className="md:col-span-7">
+          <form onSubmit={handleSubmit} className="rounded-[28px] bg-card p-6 shadow-card md:p-10">
+            <p className="f-display text-[1.75rem] leading-tight [--wght:450]">Votre message</p>
+            <p className="mt-1 text-[0.9375rem] text-muted">Tous les champs sont obligatoires.</p>
+
+            <div className="mt-8 grid gap-6 sm:grid-cols-2">
+              <Field label="Votre nom" htmlFor="c-name">
                 <input
+                  id="c-name"
                   className="field"
                   placeholder="Jeanne Martin"
                   type="text"
@@ -133,10 +169,11 @@ export default function ContactPage() {
                   onChange={(e) => setName(e.target.value)}
                 />
               </Field>
-              <Field label="Votre email">
+              <Field label="Votre email" htmlFor="c-email">
                 <input
+                  id="c-email"
                   className="field"
-                  placeholder="jeanne@entreprise.fr"
+                  placeholder="jeanne@boutique.fr"
                   type="email"
                   autoComplete="email"
                   required
@@ -145,19 +182,22 @@ export default function ContactPage() {
                 />
               </Field>
             </div>
-            <Field label="Votre projet">
-              <textarea
-                className="field min-h-40 resize-none leading-snug"
-                placeholder="Le besoin, le délai, le budget si vous l'avez déjà…"
-                rows={5}
-                required
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-              />
-            </Field>
+            <div className="mt-6">
+              <Field label="Votre projet" htmlFor="c-message">
+                <textarea
+                  id="c-message"
+                  className="field min-h-44 resize-y"
+                  placeholder="Votre commerce, ce que vous aimeriez sur votre site, le délai, le budget si vous l'avez déjà…"
+                  rows={6}
+                  required
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                />
+              </Field>
+            </div>
 
-            <div className="flex flex-col-reverse items-start justify-between gap-6 sm:flex-row sm:items-center">
-              <p className="f-label text-muted" aria-live="polite">
+            <div className="mt-8 flex flex-col-reverse items-start justify-between gap-5 sm:flex-row sm:items-center">
+              <p className="min-h-6 text-[0.9375rem] text-muted" aria-live="polite">
                 <AnimatePresence mode="wait">
                   <motion.span
                     key={status}
@@ -165,46 +205,24 @@ export default function ContactPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -6 }}
                     transition={{ duration: 0.3 }}
-                    className={`block ${status === "success" ? "text-ink" : status === "error" || status === "ratelimit" ? "text-signal" : ""}`}
+                    className={`block ${status === "success" ? "font-semibold text-ink" : status === "error" || status === "ratelimit" ? "font-semibold text-accent-ink" : ""}`}
                   >
                     {
                       {
-                        idle: "Tous les champs sont obligatoires",
+                        idle: "",
                         loading: "Envoi en cours…",
-                        success: "Message envoyé — je reviens vers vous rapidement.",
-                        error: "Erreur lors de l'envoi. Réessayez.",
-                        ratelimit: "Limite atteinte — patientez 5 minutes",
+                        success: "Message envoyé, je reviens vers vous rapidement.",
+                        error: "Erreur lors de l'envoi. Réessayez, ou écrivez-moi par email.",
+                        ratelimit: "Limite atteinte, patientez 5 minutes.",
                       }[status]
                     }
                   </motion.span>
                 </AnimatePresence>
               </p>
-
-              <motion.button
-                type="submit"
-                disabled={disabled}
-                whileTap={{ scale: 0.97 }}
-                className="group relative flex h-16 items-center gap-6 overflow-hidden bg-ink pl-7 pr-5 text-paper disabled:opacity-50"
-              >
-                <span
-                  aria-hidden
-                  className="opal-fill absolute inset-0 origin-left scale-x-0 transition-transform duration-500 ease-[var(--ease-expo)] group-hover:scale-x-100"
-                />
-                <span
-                  className="f-display relative text-2xl uppercase transition-colors group-hover:text-on-signal"
-                  style={{ "--wdth": 110, "--wght": 760 } as React.CSSProperties}
-                >
-                  {status === "loading" ? "Envoi…" : "Envoyer"}
-                </span>
-                <span className="relative grid h-9 w-9 place-items-center overflow-hidden transition-colors group-hover:text-on-signal">
-                  <ArrowRightIcon size={20} weight="bold" className="transition-transform duration-500 ease-[var(--ease-expo)] group-hover:translate-x-10" />
-                  <ArrowRightIcon
-                    size={20}
-                    weight="bold"
-                    className="absolute -translate-x-10 transition-transform duration-500 ease-[var(--ease-expo)] group-hover:translate-x-0"
-                  />
-                </span>
-              </motion.button>
+              <button type="submit" disabled={disabled} className={`${ctaClass} h-14 px-8 text-lg disabled:opacity-50`}>
+                {status === "loading" ? "Envoi…" : "Envoyer le message"}
+                <ArrowRightIcon size={18} weight="bold" className="transition-transform duration-500 ease-[var(--ease-expo)] group-hover:translate-x-1" />
+              </button>
             </div>
           </form>
         </FadeIn>

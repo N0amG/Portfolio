@@ -3,6 +3,8 @@ export const site = {
   role: "Développeur web freelance",
   city: "Lyon, France",
   email: "noamguez0@gmail.com",
+  /** Téléphone / WhatsApp affiché sur la page Contact (laisser vide pour le masquer), ex. "+33 6 12 34 56 78". */
+  phone: "" as string,
   socials: [
     { label: "GitHub", href: "https://github.com/N0amG", handle: "@N0amG" },
     { label: "LinkedIn", href: "https://www.linkedin.com/in/noam-guez-0ba691261/", handle: "/in/noam-guez" },
