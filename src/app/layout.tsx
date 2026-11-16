@@ -39,12 +39,15 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  // Thème clair par défaut, quel que soit le réglage du système
-  themeColor: "#F6F3EA",
+  // Suit le thème de l'appareil (le bouton du site prend ensuite le relais)
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F6F3EA" },
+    { media: "(prefers-color-scheme: dark)", color: "#121A16" },
+  ],
 };
 
 /* Appliqué avant le premier paint : pas de flash de thème */
-const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t==='night')t='dark';if(t==='winter')t='light';if(t!=='dark')t='light';document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','light')}})()`;
+const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t==='night')t='dark';if(t==='winter')t='light';if(t!=='dark'&&t!=='light'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','light')}})()`;
 
 export default function RootLayout({
   children,
