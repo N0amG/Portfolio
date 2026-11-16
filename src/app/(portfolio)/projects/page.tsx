@@ -1,134 +1,142 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { useMemo, useState } from "react";
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
+import * as ToggleGroup from "@radix-ui/react-toggle-group";
+import { ArrowDownIcon, RowsIcon, SquaresFourIcon } from "@phosphor-icons/react";
 import ProjectCard from "@/components/ProjectCard";
-import AnimatedSection from "@/components/AnimatedSection";
-import { projects } from "@/data/portfolio/projects";
-import Link from "next/link";
+import ProjectIndex from "@/components/ProjectIndex";
+import { FadeIn, MaskLines, DrawRule } from "@/components/Reveal";
+import { projects, allCategories } from "@/data/portfolio/projects";
+import { ease } from "@/lib/site";
 
-const categories = ["Tous", "Frontend", "Backend", "Fullstack", "Python", "Gestion de projet"];
+const filters = ["Tous", ...allCategories] as const;
+type View = "list" | "grid";
+
+const chip =
+  "f-label relative flex h-9 items-center gap-1.5 border border-line px-3 transition-colors hover:border-ink data-[state=on]:border-ink data-[state=on]:text-paper";
 
 export default function ProjectsPage() {
-  const [activeFilter, setActiveFilter] = useState("Tous");
-  const [sortAsc, setSortAsc] = useState(false); // false = décroissant (défaut)
+  const [filter, setFilter] = useState<string>("Tous");
+  const [desc, setDesc] = useState(true);
+  const [view, setView] = useState<View>("list");
 
-  const filteredProjects = useMemo(() => {
-    const filtered =
-      activeFilter === "Tous"
-        ? [...projects]
-        : projects.filter((p) => p.categories.includes(activeFilter));
+  const counts = useMemo(() => {
+    const c: Record<string, number> = { Tous: projects.length };
+    for (const cat of allCategories) c[cat] = projects.filter((p) => p.categories.includes(cat)).length;
+    return c;
+  }, []);
 
-    filtered.sort((a, b) => {
-      const cmp = a.date.localeCompare(b.date);
-      return sortAsc ? cmp : -cmp;
-    });
-
-    return filtered;
-  }, [activeFilter, sortAsc]);
+  const list = useMemo(() => {
+    const out = filter === "Tous" ? [...projects] : projects.filter((p) => p.categories.includes(filter));
+    out.sort((a, b) => (desc ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date)));
+    return out;
+  }, [filter, desc]);
 
   return (
-    <div className="pt-24">
-      <div className="w-full max-w-7xl mx-auto px-6 py-12">
-        {/* Hero */}
-        <AnimatedSection className="mb-16" animation="blur">
-          <h2 className="text-5xl md:text-6xl font-black mb-6 tracking-tight text-base-content">
-            Galerie de <span className="text-accent">Projets</span>
-          </h2>
-          <p className="text-base-content/50 text-lg max-w-2xl leading-relaxed">
-            Une sélection de mes réalisations en développement web, mobile et
-            open-source. Focus sur la performance, la scalabilité et
-            l&apos;expérience utilisateur.
+    <div className="shell pb-24 pt-28 md:pb-36 md:pt-40">
+      {/* En-tête */}
+      <div className="grid-12 items-end gap-y-8">
+        <div className="col-span-4 md:col-span-12">
+          <p className="f-label mb-6 text-muted">
+            <span className="text-signal">(Index)</span>&nbsp;&nbsp;2024 — {new Date().getFullYear()}
           </p>
-        </AnimatedSection>
-
-        {/* Filters + Sort */}
-        <div className="flex flex-wrap items-center gap-3 mb-12 border-b border-base-content/10 pb-8">
-          {categories.map((cat) => (
-            <motion.button
-              key={cat}
-              onClick={() => setActiveFilter(cat)}
-              whileTap={{ scale: 0.92 }}
-              whileHover={{ y: -2 }}
-              className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all ${activeFilter === cat
-                  ? "btn-primary bg-primary text-primary-content shadow-lg shadow-primary/20"
-                  : "bg-base-200 text-base-content/60 hover:bg-base-300"
-                }`}
-            >
-              {cat}
-            </motion.button>
-          ))}
-
-          {/* Séparateur */}
-          <div className="hidden sm:block h-6 w-px bg-base-content/15 mx-1" />
-
-          {/* Bouton tri date */}
-          <motion.button
-            onClick={() => setSortAsc((v) => !v)}
-            whileTap={{ scale: 0.92 }}
-            whileHover={{ y: -2 }}
-            title={sortAsc ? "Plus ancien en premier" : "Plus récent en premier"}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-full text-sm font-bold bg-base-200 text-base-content/60 hover:bg-base-300 transition-all"
-          >
-            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h10M4 14h6M4 18h3" />
-            </svg>
-            <motion.svg
-              className="h-4 w-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              animate={{ rotate: sortAsc ? 180 : 0 }}
-              transition={{ duration: 0.25, ease: "easeInOut" }}
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </motion.svg>
-          </motion.button>
+          <MaskLines
+            as="h1"
+            className="f-display whitespace-nowrap text-[clamp(3.4rem,13.2vw,15rem)] uppercase [--wdth:128] [--wght:880]"
+            lines={[
+              <span key="t" className="flex items-start gap-[0.08em]">
+                Travaux
+                <span className="f-label mt-[0.35em] text-[clamp(0.75rem,1.4vw,1rem)] text-signal">({projects.length})</span>
+              </span>,
+            ]}
+          />
         </div>
-
-        {/* Projects Grid */}
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={`${activeFilter}-${sortAsc}`}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-          >
-            {filteredProjects.map((project, i) => (
-              <ProjectCard key={project.slug} project={project} index={i} />
-            ))}
-          </motion.div>
-        </AnimatePresence>
-
-        {/* CTA */}
-        <AnimatedSection className="mt-24 mb-12" animation="scale">
-          <div className="p-12 rounded-2xl bg-secondary/5 border border-secondary/20 flex flex-col md:flex-row items-center justify-between gap-8">
-            <div className="max-w-xl text-center md:text-left">
-              <h3 className="text-3xl font-black mb-4 tracking-tight text-base-content">
-                Un projet unique en tête ?
-              </h3>
-              <p className="text-base-content/50 text-base leading-relaxed">
-                Je suis toujours à la recherche de collaborateurs ambitieux et de
-                défis innovants. Construisons quelque chose qui fait la
-                différence.
-              </p>
-            </div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link
-                href="/contact"
-                className="flex items-center gap-3 btn btn-secondary py-4 px-8 rounded-xl font-bold shadow-xl shadow-secondary/30"
-              >
-                Démarrer une conversation
-                <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                </svg>
-              </Link>
-            </motion.div>
-          </div>
-        </AnimatedSection>
+        <FadeIn delay={0.3} className="col-span-4 md:col-span-4 md:col-start-9">
+          <p className="text-pretty max-w-[38ch] text-lg leading-snug text-muted">
+            Intégration, applications React, APIs Node, outils Python et Django : chaque projet a sa fiche, ses défis et ses
+            captures.
+          </p>
+        </FadeIn>
       </div>
+
+      {/* Barre d'outils */}
+      <div className="mt-14 md:mt-20">
+        <DrawRule />
+        <div className="flex flex-wrap items-center justify-between gap-4 py-4">
+          <LayoutGroup id="filters">
+            <ToggleGroup.Root
+              type="single"
+              value={filter}
+              onValueChange={(v) => v && setFilter(v)}
+              aria-label="Filtrer par catégorie"
+              className="flex flex-wrap gap-2"
+            >
+              {filters.map((f) => (
+                <ToggleGroup.Item key={f} value={f} className={chip}>
+                  {filter === f && (
+                    <motion.span layoutId="filter-pill" className="absolute inset-0 -z-0 bg-ink" transition={{ duration: 0.5, ease }} />
+                  )}
+                  <span className="relative">{f}</span>
+                  <span className="relative opacity-50">{counts[f]}</span>
+                </ToggleGroup.Item>
+              ))}
+            </ToggleGroup.Root>
+          </LayoutGroup>
+
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setDesc((v) => !v)}
+              className={`${chip} gap-2`}
+              aria-label={desc ? "Trier du plus ancien au plus récent" : "Trier du plus récent au plus ancien"}
+            >
+              {desc ? "Récents" : "Anciens"}
+              <motion.span animate={{ rotate: desc ? 0 : 180 }} transition={{ duration: 0.4, ease }}>
+                <ArrowDownIcon size={12} />
+              </motion.span>
+            </button>
+            <ToggleGroup.Root
+              type="single"
+              value={view}
+              onValueChange={(v) => v && setView(v as View)}
+              aria-label="Affichage"
+              className="flex"
+            >
+              <ToggleGroup.Item value="list" aria-label="Vue liste" className={`${chip} -mr-px data-[state=on]:bg-ink`}>
+                <RowsIcon size={14} />
+              </ToggleGroup.Item>
+              <ToggleGroup.Item value="grid" aria-label="Vue grille" className={`${chip} data-[state=on]:bg-ink`}>
+                <SquaresFourIcon size={14} />
+              </ToggleGroup.Item>
+            </ToggleGroup.Root>
+          </div>
+        </div>
+      </div>
+
+      {/* Contenu */}
+      <AnimatePresence mode="wait">
+        <motion.div
+          key={view}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+          className="mt-6"
+        >
+          {view === "list" ? (
+            <ProjectIndex key={`${filter}-${desc}`} projects={list} />
+          ) : (
+            <motion.div layout className="grid gap-x-[var(--gutter)] gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
+              <AnimatePresence mode="popLayout">
+                {list.map((p, i) => (
+                  <ProjectCard key={p.slug} project={p} index={i} />
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </motion.div>
+      </AnimatePresence>
     </div>
   );
 }
