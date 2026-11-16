@@ -215,7 +215,7 @@
   {
     "slug": "portfolio",
     "title": "Portfolio",
-    "date": "2026-03",
+    "date": "2026-11",
     "categories": [
       "Fullstack",
       "Frontend"
@@ -224,20 +224,29 @@
     "description": "Ce site : design sur mesure, animations au scroll et chargement quasi instantané (Next.js).",
     "tags": [
       "Next.js",
+      "TypeScript",
       "Tailwind",
-      "Node.js",
-      "Responsive"
+      "Framer Motion",
+      "Accessibilité"
     ],
     "overview": [
-      "Le portfolio que vous consultez est le résultat de mon dernier projet de formation bac +2. J'ai choisi de le concevoir avec Next.js pour sa flexibilité et ses performances, et Tailwind CSS pour son approche utilitaire qui me permet de créer des interfaces propres et réactives rapidement.",
-      "Entièrement responsive, il s'adapte à tous les types d'appareils, et il est hébergé sur Vercel pour garantir des temps de chargement rapides et une gestion fluide. À travers ce site, vous pouvez explorer mon parcours, découvrir mes compétences techniques et créatives, et consulter mes projets les plus récents.",
-      "De plus, une page de contact vous permet de me joindre facilement pour toute question ou collaboration."
+      "Ce site est ma vitrine de développeur freelance. Pour cette troisième version, je l'ai repensé pour les commerçants et les indépendants : on comprend ce que je propose dès la première ligne, et on peut me contacter sans chercher.",
+      "J'ai tout fait moi-même, de la direction artistique au code : la typographie Fraunces, la palette vert sapin et moutarde, les animations au scroll et l'écriture des textes. Le site est construit avec Next.js et hébergé sur Vercel.",
+      "Les deux versions précédentes ont servi de terrain d'essai. Celle-ci garde ce qui marchait et retire tout ce qui parlait davantage aux développeurs qu'aux clients."
     ],
-    "role": "Développeur Fullstack",
+    "role": "Design et développement",
     "challenges": [
       {
-        "title": "Architecture Next.js",
-        "description": "Mise en place d'une application Next.js avec App Router, rendu dynamique des projets via des routes dynamiques [slug]."
+        "title": "Des animations qui ne ralentissent rien",
+        "description": "Les effets au scroll (captures qui s'assemblent, phrase qui s'allume, lettres qui réagissent au curseur) ne déplacent jamais la mise en page : la page s'affiche sans à-coup, même sur un téléphone, et les animations se coupent pour les personnes qui préfèrent les réduire."
+      },
+      {
+        "title": "Une identité lisible par tous",
+        "description": "Polices auto-hébergées, couleurs vérifiées selon les normes de contraste d'accessibilité, titres correctement lus par les lecteurs d'écran, et un thème sombre pour ceux qui le préfèrent."
+      },
+      {
+        "title": "Un formulaire de contact fiable",
+        "description": "Les messages partent par email depuis le serveur, avec une limite d'envoi par visiteur pour éviter les abus."
       }
     ],
     "liveUrl": "https://www.noam-guez.com/",
