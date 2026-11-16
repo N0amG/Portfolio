@@ -11,19 +11,10 @@ import { site } from "@/lib/site";
 
 type Status = "idle" | "loading" | "success" | "error" | "ratelimit";
 
-function Field({
-  n,
-  label,
-  children,
-}: {
-  n: string;
-  label: string;
-  children: React.ReactNode;
-}) {
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label className="group block">
       <span className="f-label flex items-center gap-3 text-muted transition-colors group-focus-within:text-signal">
-        <span>{n}</span>
         <span className="h-px w-6 bg-current" />
         <span>{label}</span>
       </span>
@@ -52,7 +43,7 @@ export default function ContactPage() {
         setEmail("");
         setMessage("");
         setStatus("success");
-        toast("Message envoyé", { description: "Merci ! Je vous réponds rapidement." });
+        toast("Message envoyé", { description: "Je reviens vers vous rapidement." });
       } else if (res.status === 429) {
         setStatus("ratelimit");
         toast("Limite d'envoi atteinte", { description: "Merci de patienter 5 minutes." });
@@ -70,9 +61,6 @@ export default function ContactPage() {
 
   return (
     <div className="shell pb-24 pt-28 md:pb-36 md:pt-40">
-      <p className="f-label mb-6 text-muted">
-        <span className="text-signal">(Contact)</span>&nbsp;&nbsp;{site.status}
-      </p>
       <MaskLines
         as="h1"
         className="f-display text-[clamp(3.4rem,13vw,14rem)] uppercase [--wght:880]"
@@ -81,7 +69,7 @@ export default function ContactPage() {
             Écrivez-
           </span>,
           <span key="2" className="f-display flex items-baseline" style={{ "--wdth": 140 } as React.CSSProperties}>
-            moi<span className="text-signal">.</span>
+<span className="opal-text">moi.</span>
           </span>,
         ]}
       />
@@ -90,9 +78,9 @@ export default function ContactPage() {
         {/* Colonne infos */}
         <aside className="col-span-4 md:col-span-4">
           <FadeIn>
-            <p className="text-pretty max-w-[34ch] text-lg leading-snug">
-              Je cherche actuellement une alternance. Si mon profil vous intéresse, écrivez-moi : je réponds en général sous
-              24 heures.
+            <p className="text-pretty max-w-[38ch] text-lg leading-snug">
+              Un site à créer, une application à développer, un existant à améliorer ? Décrivez votre projet en quelques
+              lignes : je reviens vers vous avec mes questions ou une première estimation.
             </p>
           </FadeIn>
           <FadeIn delay={0.1} className="mt-12">
@@ -120,7 +108,7 @@ export default function ContactPage() {
                 </div>
               ))}
               <div className="flex items-center justify-between gap-4 py-4">
-                <dt className="text-muted">Lyon</dt>
+                <dt className="text-muted">{site.city}</dt>
                 <dd>
                   <LocalTime />
                 </dd>
@@ -133,7 +121,7 @@ export default function ContactPage() {
         <FadeIn delay={0.15} className="col-span-4 md:col-span-7 md:col-start-6">
           <form onSubmit={handleSubmit} className="space-y-12">
             <div className="grid gap-12 md:grid-cols-2 md:gap-[var(--gutter)]">
-              <Field n="01" label="Votre nom">
+              <Field label="Votre nom">
                 <input
                   className="field"
                   placeholder="Jeanne Martin"
@@ -144,10 +132,10 @@ export default function ContactPage() {
                   onChange={(e) => setName(e.target.value)}
                 />
               </Field>
-              <Field n="02" label="Votre email">
+              <Field label="Votre email">
                 <input
                   className="field"
-                  placeholder="jeanne@studio.fr"
+                  placeholder="jeanne@entreprise.fr"
                   type="email"
                   autoComplete="email"
                   required
@@ -156,10 +144,10 @@ export default function ContactPage() {
                 />
               </Field>
             </div>
-            <Field n="03" label="Votre message">
+            <Field label="Votre projet">
               <textarea
                 className="field min-h-40 resize-none leading-snug"
-                placeholder="Le contexte, le poste, le projet…"
+                placeholder="Le besoin, le délai, le budget si vous l'avez déjà…"
                 rows={5}
                 required
                 value={message}
@@ -182,7 +170,7 @@ export default function ContactPage() {
                       {
                         idle: "Tous les champs sont requis",
                         loading: "Envoi en cours…",
-                        success: "Message envoyé — merci !",
+                        success: "Message envoyé — je reviens vers vous rapidement.",
                         error: "Erreur lors de l'envoi. Réessayez.",
                         ratelimit: "Limite atteinte — patientez 5 minutes",
                       }[status]
@@ -199,7 +187,7 @@ export default function ContactPage() {
               >
                 <span
                   aria-hidden
-                  className="absolute inset-0 origin-left scale-x-0 bg-signal transition-transform duration-500 ease-[var(--ease-expo)] group-hover:scale-x-100"
+                  className="opal-fill absolute inset-0 origin-left scale-x-0 transition-transform duration-500 ease-[var(--ease-expo)] group-hover:scale-x-100"
                 />
                 <span
                   className="f-display relative text-2xl uppercase transition-colors group-hover:text-on-signal"

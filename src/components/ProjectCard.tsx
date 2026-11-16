@@ -3,12 +3,10 @@
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowUpRightIcon } from "@phosphor-icons/react";
-import { Project, getProjectNumber, formatProjectDate } from "@/data/portfolio/projects";
-import { pad, ease } from "@/lib/site";
+import { Project, formatProjectDate } from "@/data/portfolio/projects";
+import { ease } from "@/lib/site";
 
 export default function ProjectCard({ project, index }: { project: Project; index: number }) {
-  const n = pad(getProjectNumber(project.slug));
-
   return (
     <motion.article
       layout
@@ -30,9 +28,8 @@ export default function ProjectCard({ project, index }: { project: Project; inde
           {/* volet signal qui balaie au survol */}
           <span
             aria-hidden
-            className="absolute inset-0 origin-left scale-x-0 bg-signal mix-blend-multiply transition-transform duration-700 ease-[var(--ease-expo)] group-hover:scale-x-100"
+            className="opal-fire absolute inset-0 origin-left scale-x-0 opacity-80 mix-blend-color transition-transform duration-700 ease-[var(--ease-expo)] group-hover:scale-x-100"
           />
-          <span className="f-label absolute left-0 top-0 bg-paper px-2 py-1">{n}</span>
           <span className="absolute bottom-3 right-3 grid h-11 w-11 translate-y-3 place-items-center bg-ink text-paper opacity-0 transition-all duration-500 ease-[var(--ease-expo)] group-hover:translate-y-0 group-hover:opacity-100">
             <ArrowUpRightIcon size={20} weight="bold" />
           </span>

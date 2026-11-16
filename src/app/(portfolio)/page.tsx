@@ -7,14 +7,41 @@ import ProjectIndex from "@/components/ProjectIndex";
 import LocalTime from "@/components/LocalTime";
 import { FadeIn, SectionHead } from "@/components/Reveal";
 import { latestProjects } from "@/data/portfolio/projects";
-import { site } from "@/lib/site";
 
 const stack = ["React", "Next.js", "TypeScript", "Node.js", "NestJS", "Python", "Django", "PostgreSQL", "Tailwind", "Docker"];
 
-const facts = [
-  { k: "Formation", v: "Bac +3 Développeur web", d: "OpenClassrooms — Python / Django, 2026" },
-  { k: "Terrain", v: "6 mois en agence", d: "JVAIS — React Native, NestJS, APIs IA" },
-  { k: "Origine", v: "Piscine École 42", d: "Lyon, juillet 2024 — C, rushs en équipe" },
+const services = [
+  {
+    title: "Sites vitrines & landing pages",
+    text: "Rapides, bien référencés, faciles à faire évoluer.",
+  },
+  {
+    title: "Applications web",
+    text: "Espaces clients, back-offices, outils internes : interface et API sur mesure.",
+  },
+  {
+    title: "API & back-end",
+    text: "Node.js, NestJS ou Django, base de données, authentification, déploiement automatisé (Docker, CI/CD).",
+  },
+  {
+    title: "Optimisation",
+    text: "Performance, accessibilité et SEO d'un site existant.",
+  },
+];
+
+const steps = [
+  {
+    title: "Cadrage",
+    text: "On définit ensemble le besoin, le périmètre et le délai. Vous recevez un devis clair.",
+  },
+  {
+    title: "Développement",
+    text: "Vous suivez l'avancement sur une version en ligne, mise à jour au fil du projet.",
+  },
+  {
+    title: "Livraison",
+    text: "Mise en ligne, transmission des accès, et je reste joignable après.",
+  },
 ];
 
 export default function Home() {
@@ -24,20 +51,16 @@ export default function Home() {
       <section className="shell relative flex min-h-[84svh] flex-col pb-6 pt-24 md:min-h-svh md:pt-28">
         <FadeIn delay={0.9} y={0} className="f-label grid-12 gap-y-2 text-muted">
           <span className="col-span-2 md:col-span-3">
-            (Portfolio)
+            Indépendant
             <br />
-            Édition {new Date().getFullYear()}
+            Particuliers & entreprises
           </span>
           <span className="col-span-2 md:col-span-3">
-            {site.role}
+            Sites, applications,
             <br />
-            Front · Back · Données
+            API
           </span>
-          <span className="col-span-2 hidden md:col-span-3 md:block">
-            {site.city}
-            <br />
-            {site.coords}
-          </span>
+          <span className="col-span-2 hidden md:col-span-3 md:block">{"Lyon, France"}</span>
           <span className="col-span-2 hidden text-right md:col-span-3 md:block">
             Heure locale
             <br />
@@ -51,28 +74,25 @@ export default function Home() {
         </div>
 
         <div className="grid-12 mt-8 items-end gap-y-6 md:mt-10">
-          <FadeIn delay={1.1} className="col-span-4 md:col-span-5">
-            <p className="text-pretty max-w-[34ch] text-lg leading-snug md:text-[1.375rem]">
-              Je conçois et développe des applications web de bout en bout — de l&apos;interface au serveur — avec une
-              attention maniaque au détail.
+          <FadeIn delay={1.1} className="col-span-4 md:col-span-6">
+            <p className="text-pretty max-w-[40ch] text-lg leading-snug md:text-[1.375rem]">
+              Je conçois et développe votre site ou votre application web, de la maquette à la mise en ligne. Un seul
+              interlocuteur, du code propre, et un résultat rapide à charger.
             </p>
           </FadeIn>
-          <FadeIn delay={1.2} className="f-label col-span-2 md:col-span-3 md:col-start-7">
-            <span className="flex items-center gap-2.5">
-              <span className="live-dot" />
-              {site.status}
-            </span>
-            <span className="mt-1 block text-muted">Réponse habituelle sous 24 h</span>
-          </FadeIn>
-          <FadeIn delay={1.3} className="col-span-2 flex justify-end md:col-span-3 md:col-start-10">
+          <FadeIn delay={1.25} className="col-span-4 flex flex-wrap gap-2 md:col-span-5 md:col-start-8 md:justify-end">
             <Link
               href="#travaux"
-              className="f-label group flex items-center gap-3 border border-ink px-4 py-3 transition-colors hover:bg-ink hover:text-paper"
+              className="f-label flex h-12 items-center border border-ink px-5 transition-colors hover:bg-ink hover:text-paper"
             >
-              Voir les travaux
-              <span className="relative block h-3 w-px overflow-hidden bg-current">
-                <span className="absolute inset-x-0 top-0 h-full -translate-y-full bg-signal transition-transform duration-500 group-hover:translate-y-full" />
-              </span>
+              Voir les projets
+            </Link>
+            <Link
+              href="/contact"
+              className="f-label opal-fill group flex h-12 items-center gap-3 px-5 text-on-signal"
+            >
+              Démarrer un projet
+              <span className="transition-transform duration-500 ease-[var(--ease-expo)] group-hover:translate-x-1">→</span>
             </Link>
           </FadeIn>
         </div>
@@ -86,51 +106,68 @@ export default function Home() {
         />
       </section>
 
-      {/* ───────── 01 Profil ───────── */}
+      {/* ───────── Ce que je fais ───────── */}
       <section className="shell py-24 md:py-40">
-        <SectionHead index="01" title="Profil" meta="Lyon — depuis 2024" />
-        <div className="grid-12 mt-10 gap-y-14 md:mt-16">
+        <div className="grid-12">
           <div className="col-span-4 md:col-span-10 md:col-start-3">
             <ScrollStatement
               className="f-display text-[clamp(2rem,4.6vw,4.6rem)] leading-[1.06] [--wdth:96] [--wght:560]"
-              text="Développeur web basé à Lyon, je construis des produits complets, du pixel à la base de données. React et Next.js côté client, Python, Django et NestJS côté serveur — avec une *obsession* *du* *détail* qui se voit dans le rendu final."
+              text="Je travaille en direct avec vous : pas d'intermédiaire, pas de jargon. React et Next.js pour l'interface, Node.js ou Django pour le serveur, et une *obsession* *du* *détail* qui se voit à l'usage."
             />
           </div>
-
-          <div className="col-span-4 grid gap-px bg-line md:col-span-10 md:col-start-3 md:grid-cols-3">
-            {facts.map((f, i) => (
-              <FadeIn key={f.k} delay={i * 0.08} className="bg-paper py-6 md:px-6 md:first:pl-0">
-                <p className="f-label text-muted">{f.k}</p>
-                <p className="mt-4 text-xl font-medium md:text-2xl">{f.v}</p>
-                <p className="mt-1 text-[15px] text-muted">{f.d}</p>
-              </FadeIn>
-            ))}
-          </div>
-
-          <FadeIn className="col-span-4 md:col-span-10 md:col-start-3">
-            <Link href="/about" className="f-label u-link inline-flex items-center gap-2">
-              Parcours complet <span className="text-signal">→</span>
-            </Link>
-          </FadeIn>
         </div>
+
+        <SectionHead title="Ce que je fais" meta="Sites · Applications · API" className="mt-24 md:mt-36" />
+        <ul className="grid md:grid-cols-2">
+          {services.map((s, i) => (
+            <li
+              key={s.title}
+              className={`border-b border-line py-8 md:py-10 ${i % 2 === 0 ? "md:border-r md:pr-10" : "md:pl-10"}`}
+            >
+              <FadeIn delay={(i % 2) * 0.08}>
+                <h3 className="f-display text-[clamp(1.6rem,2.6vw,2.6rem)] uppercase [--wdth:84] [--wght:700]">
+                  {s.title}
+                </h3>
+                <p className="mt-4 max-w-[46ch] text-[17px] leading-relaxed text-muted">{s.text}</p>
+              </FadeIn>
+            </li>
+          ))}
+        </ul>
+
+        <SectionHead title="Comment je travaille" className="mt-24 md:mt-36" />
+        <ol className="grid gap-x-[var(--gutter)] md:grid-cols-3">
+          {steps.map((s, i) => (
+            <li key={s.title} className="border-b border-line py-8 md:border-b-0">
+              <FadeIn delay={i * 0.08}>
+                <span aria-hidden className="opal-fire mb-6 block h-[3px] w-full" />
+                <h3 className="text-2xl font-medium">{s.title}</h3>
+                <p className="mt-3 text-[17px] leading-relaxed text-muted">{s.text}</p>
+              </FadeIn>
+            </li>
+          ))}
+        </ol>
+
+        <FadeIn className="mt-12">
+          <Link href="/about" className="f-label u-link inline-flex items-center gap-2">
+            En savoir plus sur moi <span className="text-signal">→</span>
+          </Link>
+        </FadeIn>
       </section>
 
-      {/* ───────── 02 Travaux ───────── */}
+      {/* ───────── Projets récents ───────── */}
       <section id="travaux" className="shell scroll-mt-24 pb-24 md:pb-40">
-        <SectionHead index="02" title="Travaux récents" meta={`${latestProjects.length} projets au total`} />
-        <div className="mt-10 md:mt-14">
+        <SectionHead title="Projets récents" meta={`${latestProjects.length} projets`} />
+        <div className="mt-6 md:mt-8">
           <ProjectIndex projects={latestProjects.slice(0, 6)} />
         </div>
         <FadeIn className="mt-12 flex justify-end">
-          <Link href="/projects" className="group flex items-baseline gap-4">
-            <span className="f-label text-muted">Index complet</span>
+          <Link href="/projects" className="group flex items-baseline gap-3">
             <span
-              className="f-display text-[clamp(2.4rem,6vw,6rem)] uppercase transition-colors group-hover:text-signal"
-              style={{ "--wdth": 120 } as React.CSSProperties}
+              className="f-display text-[clamp(2.4rem,6vw,6rem)] uppercase transition-[font-variation-settings] duration-700 ease-[var(--ease-expo)] [--wdth:110] group-hover:[--wdth:130]"
             >
               Tous les projets
-              <sup className="f-label ml-1 align-top text-signal">({latestProjects.length})</sup>
             </span>
+            <span className="f-label text-signal">({latestProjects.length})</span>
           </Link>
         </FadeIn>
       </section>

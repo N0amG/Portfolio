@@ -6,18 +6,18 @@ import Footer from "@/components/Footer";
 import CommandMenu from "@/components/CommandMenu";
 
 export const metadata: Metadata = {
-  title: "Noam Guez | Développeur Web",
+  title: "Noam Guez — Développeur web freelance à Lyon",
   description:
-    "Portfolio de Noam Guez – Développeur Web passionné par la création d'applications web modernes avec React, Next.js, Python et Django.",
+    "Développeur web freelance à Lyon. Je conçois et développe sites, applications web et API en React, Next.js, Node.js et Django.",
 };
 
 export default function PortfolioLayout({ children }: { children: React.ReactNode }) {
   return (
     <Providers>
-      <div className="grain relative flex min-h-svh w-full flex-col overflow-x-clip bg-paper text-ink">
+      <div className="grain relative flex min-h-svh w-full flex-col overflow-x-clip text-ink">
         <a
           href="#contenu"
-          className="f-label fixed left-3 top-3 z-[100] -translate-y-20 bg-signal px-3 py-2 text-on-signal focus:translate-y-0"
+          className="f-label opal-fill fixed left-3 top-3 z-[100] -translate-y-20 px-3 py-2 text-on-signal focus:translate-y-0"
         >
           Aller au contenu
         </a>

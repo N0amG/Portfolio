@@ -40,8 +40,8 @@ const mono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Noam Guez",
-  description: "Portfolio de Noam Guez – Développeur Web.",
+  title: "Noam Guez — Développeur web freelance",
+  description: "Noam Guez, développeur web freelance à Lyon : sites, applications web et API.",
   icons: {
     icon: "/img/avatar.webp",
     apple: "/img/avatar.webp",
@@ -50,8 +50,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#ECE9E1" },
-    { media: "(prefers-color-scheme: dark)", color: "#0E0E0C" },
+    { media: "(prefers-color-scheme: light)", color: "#F3F0F2" },
+    { media: "(prefers-color-scheme: dark)", color: "#0C0B0F" },
   ],
 };
 

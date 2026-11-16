@@ -38,24 +38,21 @@ export default function ProjectsPage() {
       {/* En-tête */}
       <div className="grid-12 items-end gap-y-8">
         <div className="col-span-4 md:col-span-12">
-          <p className="f-label mb-6 text-muted">
-            <span className="text-signal">(Index)</span>&nbsp;&nbsp;2024 — {new Date().getFullYear()}
-          </p>
           <MaskLines
             as="h1"
             className="f-display whitespace-nowrap text-[clamp(3.4rem,13.2vw,15rem)] uppercase [--wdth:128] [--wght:880]"
             lines={[
               <span key="t" className="flex items-start gap-[0.08em]">
-                Travaux
+                <span className="opal-text">Projets</span>
                 <span className="f-label mt-[0.35em] text-[clamp(0.75rem,1.4vw,1rem)] text-signal">({projects.length})</span>
               </span>,
             ]}
           />
         </div>
-        <FadeIn delay={0.3} className="col-span-4 md:col-span-4 md:col-start-9">
-          <p className="text-pretty max-w-[38ch] text-lg leading-snug text-muted">
-            Intégration, applications React, APIs Node, outils Python et Django : chaque projet a sa fiche, ses défis et ses
-            captures.
+        <FadeIn delay={0.3} className="col-span-4 md:col-span-5 md:col-start-8">
+          <p className="text-pretty max-w-[42ch] text-lg leading-snug text-muted">
+            Sites, applications et API réalisés en agence, en formation et en projet personnel. Chaque fiche détaille le
+            besoin, les choix techniques et le résultat.
           </p>
         </FadeIn>
       </div>

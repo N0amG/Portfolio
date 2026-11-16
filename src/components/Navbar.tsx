@@ -10,7 +10,7 @@ import ThemeToggle from "./ThemeToggle";
 import LocalTime from "./LocalTime";
 import { useCommandMenu } from "./CommandMenu";
 import { useLenisLock } from "./SmoothScroll";
-import { site, pad, ease, easeInOut } from "@/lib/site";
+import { site, ease, easeInOut } from "@/lib/site";
 
 export function Monogram({ className, mono = false }: { className?: string; mono?: boolean }) {
   return (
@@ -76,11 +76,7 @@ export default function Navbar() {
             aria-label="Noam Guez — accueil"
           >
             <Monogram mono className="h-7 w-7 shrink-0" />
-            <span className="f-label hidden leading-tight sm:block">
-              Noam Guez
-              <br />
-              <span className="opacity-60">Portfolio ©{new Date().getFullYear()}</span>
-            </span>
+            <span className="f-label hidden leading-tight sm:block">Noam Guez</span>
           </Link>
 
           <div className="f-label col-span-3 hidden leading-tight md:block">
@@ -93,9 +89,8 @@ export default function Navbar() {
           </div>
 
           <nav className="col-span-4 hidden items-center gap-5 md:flex lg:gap-8" aria-label="Navigation principale">
-            {site.nav.map((l, i) => (
-              <Link key={l.href} href={l.href} className="f-label group flex items-baseline gap-1.5">
-                <span className="opacity-50">{pad(i + 1)}</span>
+            {site.nav.map((l) => (
+              <Link key={l.href} href={l.href} className="f-label group flex items-baseline">
                 <span className="relative">
                   {l.label}
                   <span
@@ -175,12 +170,11 @@ export default function Navbar() {
                             className="flex items-baseline justify-between py-3"
                           >
                             <span
-                              className={`f-display text-[17vw] uppercase ${pathname === l.href ? "text-signal" : ""}`}
-                              style={{ "--wdth": 120, "--wght": 850 } as React.CSSProperties}
+                              className={`f-display whitespace-nowrap text-[12.5vw] uppercase ${pathname === l.href ? "opal-text" : ""}`}
+                              style={{ "--wdth": 108, "--wght": 850 } as React.CSSProperties}
                             >
                               {l.label}
                             </span>
-                            <span className="f-label opacity-50">{pad(i)}</span>
                           </Link>
                         </motion.div>
                       </div>

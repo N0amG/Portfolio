@@ -9,10 +9,13 @@ const BASE_W = 138;
 const BASE_G = 840;
 
 /**
- * Le nom en Anybody variable. Chaque lettre lit la distance au curseur et
- * interpole ses axes wdth / wght : les lettres proches s'élargissent et
- * s'épaississent, les autres se resserrent. Sur écran tactile, une onde lente
- * remplace le curseur. Désactivé si l'utilisateur réduit les animations.
+ * Le nom en Anybody variable, rempli d'opale.
+ *
+ * — Chaque lettre lit la distance au curseur et interpole ses axes wdth / wght.
+ * — Toutes les lettres partagent UN dégradé opale (taillé à la taille du titre
+ *   puis décalé lettre par lettre) : la matière paraît continue d'une lettre à
+ *   l'autre. Un reflet nacré suit le curseur ; sur tactile, il orbite seul.
+ * — Les couleurs tournent en continu via --opal-a (animé sur :root).
  */
 export default function HeroName({ lines }: { lines: string[] }) {
   const rootRef = useRef<HTMLHeadingElement>(null);
@@ -22,13 +25,39 @@ export default function HeroName({ lines }: { lines: string[] }) {
   useFitText(rootRef, lines, `"wdth" ${BASE_W}, "wght" ${BASE_G}`);
 
   useEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-
-    const fine = window.matchMedia("(pointer: fine)").matches;
+    const maybeRoot = rootRef.current;
+    if (!maybeRoot) return;
+    const root: HTMLHeadingElement = maybeRoot;
     const els = letters.current.filter(Boolean) as HTMLSpanElement[];
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const fine = window.matchMedia("(pointer: fine)").matches;
+
+    /** Cale le dégradé de chaque lettre sur le repère du titre. */
+    const placeBackgrounds = (rr: DOMRect, rects: DOMRect[]) => {
+      els.forEach((el, i) => {
+        const r = rects[i];
+        el.style.backgroundSize = `${rr.width}px ${rr.height}px`;
+        el.style.backgroundPosition = `${-(r.left - rr.left)}px ${-(r.top - rr.top)}px`;
+      });
+    };
+
+    const measure = () => {
+      const rr = root.getBoundingClientRect();
+      placeBackgrounds(
+        rr,
+        els.map((el) => el.getBoundingClientRect()),
+      );
+    };
+
+    if (reduce) {
+      measure();
+      const ro = new ResizeObserver(measure);
+      ro.observe(root);
+      return () => ro.disconnect();
+    }
+
     const state = els.map(() => ({ w: 50, g: 300 })); // départ compressé → s'ouvre à l'entrée
+    const sheen = { x: 0.3, y: 0.35 };
     let mx = 0;
     let my = 0;
     let inside = false;
@@ -56,20 +85,34 @@ export default function HeroName({ lines }: { lines: string[] }) {
         return;
       }
       const elapsed = t - start;
-      const intro = Math.min(1, Math.max(0, (elapsed - 500) / 900)); // laisse le masque se lever
+      const intro = Math.min(1, Math.max(0, (elapsed - 500) / 900));
       const span = window.innerWidth * 0.3;
-      // lecture groupée (pas de layout thrash)
-      const centers = els.map((el) => {
-        const r = el.getBoundingClientRect();
-        return [r.left + r.width / 2, r.top + r.height / 2];
-      });
+
+      // lectures groupées, puis écritures (pas de layout thrash)
+      const rr = root.getBoundingClientRect();
+      const rects = els.map((el) => el.getBoundingClientRect());
+
+      // reflet : suit le curseur, ou orbite lentement
+      let tx: number;
+      let ty: number;
+      if (fine && inside) {
+        tx = (mx - rr.left) / rr.width;
+        ty = (my - rr.top) / rr.height;
+      } else {
+        tx = 0.5 + Math.cos(elapsed / 2600) * 0.38;
+        ty = 0.5 + Math.sin(elapsed / 1900) * 0.32;
+      }
+      sheen.x += (tx - sheen.x) * 0.08;
+      sheen.y += (ty - sheen.y) * 0.08;
+      root.style.setProperty("--mx", `${(sheen.x * rr.width).toFixed(1)}px`);
+      root.style.setProperty("--my", `${(sheen.y * rr.height).toFixed(1)}px`);
 
       els.forEach((el, i) => {
         let tw = BASE_W;
         let tg = BASE_G;
         if (fine && inside) {
-          const [cx, cy] = centers[i];
-          const d = Math.hypot(mx - cx, (my - cy) * 1.6);
+          const r = rects[i];
+          const d = Math.hypot(mx - (r.left + r.width / 2), (my - (r.top + r.height / 2)) * 1.6);
           const k = Math.max(0, 1 - d / span);
           const e = k * k * (3 - 2 * k); // smoothstep
           tw = 92 + e * 58;
@@ -86,6 +129,8 @@ export default function HeroName({ lines }: { lines: string[] }) {
         st.g += (tg - st.g) * 0.09;
         el.style.fontVariationSettings = `"wdth" ${st.w.toFixed(2)}, "wght" ${st.g.toFixed(1)}`;
       });
+
+      placeBackgrounds(rr, rects);
       raf = requestAnimationFrame(tick);
     }
 
@@ -124,7 +169,7 @@ export default function HeroName({ lines }: { lines: string[] }) {
                   ref={(el) => {
                     letters.current[idx] = el;
                   }}
-                  className="inline-block"
+                  className="opal-text inline-block"
                   style={{ fontVariationSettings: `"wdth" ${BASE_W}, "wght" ${BASE_G}` }}
                 >
                   {ch}
