@@ -6,9 +6,9 @@
 /* ───────────────────────── Tokens ───────────────────────── */
 
 @theme inline {
-  --font-display: var(--ff-display), "Arial Narrow", sans-serif;
+  --font-display: var(--ff-display), Georgia, "Times New Roman", serif;
   --font-sans: var(--ff-sans), "Helvetica Neue", Arial, sans-serif;
-  --font-mono: var(--ff-mono), ui-monospace, Menlo, monospace;
+  --font-mono: var(--ff-sans), "Helvetica Neue", Arial, sans-serif;
 
   --color-paper: var(--paper);
   --color-surface: var(--surface);
@@ -17,6 +17,16 @@
   --color-line: var(--line);
   --color-signal: var(--signal);
   --color-on-signal: var(--on-signal);
+  --color-card: var(--card);
+  --color-alt: var(--alt);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-on-accent: var(--on-accent);
+
+  --radius-card: 18px;
+  --radius-media: 12px;
+  --shadow-card: 0 1px 2px rgb(31 30 28 / 0.06);
+  --shadow-card-hover: 0 18px 40px -20px color-mix(in oklab, var(--accent) 45%, transparent);
 
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-quart: cubic-bezier(0.76, 0, 0.24, 1);
@@ -58,75 +68,67 @@
 :root {
   color-scheme: light;
 
-  /* Magenta / bleu nuit — clair */
-  --paper: #f4f2fa;
-  --surface: #e8e5f3;
-  --ink: #0f1233;
-  --muted: #575c80;
-  --line: color-mix(in oklab, var(--ink) 15%, transparent);
-  --signal: oklch(0.52 0.23 345);
-  --on-signal: #0f1233;
-  --gutter: clamp(1rem, 2.6vw, 2.5rem);
-  --grain-opacity: 0.07;
+  /* Artisan premium — clair (contrastes WCAG mesurés sur --paper) */
+  --paper: #f7f3ec;        /* fond crème */
+  --card: #ffffff;         /* cartes */
+  --alt: #efe8dc;          /* sections alternées */
+  --surface: var(--alt);   /* fonds d'images en attente */
+  --ink: #1f1e1c;          /* texte — 15.1:1 */
+  --muted: #5e5850;        /* texte secondaire — 6.4:1 (5.8 sur --alt) */
+  --line: color-mix(in oklab, var(--ink) 12%, transparent);
+  --accent: #c2562f;       /* terracotta : surfaces et grands titres (4.1:1) */
+  --accent-ink: #a9441f;   /* terracotta foncée : liens, petit texte, boutons — 5.4:1 */
+  --on-accent: #ffffff;    /* texte sur --accent-ink — 5.9:1 */
+  --signal: var(--accent-ink);
+  --on-signal: var(--ink);
+  --gutter: clamp(1.25rem, 4vw, 3rem);
 
-  /* Reflets de fond (statiques) */
-  --sheen:
-    radial-gradient(55% 45% at 88% 0%, #e2dcff 0%, transparent 70%),
-    radial-gradient(45% 40% at 0% 38%, #ffd9ef 0%, transparent 70%),
-    radial-gradient(50% 45% at 100% 72%, #d9e4ff 0%, transparent 70%),
-    radial-gradient(45% 40% at 10% 100%, #f1dbff 0%, transparent 70%);
+  /* Plus de reflets ni de grain : fond uni */
+  --sheen: none;
+  --grain-opacity: 0;
 
-  /* Dégradé vif, pour le texte : magenta → violet → bleu */
-  --opal-c1: #e0218a;
-  --opal-c2: #d43fc4;
-  --opal-c3: #9a3cf0;
-  --opal-c4: #5b4bff;
-  --opal-c5: #2c62f0;
-  --opal-c6: #1f8fe0;
-  --opal-sheen: rgb(255 255 255 / 0.6);
-  --opal-milk: rgb(255 255 255 / 0.12);
-
-  /* Teintes pâles : pour les aplats sous du texte encre */
-  --opal-p1: #ffd3ec;
-  --opal-p2: #f5d2ff;
-  --opal-p3: #e3dbff;
-  --opal-p4: #d5ddff;
-  --opal-p5: #d0e8ff;
-  --opal-p6: #ffd9f2;
-
-  /* Facettes : éclats clairs en biais, comme une opale fracturée (statique) */
-  --opal-facets: repeating-linear-gradient(
-    118deg,
-    transparent 0 9%,
-    rgb(255 255 255 / 0.22) 11%,
-    transparent 13.5%,
-    transparent 17%,
-    rgb(255 255 255 / 0.12) 18%,
-    transparent 21%
-  );
+  /* Anciens jetons "opale" ramenés à la terracotta (supprimés à l'étape de nettoyage) */
+  --opal-c1: #c2562f;
+  --opal-c2: #a9441f;
+  --opal-c3: #c2562f;
+  --opal-c4: #a9441f;
+  --opal-c5: #c2562f;
+  --opal-c6: #a9441f;
+  --opal-sheen: transparent;
+  --opal-milk: transparent;
+  --opal-p1: #efe8dc;
+  --opal-p2: #efe8dc;
+  --opal-p3: #efe8dc;
+  --opal-p4: #efe8dc;
+  --opal-p5: #efe8dc;
+  --opal-p6: #efe8dc;
+  --opal-facets: linear-gradient(transparent, transparent);
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  /* Magenta / bleu nuit — sombre */
-  --paper: #080b1f;
-  --surface: #11163a;
-  --ink: #eef0ff;
-  --muted: #9da3cc;
-  --signal: oklch(0.76 0.17 345);
-  --grain-opacity: 0.05;
-  --sheen:
-    radial-gradient(55% 45% at 88% 0%, #1d1f5e 0%, transparent 70%),
-    radial-gradient(45% 40% at 0% 40%, #3a0f3c 0%, transparent 70%),
-    radial-gradient(50% 45% at 100% 75%, #0c2152 0%, transparent 70%);
-  --opal-c1: #ff5fb8;
-  --opal-c2: #ff86e0;
-  --opal-c3: #d58cff;
-  --opal-c4: #9d8fff;
-  --opal-c5: #6f9dff;
-  --opal-c6: #7fd4ff;
-  --opal-sheen: rgb(255 255 255 / 0.85);
-  --opal-milk: rgb(255 255 255 / 0.04);
+  /* Artisan premium — sombre (brun chaud) */
+  --paper: #16120f;
+  --card: #211b16;
+  --alt: #1b1612;
+  --ink: #f3ece2;          /* 15.9:1 */
+  --muted: #b4a999;        /* 8.1:1 */
+  --accent: #e07a52;       /* 6.3:1 */
+  --accent-ink: #e8906c;   /* 7.7:1 */
+  --on-accent: #1f1e1c;    /* texte sur --accent — 5.6:1 */
+  --line: color-mix(in oklab, var(--ink) 12%, transparent);
+  --opal-c1: #e07a52;
+  --opal-c2: #e8906c;
+  --opal-c3: #e07a52;
+  --opal-c4: #e8906c;
+  --opal-c5: #e07a52;
+  --opal-c6: #e8906c;
+  --opal-p1: #2a221c;
+  --opal-p2: #2a221c;
+  --opal-p3: #2a221c;
+  --opal-p4: #2a221c;
+  --opal-p5: #2a221c;
+  --opal-p6: #2a221c;
 }
 
 /* Les dégradés sont composés dans chaque classe (et non sur :root) pour que
@@ -256,18 +258,18 @@ body::before {
 body {
   font-family: var(--font-sans);
   color: var(--ink);
-  font-size: 1rem;
-  line-height: 1.5;
+  font-size: 1.0625rem;
+  line-height: 1.6;
   text-rendering: optimizeLegibility;
 }
 
 ::selection {
-  background: var(--signal);
-  color: var(--on-signal);
+  background: var(--accent-ink);
+  color: var(--on-accent);
 }
 
 :focus-visible {
-  outline: 2px solid var(--signal);
+  outline: 2px solid var(--accent-ink);
   outline-offset: 3px;
 }
 
@@ -285,20 +287,19 @@ img {
 .f-display {
   font-family: var(--font-display);
   font-variation-settings:
-    "wdth" var(--wdth, 100),
-    "wght" var(--wght, 800);
+    "wght" var(--wght, 450),
+    "SOFT" var(--soft, 50);
   font-weight: normal;
-  letter-spacing: -0.02em;
-  line-height: 0.86;
+  letter-spacing: -0.015em;
+  line-height: 1.04;
 }
 
 .f-label {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
   line-height: 1.45;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
-  font-variation-settings: "wght" 420;
+  letter-spacing: 0.04em;
+  font-weight: 600;
 }
 
 .f-mono {
@@ -352,28 +353,7 @@ img {
   background-size: 100% 1px;
 }
 
-/* Grain de papier — SVG feTurbulence, aucune image externe */
-.grain::after {
-  content: "";
-  position: fixed;
-  inset: -50%;
-  z-index: 90;
-  pointer-events: none;
-  opacity: var(--grain-opacity);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 1.4 -0.2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  /* transform seul : animé sur le compositeur, sans repeint */
-  will-change: transform;
-  animation: grain 1.2s steps(6) infinite;
-}
 
-@keyframes grain {
-  0% { transform: translate(0, 0); }
-  20% { transform: translate(-3%, 2%); }
-  40% { transform: translate(2%, -4%); }
-  60% { transform: translate(-4%, -1%); }
-  80% { transform: translate(3%, 3%); }
-  100% { transform: translate(0, 0); }
-}
 
 /* Accent dont la teinte tourne en continu — animé uniquement sur les éléments
    qui l'utilisent (et non sur :root, qui recalculait toute la page). */
@@ -387,15 +367,7 @@ img {
   from { --opal-h: 255; }
   to { --opal-h: 350; }
 }
-.text-signal,
-.bg-signal {
-  --signal: oklch(0.52 0.22 var(--opal-h));
-  animation: opal-hue 11s steps(330) infinite alternate;
-}
-:root[data-theme="dark"] .text-signal,
-:root[data-theme="dark"] .bg-signal {
-  --signal: oklch(0.78 0.14 var(--opal-h));
-}
+/* Accent : statique (plus de teinte qui tourne) */
 
 /* Point "en direct" */
 .live-dot {

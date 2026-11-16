@@ -4,39 +4,29 @@ import "./globals.css";
 
 /* ───────────────────────────────────────────────────────────
    Polices auto-hébergées (SIL OFL 1.1 — voir src/fonts/LICENSES.txt)
-   Anybody        → titres (axes variables wdth 50–150 / wght 100–900)
-   Instrument Sans → texte courant
-   Martian Mono   → métadonnées, labels, code
+   Fraunces → titres (serif variable, axes wght 100–900 / SOFT 0–100)
+   Manrope  → texte courant et libellés (wght 200–800)
+   Les fallbacks ont des métriques ajustées : pas de décalage au chargement.
    ─────────────────────────────────────────────────────────── */
 const display = localFont({
   src: [
-    { path: "../fonts/Anybody-Variable.woff2", style: "normal" },
-    { path: "../fonts/Anybody-Variable-Italic.woff2", style: "italic" },
+    { path: "../fonts/Fraunces-Variable.woff2", style: "normal" },
+    { path: "../fonts/Fraunces-Variable-Italic.woff2", style: "italic" },
   ],
   variable: "--ff-display",
   weight: "100 900",
   display: "swap",
-  declarations: [{ prop: "font-stretch", value: "50% 150%" }],
-  fallback: ["Arial Narrow", "Helvetica Neue", "sans-serif"],
+  adjustFontFallback: "Times New Roman",
+  fallback: ["Georgia", "Times New Roman", "serif"],
 });
 
 const sans = localFont({
-  src: [
-    { path: "../fonts/InstrumentSans-Variable.woff2", style: "normal" },
-    { path: "../fonts/InstrumentSans-Variable-Italic.woff2", style: "italic" },
-  ],
+  src: [{ path: "../fonts/Manrope-Variable.woff2", style: "normal" }],
   variable: "--ff-sans",
-  weight: "400 700",
+  weight: "200 800",
   display: "swap",
+  adjustFontFallback: "Arial",
   fallback: ["Helvetica Neue", "Arial", "sans-serif"],
-});
-
-const mono = localFont({
-  src: [{ path: "../fonts/MartianMono-Variable.woff2", style: "normal" }],
-  variable: "--ff-mono",
-  weight: "100 800",
-  display: "swap",
-  fallback: ["ui-monospace", "Menlo", "monospace"],
 });
 
 export const metadata: Metadata = {
@@ -50,8 +40,8 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F4F2FA" },
-    { media: "(prefers-color-scheme: dark)", color: "#080B1F" },
+    { media: "(prefers-color-scheme: light)", color: "#F7F3EC" },
+    { media: "(prefers-color-scheme: dark)", color: "#16120F" },
   ],
 };
 
@@ -68,7 +58,7 @@ export default function RootLayout({
       lang="fr"
       data-theme="dark"
       suppressHydrationWarning
-      className={`${display.variable} ${sans.variable} ${mono.variable}`}
+      className={`${display.variable} ${sans.variable}`}
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
