@@ -13,12 +13,13 @@ export default function AboutPortrait() {
   return (
     <motion.div
       ref={ref}
-      className="col-span-2 col-start-3 self-end md:col-span-3 md:col-start-10"
-      initial={{ clipPath: "inset(0 100% 0 0)" }}
-      animate={{ clipPath: "inset(0 0% 0 0)" }}
+      className="opal-halo relative col-span-2 col-start-3 self-end md:col-span-3 md:col-start-10"
+      // marges négatives : le rideau ne rogne pas le halo
+      initial={{ clipPath: "inset(-25% 100% -25% -25%)" }}
+      animate={{ clipPath: "inset(-25% -25% -25% -25%)" }}
       transition={{ duration: 1.1, delay: 0.25, ease: easeInOut }}
     >
-      <div className="relative aspect-[3/4] overflow-hidden bg-surface">
+      <div className="opal-veil relative aspect-[3/4] overflow-hidden bg-surface">
         <motion.div className="absolute inset-0" style={{ y, scale: 1.2 }}>
           <Image
             src="/img/selfie.jpeg"

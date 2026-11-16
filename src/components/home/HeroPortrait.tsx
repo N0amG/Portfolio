@@ -10,8 +10,8 @@ export default function HeroPortrait() {
   const rotate = useTransform(scrollY, [0, 800], [0, -6]);
 
   return (
-    <motion.div className="absolute bottom-[0.1em] left-0 w-[clamp(56px,11vw,230px)]" style={{ y, rotate }}>
-      <div className="hero-reveal relative aspect-[4/5] overflow-hidden bg-surface">
+    <motion.div className="opal-halo absolute bottom-[0.1em] left-0 w-[clamp(56px,11vw,230px)]" style={{ y, rotate }}>
+      <div className="hero-reveal opal-veil relative aspect-[4/5] overflow-hidden bg-surface">
         <Image
           src="/img/selfie.jpeg"
           alt="Portrait de Noam Guez"

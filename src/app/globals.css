@@ -179,6 +179,51 @@
   animation: opal-spin 22s steps(660) infinite;
 }
 
+/* Portrait : halo nacré très léger, pour fondre la photo dans la matière opale.
+   .opal-halo (cadre extérieur) : lueur floutée et figée derrière la photo.
+   .opal-veil (conteneur de l'image) : voile opale en lumière douce, qui tourne
+   comme la police. */
+.opal-halo {
+  isolation: isolate;
+}
+.opal-halo::before {
+  content: "";
+  position: absolute;
+  inset: -4%;
+  z-index: -1;
+  pointer-events: none;
+  background-image: repeating-conic-gradient(
+    from 30deg at 50% 50%,
+    var(--opal-c1) 0deg, var(--opal-c2) 60deg, var(--opal-c3) 120deg,
+    var(--opal-c5) 180deg, var(--opal-c6) 240deg, var(--opal-c4) 300deg, var(--opal-c1) 360deg
+  );
+  filter: blur(14px);
+  opacity: 0.22;
+  /* n'apparaît qu'une fois la photo dévoilée (opacité seule : composée) */
+  animation: opal-halo-in 0.9s ease-out 0.9s both;
+}
+@keyframes opal-halo-in {
+  from { opacity: 0; }
+}
+.opal-veil::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(60% 45% at 22% 12%, var(--opal-sheen), transparent 70%),
+    repeating-conic-gradient(
+      from var(--opal-a) at -10% 115%,
+      var(--opal-c1) 0deg, var(--opal-c2) 12deg, var(--opal-c3) 24deg, var(--opal-c4) 36deg,
+      var(--opal-c5) 48deg, var(--opal-c6) 60deg, var(--opal-c1) 72deg
+    );
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.18);
+  mix-blend-mode: soft-light;
+  opacity: 0.32;
+  animation: opal-spin 22s steps(660) infinite;
+}
+
 /* Variante figée : aplats cachés la plupart du temps (survols, rideau) */
 .opal-still {
   animation: none;
@@ -531,6 +576,8 @@ img {
   .opal-text,
   .opal-fill,
   .opal-fire,
+  .opal-veil::after,
+  .opal-halo::before,
   .hero-name > h1:not(.is-tracking),
   .hero-rise,
   .hero-up,
