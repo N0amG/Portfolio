@@ -23,6 +23,8 @@
   --color-band: var(--band);
   --color-on-band: var(--on-band);
   --color-on-overlay: var(--on-overlay);
+  --color-touch: var(--touch);
+  --color-on-touch: var(--on-touch);
 
   --radius-card: 18px;
   --shadow-card: 0 1px 2px color-mix(in oklab, var(--overlay) 6%, transparent);
@@ -38,37 +40,41 @@
 :root {
   color-scheme: light;
 
-  /* Artisan premium — clair (contrastes WCAG mesurés sur --paper) */
-  --paper: #f7f3ec;        /* fond crème */
+  /* Vert sapin et moutarde — clair (contrastes WCAG mesurés) */
+  --paper: #f6f3ea;        /* fond ivoire */
   --card: #ffffff;         /* cartes */
-  --alt: #efe8dc;          /* sections alternées */
+  --alt: #ede8d9;          /* sections alternées */
   --surface: var(--alt);   /* fonds d'images en attente */
-  --ink: #1f1e1c;          /* texte — 15.1:1 */
-  --muted: #5e5850;        /* texte secondaire — 6.4:1 (5.8 sur --alt) */
+  --ink: #1d2925;          /* texte — 13.6:1 (12.3 sur --alt) */
+  --muted: #56605b;        /* texte secondaire — 5.9:1 (5.3 sur --alt) */
   --line: color-mix(in oklab, var(--ink) 12%, transparent);
-  --accent: #c2562f;       /* terracotta : surfaces et grands titres (4.1:1) */
-  --accent-ink: #a9441f;   /* terracotta foncée : liens, petit texte, boutons — 5.4:1 */
-  --on-accent: #ffffff;    /* texte sur --accent-ink — 5.9:1 */
-  --overlay: #1f1e1c;      /* voile sombre sur les images (identique dans les 2 thèmes) */
-  --on-overlay: #f7f3ec;   /* texte posé sur ce voile */
-  --band: var(--accent-ink);  /* grande bande de couleur */
-  --on-band: var(--on-accent);
+  --accent: #2d6a55;       /* sapin clair : grands titres, survols — 5.7:1 */
+  --accent-ink: #1f4d3f;   /* vert sapin : liens, petit texte, boutons — 8.6:1 */
+  --on-accent: #ffffff;    /* texte sur --accent-ink 9.6:1, sur --accent 6.4:1 */
+  --touch: #d8a12a;        /* moutarde : aplats et points décoratifs (jamais en petit texte) */
+  --on-touch: #1d2925;     /* texte sur la moutarde — 6.5:1 */
+  --overlay: #1d2925;      /* voile sombre sur les images (identique dans les 2 thèmes) */
+  --on-overlay: #f6f3ea;   /* texte posé sur ce voile */
+  --band: var(--touch);    /* grande bande de couleur : moutarde */
+  --on-band: var(--on-touch);
   --gutter: clamp(1.25rem, 4vw, 3rem);
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  /* Artisan premium — sombre (brun chaud) */
-  --paper: #16120f;
-  --card: #211b16;
-  --alt: #1b1612;
-  --ink: #f3ece2;          /* 15.9:1 */
-  --muted: #b4a999;        /* 8.1:1 */
-  --accent: #e07a52;       /* 6.3:1 */
-  --accent-ink: #e8906c;   /* 7.7:1 */
-  --on-accent: #1f1e1c;    /* texte sur --accent — 5.6:1 */
-  --band: #8a3a1d;         /* terracotta profonde, plus chic que le saumon en sombre */
-  --on-band: #f7f3ec;      /* 7.0:1 */
+  /* Vert sapin et moutarde — sombre (vert très profond, accent moutarde) */
+  --paper: #121a16;
+  --card: #1a2520;
+  --alt: #16201b;
+  --ink: #eef0e8;          /* 15.4:1 */
+  --muted: #a7b2ab;        /* 8.1:1 */
+  --accent: #d8a12a;       /* 7.6:1 */
+  --accent-ink: #e6b54e;   /* 9.4:1 */
+  --on-accent: #1d2925;    /* texte sur --accent-ink 7.9:1, sur --accent 6.5:1 */
+  --touch: #d8a12a;
+  --on-touch: #1d2925;
+  --band: #1f4d3f;         /* bande vert sapin */
+  --on-band: #f6f3ea;      /* 8.6:1 */
   --line: color-mix(in oklab, var(--ink) 12%, transparent);
 }
 

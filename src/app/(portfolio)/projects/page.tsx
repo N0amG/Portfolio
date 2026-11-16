@@ -19,7 +19,7 @@ export default function ProjectsPage() {
       {/* En-tête */}
       <header className="shell">
         <p className="hero-up f-label flex items-center gap-2 text-accent-ink" style={{ animationDelay: "0.05s" }}>
-          <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
+          <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-touch" />
           Réalisations
         </p>
         <h1 className="f-display mt-6 text-[clamp(2.75rem,6.6vw,6.25rem)] leading-[1.02] tracking-[-0.025em] [--wght:390]">

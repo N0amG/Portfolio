@@ -72,7 +72,7 @@ export default function ContactPage() {
         {/* Colonne infos */}
         <aside className="md:col-span-5">
           <p className="hero-up f-label flex items-center gap-2 text-accent-ink" style={{ animationDelay: "0.05s" }}>
-            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
+            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-touch" />
             Contact
           </p>
           <h1 className="f-display mt-6 text-[clamp(3rem,5.2vw,4.75rem)] leading-[1] tracking-[-0.03em] [--wght:390]">
@@ -98,7 +98,7 @@ export default function ContactPage() {
           <ul className="hero-up mt-8 space-y-3" style={{ animationDelay: "0.38s" }}>
             {reassurances.map((r) => (
               <li key={r} className="flex items-start gap-3">
-                <span aria-hidden className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" />
+                <span aria-hidden className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-touch" />
                 {r}
               </li>
             ))}

@@ -38,7 +38,7 @@ export default function AboutPage() {
       <section className="shell grid items-center gap-12 md:grid-cols-[1.3fr_1fr] md:gap-16">
         <div>
           <p className="hero-up f-label flex items-center gap-2 text-accent-ink" style={{ animationDelay: "0.05s" }}>
-            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />À propos
+            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-touch" />À propos
           </p>
           <h1 className="f-display mt-6 text-[clamp(3rem,7.4vw,7rem)] leading-[1] tracking-[-0.03em] [--wght:390]">
             {[

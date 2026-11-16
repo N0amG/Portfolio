@@ -103,7 +103,7 @@ export default function Home() {
       {/* ───────── Hero ───────── */}
       <section className="shell pb-16 pt-32 md:pb-24 md:pt-40">
         <p className="hero-up f-label flex items-center gap-2 text-muted" style={{ animationDelay: "0.05s" }}>
-          <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
+          <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-touch" />
           Développeur web freelance · Lyon
         </p>
         <div className="mt-8">

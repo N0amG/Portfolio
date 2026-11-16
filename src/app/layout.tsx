@@ -40,7 +40,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = {
   // Thème clair par défaut, quel que soit le réglage du système
-  themeColor: "#F7F3EC",
+  themeColor: "#F6F3EA",
 };
 
 /* Appliqué avant le premier paint : pas de flash de thème */
