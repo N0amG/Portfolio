@@ -212,7 +212,7 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
         <section className="shell mt-24 md:mt-36">
           <div className="grid gap-10 md:grid-cols-12">
             <div className="md:col-span-4">
-              <SectionIntro eyebrow="Le projet" title="Le besoin" />
+              <SectionIntro title="Le besoin" />
               {noteLabel && <p className="mt-5 inline-flex rounded-full bg-alt px-4 py-2 text-sm text-muted">{noteLabel}</p>}
             </div>
             <div className="space-y-5 md:col-span-7 md:col-start-6">
@@ -239,13 +239,12 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
       {/* Ce qui a été fait */}
       {project.challenges && project.challenges.length > 0 && (
         <section className="shell mt-24 md:mt-36">
-          <SectionIntro eyebrow="La solution" title="Ce qui a été fait" />
+          <SectionIntro title="Ce qui a été fait" />
           <ol className="mt-12 border-b border-line">
             {project.challenges.map((c, i) => (
               <li key={c.title}>
                 <Assemble from={{ x: i % 2 === 0 ? -120 : 120, opacity: 0.15 }} end="start 0.6">
-                  <div className="grid gap-3 border-t border-line py-8 md:grid-cols-[5rem_1fr_1.3fr] md:items-baseline md:gap-8">
-                    <span className="f-display text-[2rem] italic leading-none text-accent [--wght:330]">0{i + 1}</span>
+                  <div className="grid gap-3 border-t border-line py-8 md:grid-cols-[1fr_1.3fr] md:items-baseline md:gap-10">
                     <h3 className="f-display text-[clamp(1.6rem,2.6vw,2.1rem)] leading-[1.1] [--wght:450]">{c.title}</h3>
                     <p className="leading-relaxed text-muted">{c.description}</p>
                   </div>
@@ -260,7 +259,7 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
       {project.screenshots.length > 1 && (
         <section className="shell mt-24 md:mt-36">
           <div className="flex flex-wrap items-end justify-between gap-4">
-            <SectionIntro eyebrow="En images" title="Captures d'écran" />
+            <SectionIntro title="Captures d'écran" />
             <p className="text-sm text-muted">Glissez pour parcourir, cliquez pour agrandir.</p>
           </div>
           <div className="mt-10">

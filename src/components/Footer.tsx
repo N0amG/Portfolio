@@ -22,10 +22,9 @@ export default function Footer() {
           <div className="rounded-[28px] bg-alt px-6 py-12 md:px-14 md:py-16">
             <div className="grid gap-10 md:grid-cols-[1.4fr_1fr] md:items-end">
               <div>
-                <p className="f-label text-accent-ink">Parlons de votre projet</p>
                 <MaskLines
                   as="h2"
-                  className="f-display mt-4 text-[clamp(2rem,3.6vw,3.25rem)] [--wght:450]"
+                  className="f-display text-[clamp(2rem,3.6vw,3.25rem)] [--wght:450]"
                   lines={["Un projet pour", "votre commerce ?"]}
                 />
                 <FadeIn delay={0.15}>
@@ -95,7 +94,7 @@ export default function Footer() {
         <div className="shell">
         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-line py-5 text-sm text-muted">
           <span>
-            © {new Date().getFullYear()} Noam Guez — {site.role}
+            © {new Date().getFullYear()} Noam Guez, développeur web freelance à Lyon
           </span>
           <button type="button" onClick={toTop} className="group inline-flex min-h-11 items-center gap-2 hover:text-ink">
             Haut de page

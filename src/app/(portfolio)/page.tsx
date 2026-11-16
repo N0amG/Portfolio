@@ -102,50 +102,33 @@ export default function Home() {
     <>
       {/* ───────── Hero ───────── */}
       <section className="shell pb-16 pt-32 md:pb-24 md:pt-40">
-        <p className="hero-up f-label flex items-center gap-2 text-muted" style={{ animationDelay: "0.05s" }}>
-          <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-touch" />
-          Développeur web freelance · Lyon
+        <p className="hero-up f-label text-muted" style={{ animationDelay: "0.05s" }}>
+          Noam Guez, développeur web freelance à Lyon
         </p>
         <div className="mt-8">
           <HeroTitle />
         </div>
 
-        <div className="mt-12 grid items-end gap-10 border-t border-line pt-10 md:mt-16 md:grid-cols-[1fr_auto]">
+        <div className="mt-12 border-t border-line pt-10 md:mt-16">
           <div className="hero-up" style={{ animationDelay: "0.35s" }}>
             <p className="max-w-[44ch] text-lg leading-relaxed md:text-[1.25rem]">
-              Je crée des sites simples et soignés pour les commerçants : visibles sur Google, rapides sur mobile, et faciles
-              à mettre à jour.
+              Je construis le site de votre commerce, de la première maquette à la mise en ligne. Vous n&apos;avez qu&apos;un
+              seul interlocuteur : moi.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <Link href="/contact" className={ctaClass}>
                 Demander un devis
                 <ArrowRightIcon size={16} weight="bold" className="transition-transform duration-500 ease-[var(--ease-expo)] group-hover:translate-x-1" />
               </Link>
-              <span className="text-[0.9375rem] text-muted">Réponse personnelle, devis sans engagement.</span>
+              <Link
+                href="#realisations"
+                className="group inline-flex min-h-11 items-center gap-2 font-semibold text-accent-ink"
+              >
+                Voir des réalisations
+                <ArrowDownIcon size={16} weight="bold" className="transition-transform duration-500 group-hover:translate-y-0.5" />
+              </Link>
             </div>
           </div>
-
-          {/* Badge tournant : mène aux réalisations */}
-          <Link
-            href="#realisations"
-            aria-label="Voir des réalisations"
-            className="hero-up group relative hidden h-36 w-36 place-items-center md:grid"
-            style={{ animationDelay: "0.45s" }}
-          >
-            <svg viewBox="0 0 100 100" aria-hidden className="absolute inset-0 animate-[spin_22s_linear_infinite] motion-reduce:animate-none">
-              <defs>
-                <path id="badge-circle" d="M50,50 m-38,0 a38,38 0 1,1 76,0 a38,38 0 1,1 -76,0" />
-              </defs>
-              <text className="fill-current text-[8.5px] font-semibold uppercase">
-                <textPath href="#badge-circle" textLength="236" lengthAdjust="spacing">
-                  Voir des réalisations · Voir des réalisations ·
-                </textPath>
-              </text>
-            </svg>
-            <span className="grid h-14 w-14 place-items-center rounded-full bg-accent-ink text-on-accent transition-transform duration-500 ease-[var(--ease-expo)] group-hover:scale-110">
-              <ArrowDownIcon size={20} weight="bold" />
-            </span>
-          </Link>
         </div>
       </section>
 
@@ -159,7 +142,7 @@ export default function Home() {
 
       {/* ───────── Offres : lignes qui s'assemblent ───────── */}
       <section className="shell py-24 md:py-36">
-        <SectionIntro eyebrow="Ce que je fais" title="Trois façons de faire venir vos clients." />
+        <SectionIntro title="Ce que je peux faire pour vous" />
         <ol className="mt-14 border-b border-line">
           {offers.map((o, i) => (
             <li key={o.title}>
@@ -169,10 +152,7 @@ export default function Home() {
                     aria-hidden
                     className="absolute inset-0 origin-bottom scale-y-0 bg-accent-ink transition-transform duration-700 ease-[var(--ease-expo)] group-hover:scale-y-100"
                   />
-                  <div className="relative grid gap-4 px-1 py-10 transition-colors duration-500 group-hover:text-on-accent md:grid-cols-[6rem_1fr_1.15fr] md:items-baseline md:gap-8 md:px-6 md:py-12">
-                    <span className="f-display text-[2.25rem] italic leading-none text-accent transition-colors duration-500 [--wght:350] group-hover:text-on-accent">
-                      0{i + 1}
-                    </span>
+                  <div className="relative grid gap-4 px-1 py-10 transition-colors duration-500 group-hover:text-on-accent md:grid-cols-[1fr_1.15fr] md:items-baseline md:gap-10 md:px-6 md:py-12">
                     <h3 className="f-display text-[clamp(2.1rem,3.8vw,3.4rem)] leading-[1.02] [--wght:420]">{o.title}</h3>
                     <div>
                       <p className="text-lg leading-relaxed">{o.text}</p>
@@ -191,24 +171,23 @@ export default function Home() {
       {/* ───────── Phrase choc : bande terracotta qui s'ouvre ───────── */}
       <RevealBand className="bg-band py-28 text-on-band md:py-40">
         <div className="shell">
-          <p className="f-label text-on-band/80">Pourquoi un site ?</p>
           <ScrollStatement
-            className="f-display mt-6 text-[clamp(2.1rem,4.6vw,4.4rem)] leading-[1.08] [--wght:380]"
-            text="Avant de pousser votre porte, vos clients vous cherchent sur leur téléphone. Autant qu'ils tombent sur *un* *site* *qui* *vous* *ressemble.*"
+            className="f-display text-[clamp(2.1rem,4.6vw,4.4rem)] leading-[1.08] [--wght:380]"
+            text="Avant de pousser votre porte, vos clients vous cherchent sur leur téléphone. Autant qu'ils y trouvent *ce* *qu'ils* *cherchent.*"
           />
         </div>
       </RevealBand>
 
       {/* ───────── Morceaux de sites qui s'assemblent (section épinglée) ───────── */}
       <CollageAssemble
-        title="Votre vitrine, ouverte jour et nuit."
-        caption="Un site clair et rapide, qui travaille pour vous même quand le rideau est baissé."
+        title="Des sites que j'ai construits."
+        caption="Captures de projets réalisés en agence, en formation et pour moi."
       />
 
       {/* ───────── Réalisations : tuiles qui s'emboîtent ───────── */}
       <section id="realisations" className="shell scroll-mt-24 py-24 md:py-36">
         <div className="flex flex-wrap items-end justify-between gap-6">
-          <SectionIntro eyebrow="Réalisations" title="Des projets, pas des promesses." />
+          <SectionIntro title="Quelques réalisations" />
           <Link href="/projects" className="group inline-flex min-h-11 items-center gap-2 font-semibold text-accent-ink">
             Toutes les réalisations
             <ArrowRightIcon size={16} weight="bold" className="transition-transform group-hover:translate-x-1" />
@@ -234,7 +213,7 @@ export default function Home() {
       {/* ───────── Étapes ───────── */}
       <section className="bg-alt py-24 md:py-36">
         <div className="shell">
-          <SectionIntro eyebrow="Comment ça se passe" title="Simple, du premier appel à la mise en ligne." />
+          <SectionIntro title="Comment on travaille ensemble" />
           <DrawRule className="mt-14" />
           <ol className="grid md:grid-cols-3">
             {steps.map((s, i) => (
@@ -255,7 +234,7 @@ export default function Home() {
       {/* ───────── FAQ ───────── */}
       <section className="shell py-24 md:py-36">
         <div className="grid gap-12 md:grid-cols-[1fr_1.6fr] md:gap-16">
-          <SectionIntro eyebrow="Questions fréquentes" title="Vous vous demandez peut-être…" />
+          <SectionIntro title="Questions fréquentes" />
           <FadeIn>
             <div className="border-t border-line">
               {faq.map((f) => (

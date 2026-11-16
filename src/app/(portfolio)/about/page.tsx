@@ -15,9 +15,9 @@ export const metadata: Metadata = {
 
 const milestones = [
   {
-    when: "2026 — aujourd'hui",
+    when: "Depuis 2026",
     title: "Développeur web chez Elissar",
-    text: "Je modernise un logiciel professionnel vendu à des entreprises : le genre de projet où la fiabilité n'est pas une option.",
+    text: "Je participe à la modernisation d'un logiciel professionnel vendu à des entreprises.",
   },
   {
     when: "2025",
@@ -25,9 +25,9 @@ const milestones = [
     text: "Des applications web et mobiles construites en équipe pour des clients, dont des fonctionnalités d'intelligence artificielle.",
   },
   {
-    when: "2024 — 2028",
+    when: "2024 à 2028",
     title: "Bac +3, Master en cours",
-    text: "Diplômé développeur web (Bac +3), en Master à l'EPSI : hébergement, mise en ligne et sites qui tiennent dans la durée.",
+    text: "Diplômé développeur web (Bac +3), en Master à l'EPSI, orienté hébergement et mise en ligne.",
   },
 ];
 
@@ -37,10 +37,7 @@ export default function AboutPage() {
       {/* En-tête */}
       <section className="shell grid items-center gap-12 md:grid-cols-[1.3fr_1fr] md:gap-16">
         <div>
-          <p className="hero-up f-label flex items-center gap-2 text-accent-ink" style={{ animationDelay: "0.05s" }}>
-            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-touch" />À propos
-          </p>
-          <h1 className="f-display mt-6 text-[clamp(3rem,7.4vw,7rem)] leading-[1] tracking-[-0.03em] [--wght:390]">
+          <h1 className="f-display text-[clamp(3rem,7.4vw,7rem)] leading-[1] tracking-[-0.03em] [--wght:390]">
             {[
               <>Un site</>,
               <>à votre</>,
@@ -62,8 +59,8 @@ export default function AboutPage() {
               vous voyez à l&apos;écran comme ce qui tourne en coulisses.
             </p>
             <p className="leading-relaxed text-muted">
-              Mon idée est simple : un site doit ressembler au commerce qu&apos;il présente, s&apos;afficher vite sur un
-              téléphone, et être facile à faire vivre. Vous avez un seul interlocuteur, du premier échange à la mise en ligne.
+              Je travaille surtout pour des commerçants et des indépendants. Je m&apos;occupe de tout, de la maquette à
+              l&apos;hébergement, et c&apos;est moi qui vous réponds du début à la fin.
             </p>
           </div>
         </div>
@@ -72,7 +69,7 @@ export default function AboutPage() {
 
       {/* Repères */}
       <section className="shell mt-28 md:mt-40">
-        <SectionIntro eyebrow="Pourquoi me faire confiance" title="Une expérience en entreprise et en agence." />
+        <SectionIntro title="Mon parcours" />
         <ol className="mt-12 grid gap-6 md:grid-cols-3">
           {milestones.map((m, i) => (
             <li key={m.title}>
@@ -94,7 +91,7 @@ export default function AboutPage() {
           <FadeIn>
             <p className="f-label text-muted">En dehors du travail</p>
             <p className="f-display mt-4 max-w-[26ch] text-[clamp(1.6rem,2.8vw,2.4rem)] leading-[1.2] [--wght:400]">
-              Culture japonaise, jeux vidéo, physique, et l&apos;IA <em className="text-accent">quand elle est vraiment utile.</em>
+              Culture japonaise, jeux vidéo, physique, et <em className="text-accent">beaucoup de curiosité.</em>
             </p>
           </FadeIn>
           <FadeIn delay={0.1} className="md:justify-self-end">

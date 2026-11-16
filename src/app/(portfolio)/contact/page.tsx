@@ -22,12 +22,6 @@ function Field({ label, htmlFor, children }: { label: string; htmlFor: string; c
   );
 }
 
-const reassurances = [
-  "Je vous réponds personnellement.",
-  "Premier échange et devis sans engagement.",
-  "Vous n'avez pas besoin de connaître la technique.",
-];
-
 export default function ContactPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -71,38 +65,24 @@ export default function ContactPage() {
       <div className="grid gap-14 md:grid-cols-12 md:gap-12">
         {/* Colonne infos */}
         <aside className="md:col-span-5">
-          <p className="hero-up f-label flex items-center gap-2 text-accent-ink" style={{ animationDelay: "0.05s" }}>
-            <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-touch" />
-            Contact
-          </p>
-          <h1 className="f-display mt-6 text-[clamp(3rem,5.2vw,4.75rem)] leading-[1] tracking-[-0.03em] [--wght:390]">
+          <h1 className="f-display text-[clamp(3rem,5.2vw,4.75rem)] leading-[1] tracking-[-0.03em] [--wght:390]">
             {[
-              <>Parlons de</>,
               <>
-                votre <em className="text-accent">projet.</em>
+                Écrivez-<em className="text-accent">moi.</em>
               </>,
             ].map((line, i) => (
               <span key={i} className="-my-[0.1em] block overflow-hidden py-[0.1em]">
                 <span className="hero-rise block" style={{ animationDelay: `${0.06 + i * 0.09}s` }}>
                   {line}
                 </span>
-                {i === 0 && " "}
               </span>
             ))}
           </h1>
           <p className="hero-up mt-8 max-w-[40ch] text-lg leading-relaxed text-muted" style={{ animationDelay: "0.3s" }}>
             Un site à créer, une réservation en ligne, un site existant à améliorer ? Décrivez votre besoin en quelques
-            lignes : je reviens vers vous avec mes questions ou une première estimation.
+            lignes : je reviens vers vous avec mes questions ou une première estimation. Le premier échange et le devis
+            sont sans engagement.
           </p>
-
-          <ul className="hero-up mt-8 space-y-3" style={{ animationDelay: "0.38s" }}>
-            {reassurances.map((r) => (
-              <li key={r} className="flex items-start gap-3">
-                <span aria-hidden className="mt-2.5 h-1.5 w-1.5 shrink-0 rounded-full bg-touch" />
-                {r}
-              </li>
-            ))}
-          </ul>
 
           <FadeIn delay={0.2} className="mt-12 space-y-1 border-t border-line pt-6">
             <div className="flex flex-wrap items-center justify-between gap-3 py-2">

@@ -18,15 +18,11 @@ export default function ProjectsPage() {
     <div className="pb-24 pt-32 md:pb-36 md:pt-40">
       {/* En-tête */}
       <header className="shell">
-        <p className="hero-up f-label flex items-center gap-2 text-accent-ink" style={{ animationDelay: "0.05s" }}>
-          <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-touch" />
-          Réalisations
-        </p>
-        <h1 className="f-display mt-6 text-[clamp(2.75rem,6.6vw,6.25rem)] leading-[1.02] tracking-[-0.025em] [--wght:390]">
+        <h1 className="f-display text-[clamp(2.75rem,6.6vw,6.25rem)] leading-[1.02] tracking-[-0.025em] [--wght:390]">
           {[
-            <>Des sites pensés</>,
+            <>Ce que j&apos;ai déjà</>,
             <>
-              pour <em className="text-accent">ceux</em> qui les utilisent.
+              <em className="text-accent">construit.</em>
             </>,
           ].map((line, i) => (
             <span key={i} className="-my-[0.1em] block overflow-hidden py-[0.1em]">
@@ -38,8 +34,8 @@ export default function ProjectsPage() {
           ))}
         </h1>
         <p className="hero-up mt-8 max-w-[52ch] text-lg leading-relaxed text-muted md:text-[1.25rem]" style={{ animationDelay: "0.3s" }}>
-          Sites vitrines, réservation, optimisation : une sélection de projets réalisés en agence, en formation et pour moi.
-          Chaque fiche raconte le besoin, ce qui a été fait et le résultat.
+          Une sélection de projets réalisés en agence, en formation et pour moi. Chaque fiche explique le besoin et ce
+          qui a été fait.
         </p>
       </header>
 
@@ -71,8 +67,7 @@ export default function ProjectsPage() {
                   </div>
                 </Assemble>
                 <FadeIn className={`md:col-span-5 ${flip ? "md:order-1" : ""}`}>
-                  <span className="f-display block text-[2.25rem] italic leading-none text-accent [--wght:330]">0{i + 1}</span>
-                  <p className="f-label mt-6 text-accent-ink">{p.categoryLabel}</p>
+                  <p className="f-label text-accent-ink">{p.categoryLabel}</p>
                   <h2 className="f-display mt-2 text-[clamp(2.2rem,4vw,3.5rem)] leading-[1.02] [--wght:420]">{p.title}</h2>
                   <p className="mt-4 max-w-[44ch] text-lg leading-relaxed text-muted">{p.description}</p>
                   <span className="mt-6 inline-flex min-h-11 items-center gap-2 font-semibold text-accent-ink">
@@ -90,7 +85,6 @@ export default function ProjectsPage() {
       {otherProjects.length > 0 && (
         <section className="shell mt-32 md:mt-44">
           <SectionIntro
-            eyebrow="Autres travaux"
             title="Exercices et projets de formation"
             intro="Des projets plus techniques, réalisés pendant mes formations : programmes, outils de gestion, parties serveur."
           />
