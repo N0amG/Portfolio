@@ -19,7 +19,7 @@ export default function ThemeToggle({ className }: { className?: string }) {
             toggleTheme({ x: r.left + r.width / 2, y: r.top + r.height / 2 });
           }}
           aria-label={label}
-          className={`group relative grid h-9 w-9 place-items-center ${className ?? ""}`}
+          className={`group relative grid h-11 w-11 place-items-center rounded-full transition-colors hover:bg-alt ${className ?? ""}`}
         >
           <span
             className="block h-[18px] w-[18px] rounded-full border-[1.5px] border-current transition-transform duration-700 ease-[var(--ease-expo)] group-hover:rotate-180"
@@ -31,7 +31,7 @@ export default function ThemeToggle({ className }: { className?: string }) {
         </button>
       </Tooltip.Trigger>
       <Tooltip.Portal>
-        <Tooltip.Content sideOffset={8} className="f-label z-[100] bg-ink px-2 py-1 text-paper">
+        <Tooltip.Content sideOffset={8} className="f-label z-[100] rounded-md bg-ink px-2 py-1 text-paper">
           {label}
         </Tooltip.Content>
       </Tooltip.Portal>

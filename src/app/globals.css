@@ -319,6 +319,8 @@ img {
 
 .shell {
   width: 100%;
+  max-width: calc(1200px + 2 * var(--gutter));
+  margin-inline: auto;
   padding-inline: var(--gutter);
 }
 

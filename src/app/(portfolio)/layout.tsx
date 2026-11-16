@@ -13,10 +13,10 @@ export const metadata: Metadata = {
 export default function PortfolioLayout({ children }: { children: React.ReactNode }) {
   return (
     <Providers>
-      <div className="grain relative flex min-h-svh w-full flex-col overflow-x-clip text-ink">
+      <div className="relative flex min-h-svh w-full flex-col overflow-x-clip text-ink">
         <a
           href="#contenu"
-          className="f-label opal-fill fixed left-3 top-3 z-[100] -translate-y-20 px-3 py-2 text-on-signal focus:translate-y-0"
+          className="fixed left-3 top-3 z-[100] -translate-y-20 rounded-full bg-accent-ink px-4 py-2 text-sm font-semibold text-on-accent focus:translate-y-0"
         >
           Aller au contenu
         </a>
