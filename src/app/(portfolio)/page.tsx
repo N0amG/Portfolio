@@ -211,7 +211,7 @@ export default function Home() {
       </section>
 
       {/* ───────── Étapes + FAQ, côte à côte sur desktop ───────── */}
-      <section className="bg-alt py-16 md:py-24">
+      <section className="mb-16 bg-alt py-16 md:mb-24 md:py-24">
         <div className="shell grid gap-14 md:grid-cols-2 md:gap-16">
           <div>
             <SectionIntro title="Comment on travaille ensemble" />

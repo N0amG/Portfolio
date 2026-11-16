@@ -65,7 +65,7 @@
   /* Vert sapin et moutarde — sombre (vert très profond, accent moutarde) */
   --paper: #121a16;
   --card: #1a2520;
-  --alt: #16201b;
+  --alt: #1d2a23;          /* sections alternées, nettement distinctes du fond */
   --ink: #eef0e8;          /* 15.4:1 */
   --muted: #a7b2ab;        /* 8.1:1 */
   --accent: #d8a12a;       /* 7.6:1 */
