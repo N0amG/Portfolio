@@ -1,7 +1,7 @@
 "use client";
 
 import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
+import { Fragment, useRef } from "react";
 import { ease } from "@/lib/site";
 
 /**
@@ -15,6 +15,7 @@ export function MaskLines({
   delay = 0,
   as: Tag = "h2",
   once = true,
+  joiner = " ",
 }: {
   lines: React.ReactNode[];
   className?: string;
@@ -22,6 +23,9 @@ export function MaskLines({
   delay?: number;
   as?: "h1" | "h2" | "h3" | "p" | "div";
   once?: boolean;
+  /** Texte inséré entre les lignes (invisible : les lignes sont des blocs) pour
+   *  que le titre se lise correctement (lecteurs d'écran, moteurs de recherche, copier-coller). */
+  joiner?: string;
 }) {
   const ref = useRef<HTMLElement>(null);
   const inView = useInView(ref, { once, margin: "-10% 0px" });
@@ -29,16 +33,19 @@ export function MaskLines({
   return (
     <Tag ref={ref as never} className={className}>
       {lines.map((line, i) => (
-        <span key={i} className="-my-[0.14em] block overflow-hidden py-[0.14em]">
-          <motion.span
-            className={`block ${lineClassName ?? ""}`}
-            initial={{ y: "105%" }}
-            animate={inView ? { y: "0%" } : { y: "105%" }}
-            transition={{ duration: 1.1, delay: delay + i * 0.08, ease }}
-          >
-            {line}
-          </motion.span>
-        </span>
+        <Fragment key={i}>
+          {i > 0 && joiner}
+          <span className="-my-[0.14em] block overflow-hidden py-[0.14em]">
+            <motion.span
+              className={`block ${lineClassName ?? ""}`}
+              initial={{ y: "105%" }}
+              animate={inView ? { y: "0%" } : { y: "105%" }}
+              transition={{ duration: 1.1, delay: delay + i * 0.08, ease }}
+            >
+              {line}
+            </motion.span>
+          </span>
+        </Fragment>
       ))}
     </Tag>
   );

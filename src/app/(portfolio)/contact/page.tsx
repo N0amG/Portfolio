@@ -64,6 +64,7 @@ export default function ContactPage() {
       <MaskLines
         as="h1"
         className="f-display text-[clamp(3.4rem,13vw,14rem)] uppercase [--wght:880]"
+        joiner=""
         lines={[
           <span key="1" className="f-display" style={{ "--wdth": 64 } as React.CSSProperties}>
             Écrivez-

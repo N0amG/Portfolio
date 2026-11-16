@@ -89,13 +89,13 @@ export default function AboutPage() {
             lineClassName="[--wght:860]"
             lines={[
               <span key="1" style={{ "--wdth": 130 } as React.CSSProperties} className="f-display">
-                Des sites
+                Un site
               </span>,
               <span key="2" style={{ "--wdth": 70 } as React.CSSProperties} className="f-display">
-                qui tiennent
+                à votre
               </span>,
               <span key="3" style={{ "--wdth": 130 } as React.CSSProperties} className="f-display opal-text">
-                la route.
+                image.
               </span>,
             ]}
           />
