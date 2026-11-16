@@ -2,7 +2,7 @@
 
 import { ReactLenis, useLenis } from "lenis/react";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useMediaQuery } from "@/lib/useMediaQuery";
 
 function RouteReset() {
@@ -15,12 +15,18 @@ function RouteReset() {
 }
 
 export default function SmoothScroll({ children }: { children: React.ReactNode }) {
-  const reduce = useMediaQuery("(prefers-reduced-motion: reduce)", true);
-
-  if (reduce) return <>{children}</>;
+  // La structure de l'arbre doit rester identique entre le serveur et le client :
+  // basculer entre "avec" et "sans" Lenis après l'hydratation démontait et
+  // remontait toute la page. On garde donc toujours Lenis, et on coupe
+  // seulement le lissage si l'utilisateur préfère réduire les animations.
+  const reduce = useMediaQuery("(prefers-reduced-motion: reduce)", false);
+  const options = useMemo(
+    () => ({ lerp: 0.1, wheelMultiplier: 1, anchors: true, smoothWheel: !reduce }),
+    [reduce],
+  );
 
   return (
-    <ReactLenis root options={{ lerp: 0.1, wheelMultiplier: 1, anchors: true }}>
+    <ReactLenis root options={options}>
       <RouteReset />
       {children}
     </ReactLenis>

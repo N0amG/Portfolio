@@ -2,13 +2,17 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import dynamic from "next/dynamic";
 import { motion, useScroll, useTransform } from "framer-motion";
 import useEmblaCarousel from "embla-carousel-react";
 import { ArrowLeftIcon, ArrowRightIcon, ArrowUpRightIcon, ArrowsOutSimpleIcon } from "@phosphor-icons/react";
-import Lightbox from "@/components/Lightbox";
+
+// Chargée seulement quand on ouvre une capture.
+const Lightbox = dynamic(() => import("@/components/Lightbox"), { ssr: false });
 import { FadeIn, MaskLines, SectionHead } from "@/components/Reveal";
 import { Project, projects, getProjectNumber, formatProjectDate } from "@/data/portfolio/projects";
-import { pad, ease } from "@/lib/site";
+import { pad } from "@/lib/site";
 
 interface Props {
   project: Project;
@@ -22,28 +26,29 @@ function Cover({ project, onOpen }: { project: Project; onOpen: () => void }) {
   const y = useTransform(scrollYProgress, [0, 1], ["-12%", "12%"]);
 
   return (
-    <motion.button
+    <button
       ref={ref}
       type="button"
       onClick={onOpen}
-      className="group relative block aspect-[4/3] w-full overflow-hidden bg-surface md:aspect-[21/9]"
-      initial={{ clipPath: "inset(0 0 100% 0)" }}
-      animate={{ clipPath: "inset(0 0 0% 0)" }}
-      transition={{ duration: 1.2, delay: 0.5, ease }}
+      className="cover-reveal group relative block aspect-[4/3] w-full overflow-hidden bg-surface md:aspect-[21/9]"
       aria-label="Agrandir la capture principale"
     >
       {project.thumbnail && (
-        <motion.img
-          src={project.thumbnail}
-          alt={project.title}
-          style={{ y, scale: 1.25 }}
-          className="absolute inset-0 h-full w-full object-cover object-top"
-        />
+        <motion.div className="absolute inset-0" style={{ y, scale: 1.25 }}>
+          <Image
+            src={project.thumbnail}
+            alt={project.title}
+            fill
+            preload
+            sizes="100vw"
+            className="object-cover object-top"
+          />
+        </motion.div>
       )}
       <span className="f-label absolute bottom-0 right-0 flex items-center gap-2 bg-paper px-3 py-2 opacity-0 transition-opacity group-hover:opacity-100">
         <ArrowsOutSimpleIcon size={12} /> Agrandir
       </span>
-    </motion.button>
+    </button>
   );
 }
 
@@ -82,12 +87,13 @@ function Gallery({ project, onOpen }: { project: Project; onOpen: (i: number) =>
                 className="group relative block aspect-[16/10] w-full overflow-hidden bg-surface"
                 aria-label={`Agrandir la capture ${i + 1}`}
               >
-                <img
+                <Image
                   src={src}
                   alt={`${project.title} — capture ${i + 1}`}
-                  loading="lazy"
+                  fill
                   draggable={false}
-                  className="h-full w-full object-cover object-top transition-transform duration-[1.2s] ease-[var(--ease-expo)] group-hover:scale-[1.04]"
+                  sizes="(min-width: 1024px) 46vw, (min-width: 640px) 62vw, 86vw"
+                  className="object-cover object-top transition-transform duration-[1.2s] ease-[var(--ease-expo)] group-hover:scale-[1.04]"
                 />
               </button>
             </div>
@@ -125,6 +131,11 @@ function Gallery({ project, onOpen }: { project: Project; onOpen: (i: number) =>
 
 export default function ProjectDetailClient({ project, prev, next }: Props) {
   const [lightbox, setLightbox] = useState<number | null>(null);
+  const [lbReady, setLbReady] = useState(false);
+  const openLightbox = (i: number) => {
+    setLbReady(true);
+    setLightbox(i);
+  };
   const n = pad(getProjectNumber(project.slug));
   const overview = project.overview ?? [];
   const note = overview.find((p) => /^\(.*\)$/.test(p.trim()));
@@ -209,7 +220,7 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
 
       {/* Couverture */}
       <div className="shell mt-6">
-        <Cover project={project} onOpen={() => setLightbox(0)} />
+        <Cover project={project} onOpen={() => openLightbox(0)} />
       </div>
 
       {/* Le projet */}
@@ -265,7 +276,7 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
         <section className="shell mt-24 md:mt-36">
           <SectionHead title="Captures d'écran" meta="Glisser pour parcourir" />
           <div className="mt-10">
-            <Gallery project={project} onOpen={setLightbox} />
+            <Gallery project={project} onOpen={openLightbox} />
           </div>
         </section>
       )}
@@ -279,16 +290,18 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
               <span
                 className="f-display text-[clamp(2.6rem,9vw,9rem)] uppercase transition-[font-variation-settings] duration-700 ease-[var(--ease-expo)] [--wdth:90] group-hover:[--wdth:120]"
               >
-                <span className="bg-clip-text transition-colors duration-500 group-hover:text-transparent group-hover:[background-image:var(--opal-facets),var(--opal-fire)]">
+                <span className="opal-hover">
                   {next.title}
                 </span>
               </span>
               {next.thumbnail && (
                 <span className="relative hidden aspect-[4/3] w-[clamp(140px,16vw,260px)] shrink-0 overflow-hidden md:block">
-                  <img
+                  <Image
                     src={next.thumbnail}
                     alt=""
-                    className="h-full w-full scale-110 object-cover grayscale transition-all duration-700 ease-[var(--ease-expo)] group-hover:scale-100 group-hover:grayscale-0"
+                    fill
+                    sizes="260px"
+                    className="scale-110 object-cover grayscale transition-all duration-700 ease-[var(--ease-expo)] group-hover:scale-100 group-hover:grayscale-0"
                   />
                 </span>
               )}
@@ -304,7 +317,9 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
         </Link>
       </nav>
 
-      <Lightbox images={project.screenshots} index={lightbox} alt={project.title} onClose={() => setLightbox(null)} />
+      {lbReady && (
+        <Lightbox images={project.screenshots} index={lightbox} alt={project.title} onClose={() => setLightbox(null)} />
+      )}
     </article>
   );
 }

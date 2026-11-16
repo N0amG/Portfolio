@@ -1,66 +1,72 @@
 "use client";
 
-import { useRef } from "react";
-import {
-  motion,
-  useAnimationFrame,
-  useMotionValue,
-  useReducedMotion,
-  useScroll,
-  useSpring,
-  useTransform,
-  useVelocity,
-  wrap,
-} from "framer-motion";
+import { useEffect, useRef } from "react";
 
-/** Bandeau infini dont la vitesse et le sens suivent la vélocité du scroll. */
-export default function VelocityMarquee({
-  items,
-  baseVelocity = -2.4,
-  className,
-}: {
-  items: string[];
-  baseVelocity?: number;
-  className?: string;
-}) {
-  const reduce = useReducedMotion();
-  const x = useMotionValue(0);
-  const { scrollY } = useScroll();
-  const velocity = useVelocity(scrollY);
-  const smooth = useSpring(velocity, { damping: 50, stiffness: 400 });
-  const factor = useTransform(smooth, [-1000, 0, 1000], [-4, 0, 4], { clamp: false });
-  const dir = useRef(1);
-  const tx = useTransform(x, (v) => `${wrap(-25, -50, v)}%`);
+/**
+ * Bandeau infini : le défilement est une animation CSS (transform, sur le
+ * compositeur). La vitesse et le sens suivent la vélocité du scroll en
+ * réglant le playbackRate de cette animation — calculé au scroll, pas à
+ * chaque frame.
+ */
+export default function VelocityMarquee({ items, className }: { items: string[]; className?: string }) {
+  const trackRef = useRef<HTMLDivElement>(null);
 
-  useAnimationFrame((_, delta) => {
-    if (reduce) return;
-    let move = dir.current * baseVelocity * (delta / 1000);
-    const f = factor.get();
-    if (f < 0) dir.current = -1;
-    else if (f > 0) dir.current = 1;
-    move += dir.current * move * f;
-    x.set(x.get() + move);
-  });
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const anim = track.getAnimations()[0];
+    if (!anim) return;
+
+    let lastY = window.scrollY;
+    let lastT = performance.now();
+    let dir = 1;
+    let rate = 1;
+    let raf = 0;
+
+    // Retour en douceur vers la vitesse de croisière quand le scroll s'arrête.
+    const settle = () => {
+      rate += (dir - rate) * 0.08;
+      anim.playbackRate = rate;
+      raf = Math.abs(rate - dir) > 0.01 ? requestAnimationFrame(settle) : 0;
+    };
+
+    const onScroll = () => {
+      const now = performance.now();
+      const v = (window.scrollY - lastY) / Math.max(1, now - lastT); // px/ms
+      lastY = window.scrollY;
+      lastT = now;
+      if (v > 0.02) dir = 1;
+      else if (v < -0.02) dir = -1;
+      rate = dir * (1 + Math.min(5, Math.abs(v) * 3));
+      anim.playbackRate = rate;
+      if (!raf) raf = requestAnimationFrame(settle);
+    };
+
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(raf);
+    };
+  }, []);
 
   const row = (
-    <>
+    <span className="flex shrink-0">
       {items.map((it, i) => (
         <span key={i} className="flex items-center">
           <span>{it}</span>
-          <span className="mx-[0.35em] inline-block h-[0.18em] w-[0.18em] translate-y-[-0.05em] bg-signal" />
+          <span className="opal-fire opal-still mx-[0.35em] inline-block h-[0.18em] w-[0.18em] translate-y-[-0.05em]" />
         </span>
       ))}
-    </>
+    </span>
   );
 
   return (
     <div className={`overflow-hidden whitespace-nowrap ${className ?? ""}`} aria-hidden>
-      <motion.div className="flex w-max" style={{ x: tx }}>
+      <div ref={trackRef} className="marquee-track flex w-max">
         {row}
         {row}
-        {row}
-        {row}
-      </motion.div>
+      </div>
     </div>
   );
 }

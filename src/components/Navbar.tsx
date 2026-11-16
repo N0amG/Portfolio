@@ -8,7 +8,7 @@ import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-
 import { ArrowUpRightIcon } from "@phosphor-icons/react";
 import ThemeToggle from "./ThemeToggle";
 import LocalTime from "./LocalTime";
-import { useCommandMenu } from "./CommandMenu";
+import { useCommandMenu } from "./CommandMenuContext";
 import { useLenisLock } from "./SmoothScroll";
 import { site, ease, easeInOut } from "@/lib/site";
 

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRef } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { easeInOut } from "@/lib/site";
@@ -15,10 +16,19 @@ export default function AboutPortrait() {
       className="col-span-2 col-start-3 self-end md:col-span-3 md:col-start-10"
       initial={{ clipPath: "inset(0 100% 0 0)" }}
       animate={{ clipPath: "inset(0 0% 0 0)" }}
-      transition={{ duration: 1.3, delay: 0.5, ease: easeInOut }}
+      transition={{ duration: 1.1, delay: 0.25, ease: easeInOut }}
     >
-      <div className="opal-photo aspect-[3/4] overflow-hidden">
-        <motion.img src="/img/selfie.jpeg" alt="Portrait de Noam Guez" style={{ y, scale: 1.2 }} className="h-full w-full object-cover" />
+      <div className="relative aspect-[3/4] overflow-hidden bg-surface">
+        <motion.div className="absolute inset-0" style={{ y, scale: 1.2 }}>
+          <Image
+            src="/img/selfie.jpeg"
+            alt="Portrait de Noam Guez"
+            fill
+            preload
+            sizes="(min-width: 768px) 25vw, 50vw"
+            className="object-cover"
+          />
+        </motion.div>
       </div>
     </motion.div>
   );

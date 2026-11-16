@@ -49,7 +49,7 @@ export default function Home() {
     <>
       {/* ───────── Hero ───────── */}
       <section className="shell relative flex min-h-[84svh] flex-col pb-6 pt-24 md:min-h-svh md:pt-28">
-        <FadeIn delay={0.9} y={0} className="f-label grid-12 gap-y-2 text-muted">
+        <div className="f-label hero-up grid-12 gap-y-2 text-muted" style={{ animationDelay: "0.15s" }}>
           <span className="col-span-2 md:col-span-3">
             Indépendant
             <br />
@@ -66,21 +66,24 @@ export default function Home() {
             <br />
             <LocalTime className="text-ink" />
           </span>
-        </FadeIn>
+        </div>
 
-        <div className="relative mt-auto pt-10 text-[19vw]">
+        <div className="hero-name relative mt-auto pt-10 text-[19vw]">
           <HeroName lines={["Noam", "Guez"]} />
           <HeroPortrait />
         </div>
 
         <div className="grid-12 mt-8 items-end gap-y-6 md:mt-10">
-          <FadeIn delay={1.1} className="col-span-4 md:col-span-6">
+          <div className="hero-up col-span-4 md:col-span-6" style={{ animationDelay: "0.2s" }}>
             <p className="text-pretty max-w-[40ch] text-lg leading-snug md:text-[1.375rem]">
               Je conçois et développe votre site ou votre application web, de la maquette à la mise en ligne. Un seul
               interlocuteur, du code propre, et un résultat rapide à charger.
             </p>
-          </FadeIn>
-          <FadeIn delay={1.25} className="col-span-4 flex flex-wrap gap-2 md:col-span-5 md:col-start-8 md:justify-end">
+          </div>
+          <div
+            className="hero-up col-span-4 flex flex-wrap gap-2 md:col-span-5 md:col-start-8 md:justify-end"
+            style={{ animationDelay: "0.3s" }}
+          >
             <Link
               href="#travaux"
               className="f-label flex h-12 items-center border border-ink px-5 transition-colors hover:bg-ink hover:text-paper"
@@ -94,7 +97,7 @@ export default function Home() {
               Démarrer un projet
               <span className="transition-transform duration-500 ease-[var(--ease-expo)] group-hover:translate-x-1">→</span>
             </Link>
-          </FadeIn>
+          </div>
         </div>
       </section>
 

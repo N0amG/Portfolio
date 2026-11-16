@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useState } from "react";
 import { useMediaQuery } from "@/lib/useMediaQuery";
 import { AnimatePresence, motion, useMotionValue, useSpring } from "framer-motion";
@@ -56,7 +57,7 @@ export default function ProjectIndex({ projects }: { projects: Project[] }) {
               {/* remplissage signal depuis le bas */}
               <span
                 aria-hidden
-                className="opal-fill absolute inset-0 origin-bottom scale-y-0 transition-transform duration-500 ease-[var(--ease-expo)] group-hover:scale-y-100 group-focus-visible:scale-y-100"
+                className="opal-fill opal-still absolute inset-0 origin-bottom scale-y-0 transition-transform duration-500 ease-[var(--ease-expo)] group-hover:scale-y-100 group-focus-visible:scale-y-100"
               />
               <span className="grid-12 relative items-center py-5 transition-colors duration-300 group-hover:text-on-signal md:py-6">
                 <span className="col-span-4 flex items-center gap-3 md:col-span-6 md:pl-1">
@@ -82,7 +83,7 @@ export default function ProjectIndex({ projects }: { projects: Project[] }) {
               </span>
               {p.thumbnail && (
                 <span className="relative mb-5 hidden aspect-[16/9] overflow-hidden pointer-coarse:block">
-                  <img src={p.thumbnail} alt="" loading="lazy" className="h-full w-full object-cover" />
+                  <Image src={p.thumbnail} alt="" fill sizes="100vw" className="object-cover" />
                 </span>
               )}
             </Link>
@@ -109,16 +110,16 @@ export default function ProjectIndex({ projects }: { projects: Project[] }) {
                 transition={{ duration: 0.5, ease }}
               >
                 <AnimatePresence initial={false}>
-                  <motion.img
+                  <motion.div
                     key={projects[active].slug}
-                    src={projects[active].thumbnail}
-                    alt=""
-                    className="absolute inset-0 h-full w-full object-cover"
+                    className="absolute inset-0"
                     initial={{ y: "100%", scale: 1.2 }}
                     animate={{ y: "0%", scale: 1 }}
                     exit={{ y: "-30%", opacity: 0 }}
                     transition={{ duration: 0.6, ease }}
-                  />
+                  >
+                    <Image src={projects[active].thumbnail} alt="" fill sizes="420px" className="object-cover" />
+                  </motion.div>
                 </AnimatePresence>
                 <span className="f-label absolute bottom-0 left-0 bg-ink px-2 py-1 text-paper">{projects[active].title}</span>
               </motion.div>

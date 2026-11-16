@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { ArrowUpRightIcon, CopyIcon, ArrowRightIcon } from "@phosphor-icons/react";
 import { FadeIn, MaskLines, DrawRule } from "@/components/Reveal";
 import LocalTime from "@/components/LocalTime";
-import { copyEmail } from "@/components/CommandMenu";
+import { copyEmail } from "@/lib/copyEmail";
 import { site } from "@/lib/site";
 
 type Status = "idle" | "loading" | "success" | "error" | "ratelimit";

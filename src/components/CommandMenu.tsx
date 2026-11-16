@@ -1,11 +1,10 @@
 "use client";
 
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Command } from "cmdk";
 import * as Dialog from "@radix-ui/react-dialog";
 import { AnimatePresence, motion } from "framer-motion";
-import { toast } from "sonner";
 import {
   ArrowRightIcon,
   ArrowUpRightIcon,
@@ -15,41 +14,10 @@ import {
 } from "@phosphor-icons/react";
 import { latestProjects } from "@/data/portfolio/projects";
 import { site, ease } from "@/lib/site";
+import { copyEmail } from "@/lib/copyEmail";
 import { useTheme } from "./ThemeProvider";
 import { useLenisLock } from "./SmoothScroll";
-
-const Ctx = createContext<{ open: boolean; setOpen: (v: boolean) => void }>({
-  open: false,
-  setOpen: () => {},
-});
-
-export const useCommandMenu = () => useContext(Ctx);
-
-export function CommandMenuProvider({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = useState(false);
-
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key.toLowerCase() === "k" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        setOpen((v) => !v);
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, []);
-
-  return <Ctx.Provider value={{ open, setOpen }}>{children}</Ctx.Provider>;
-}
-
-export async function copyEmail() {
-  try {
-    await navigator.clipboard.writeText(site.email);
-    toast("Adresse copiée", { description: site.email });
-  } catch {
-    window.location.href = `mailto:${site.email}`;
-  }
-}
+import { useCommandMenu } from "./CommandMenuContext";
 
 const itemCls =
   "group flex cursor-pointer items-center gap-4 px-5 py-3 text-[15px] text-ink/80 transition-colors data-[selected=true]:bg-ink data-[selected=true]:text-paper";

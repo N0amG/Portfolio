@@ -3,7 +3,6 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import Providers from "@/components/Providers";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import CommandMenu from "@/components/CommandMenu";
 
 export const metadata: Metadata = {
   title: "Noam Guez — Développeur web freelance à Lyon",
@@ -26,7 +25,6 @@ export default function PortfolioLayout({ children }: { children: React.ReactNod
           {children}
         </main>
         <Footer />
-        <CommandMenu />
       </div>
       <SpeedInsights />
     </Providers>

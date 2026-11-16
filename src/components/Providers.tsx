@@ -5,7 +5,7 @@ import * as Tooltip from "@radix-ui/react-tooltip";
 import { Toaster } from "sonner";
 import ThemeProvider from "./ThemeProvider";
 import SmoothScroll from "./SmoothScroll";
-import { CommandMenuProvider } from "./CommandMenu";
+import { CommandMenuProvider } from "./CommandMenuContext";
 
 export default function Providers({ children }: { children: React.ReactNode }) {
   return (

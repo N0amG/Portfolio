@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { motion } from "framer-motion";
 import { ArrowUpRightIcon } from "@phosphor-icons/react";
 import { Project, formatProjectDate } from "@/data/portfolio/projects";
@@ -18,11 +19,12 @@ export default function ProjectCard({ project, index }: { project: Project; inde
       <Link href={`/projects/${project.slug}`} className="group block">
         <div className="relative aspect-[4/3] overflow-hidden bg-surface">
           {project.thumbnail && (
-            <img
+            <Image
               src={project.thumbnail}
               alt={project.title}
-              loading="lazy"
-              className="h-full w-full object-cover transition-transform duration-[1.2s] ease-[var(--ease-expo)] group-hover:scale-[1.06]"
+              fill
+              sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
+              className="object-cover transition-transform duration-[1.2s] ease-[var(--ease-expo)] group-hover:scale-[1.06]"
             />
           )}
           {/* volet signal qui balaie au survol */}
