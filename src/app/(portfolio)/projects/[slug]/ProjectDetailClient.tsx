@@ -10,9 +10,11 @@ import { ArrowLeftIcon, ArrowRightIcon, ArrowUpRightIcon, ArrowsOutSimpleIcon } 
 
 // Chargée seulement quand on ouvre une capture.
 const Lightbox = dynamic(() => import("@/components/Lightbox"), { ssr: false });
-import { FadeIn, MaskLines, SectionHead } from "@/components/Reveal";
-import { Project, projects, getProjectNumber, formatProjectDate, categoryName } from "@/data/portfolio/projects";
-import { pad } from "@/lib/site";
+import { FadeIn } from "@/components/Reveal";
+import Assemble from "@/components/scroll/Assemble";
+import SectionIntro from "@/components/SectionIntro";
+import { ctaClass } from "@/components/Navbar";
+import { Project } from "@/data/portfolio/projects";
 
 interface Props {
   project: Project;
@@ -20,33 +22,27 @@ interface Props {
   next: Project;
 }
 
+/** Couverture arrondie, dévoilée par le haut, avec un parallaxe interne au scroll. */
 function Cover({ project, onOpen }: { project: Project; onOpen: () => void }) {
   const ref = useRef<HTMLButtonElement>(null);
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start end", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], ["-12%", "12%"]);
+  const y = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
 
   return (
     <button
       ref={ref}
       type="button"
       onClick={onOpen}
-      className="cover-reveal group relative block aspect-[4/3] w-full overflow-hidden bg-surface md:aspect-[21/9]"
+      className="cover-reveal group relative block aspect-[4/3] w-full overflow-hidden rounded-[28px] bg-surface md:aspect-[21/10]"
       aria-label="Agrandir la capture principale"
     >
       {project.thumbnail && (
-        <motion.div className="absolute inset-0" style={{ y, scale: 1.25 }}>
-          <Image
-            src={project.thumbnail}
-            alt={project.title}
-            fill
-            preload
-            sizes="100vw"
-            className="object-cover object-top"
-          />
+        <motion.div className="absolute inset-0" style={{ y, scale: 1.22 }}>
+          <Image src={project.thumbnail} alt={project.title} fill preload sizes="100vw" className="object-cover object-top" />
         </motion.div>
       )}
-      <span className="f-label absolute bottom-0 right-0 flex items-center gap-2 bg-paper px-3 py-2 opacity-0 transition-opacity group-hover:opacity-100">
-        <ArrowsOutSimpleIcon size={12} /> Agrandir
+      <span className="absolute bottom-4 right-4 flex items-center gap-2 rounded-full bg-paper px-4 py-2 text-sm font-semibold opacity-0 transition-opacity group-hover:opacity-100">
+        <ArrowsOutSimpleIcon size={14} /> Agrandir
       </span>
     </button>
   );
@@ -84,7 +80,7 @@ function Gallery({ project, onOpen }: { project: Project; onOpen: (i: number) =>
               <button
                 type="button"
                 onClick={() => onOpen(i)}
-                className="group relative block aspect-[16/10] w-full overflow-hidden bg-surface"
+                className="group relative block aspect-[16/10] w-full overflow-hidden rounded-card bg-surface"
                 aria-label={`Agrandir la capture ${i + 1}`}
               >
                 <Image
@@ -102,7 +98,7 @@ function Gallery({ project, onOpen }: { project: Project; onOpen: (i: number) =>
       </div>
       <div className="mt-6 flex items-center gap-6">
         <div className="relative h-px flex-1 bg-line">
-          <span className="absolute inset-y-0 left-0 bg-ink" style={{ width: `${Math.max(8, progress * 100)}%` }} />
+          <span className="absolute inset-y-0 left-0 bg-accent-ink" style={{ width: `${Math.max(8, progress * 100)}%` }} />
         </div>
         <div className="flex gap-2">
           <button
@@ -110,7 +106,7 @@ function Gallery({ project, onOpen }: { project: Project; onOpen: (i: number) =>
             onClick={() => embla?.scrollPrev()}
             disabled={!canPrev}
             aria-label="Précédent"
-            className="grid h-11 w-11 place-items-center border border-line transition-colors hover:border-ink disabled:opacity-30"
+            className="grid h-11 w-11 place-items-center rounded-full border border-line transition-colors hover:border-ink hover:bg-card disabled:opacity-30"
           >
             <ArrowLeftIcon size={16} />
           </button>
@@ -119,7 +115,7 @@ function Gallery({ project, onOpen }: { project: Project; onOpen: (i: number) =>
             onClick={() => embla?.scrollNext()}
             disabled={!canNext}
             aria-label="Suivant"
-            className="grid h-11 w-11 place-items-center border border-line transition-colors hover:border-ink disabled:opacity-30"
+            className="grid h-11 w-11 place-items-center rounded-full border border-line transition-colors hover:border-ink hover:bg-card disabled:opacity-30"
           >
             <ArrowRightIcon size={16} />
           </button>
@@ -136,184 +132,175 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
     setLbReady(true);
     setLightbox(i);
   };
-  const n = pad(getProjectNumber(project.slug));
   const overview = project.overview ?? [];
   const note = overview.find((p) => /^\(.*\)$/.test(p.trim()));
   const paragraphs = overview.filter((p) => p !== note);
-  const noteLabel = note
-    ? /fictif/i.test(note)
-      ? "Projet de formation — scénario fictif"
-      : note.replace(/[()]/g, "").trim()
-    : undefined;
+  const noteLabel = note ? (/fictif/i.test(note) ? "Projet de formation, scénario fictif" : note.replace(/[()]/g, "").trim()) : undefined;
 
-  const spec: { k: string; v: React.ReactNode }[] = [
-    { k: "Rôle", v: project.role ?? "—" },
-    { k: "Date", v: formatProjectDate(project.date) },
+  const facts = [
     { k: "Type", v: project.categoryLabel },
-    { k: "Catégories", v: project.categories.map(categoryName).join(", ") },
+    { k: "Année", v: project.date.slice(0, 4) },
+    { k: "Rôle", v: project.role ?? "Développeur web" },
   ];
 
   return (
-    <article className="pb-24 pt-28 md:pb-36 md:pt-36">
+    <article className="pb-24 pt-32 md:pb-36 md:pt-40">
       {/* En-tête */}
       <header className="shell">
-        <FadeIn y={0} className="f-label flex items-center justify-between text-muted">
-          <Link href="/projects" className="group flex items-center gap-2 hover:text-ink">
-            <ArrowLeftIcon size={12} className="transition-transform group-hover:-translate-x-1" /> Tous les projets
-          </Link>
-          <span>
-            <span className="text-signal">{n}</span> / {pad(projects.length)}
-          </span>
-        </FadeIn>
+        <Link
+          href="/projects"
+          className="hero-up group inline-flex min-h-11 items-center gap-2 text-[0.9375rem] font-medium text-muted hover:text-ink"
+          style={{ animationDelay: "0.02s" }}
+        >
+          <ArrowLeftIcon size={14} className="transition-transform group-hover:-translate-x-1" /> Toutes les réalisations
+        </Link>
 
-        <div className="grid-12 mt-10 items-end gap-y-8 md:mt-14">
-          <MaskLines
-            as="h1"
-            className="f-display text-balance col-span-4 text-[clamp(3rem,10.5vw,12rem)] uppercase [--wdth:104] [--wght:860] md:col-span-12"
-            lines={[project.title]}
-          />
-          <FadeIn delay={0.35} className="col-span-4 md:col-span-4 md:col-start-9">
-            <p className="text-pretty text-lg leading-snug">{project.description}</p>
-          </FadeIn>
+        <div className="mt-8 grid items-end gap-10 md:grid-cols-12">
+          <h1 className="f-display text-[clamp(3rem,8vw,7.5rem)] leading-[0.98] tracking-[-0.03em] [--wght:390] md:col-span-8">
+            <span className="-my-[0.1em] block overflow-hidden py-[0.1em]">
+              <span className="hero-rise block" style={{ animationDelay: "0.08s" }}>
+                {project.title}
+              </span>
+            </span>
+          </h1>
+          <p className="hero-up text-lg leading-relaxed text-muted md:col-span-4 md:pb-3" style={{ animationDelay: "0.25s" }}>
+            {project.description}
+          </p>
         </div>
 
-        {/* Fiche technique */}
-        <FadeIn delay={0.45} className="mt-12 border-t border-ink md:mt-16">
-          <dl className="grid grid-cols-2 md:grid-cols-6">
-            {spec.map((s) => (
-              <div key={s.k} className="border-b border-line py-4 pr-4 md:border-b-0">
-                <dt className="f-label text-muted">{s.k}</dt>
-                <dd className="mt-2 text-[15px]">{s.v}</dd>
+        <div
+          className="hero-up mt-10 flex flex-wrap items-center justify-between gap-6 border-t border-line pt-6"
+          style={{ animationDelay: "0.35s" }}
+        >
+          <dl className="flex flex-wrap gap-x-10 gap-y-4">
+            {facts.map((f) => (
+              <div key={f.k}>
+                <dt className="f-label text-muted">{f.k}</dt>
+                <dd className="mt-1 font-medium">{f.v}</dd>
               </div>
             ))}
-            <div className="col-span-2 py-4 md:col-span-2 md:pl-4">
-              <dt className="f-label text-muted">Liens</dt>
-              <dd className="mt-2 flex flex-wrap gap-2">
-                {project.liveUrl && (
-                  <a
-                    href={project.liveUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="f-label opal-fill group flex h-9 items-center gap-2 px-3 text-on-signal"
-                  >
-                    Voir le site
-                    <ArrowUpRightIcon size={12} weight="bold" className="transition-transform group-hover:rotate-45" />
-                  </a>
-                )}
-                {project.codeUrl && (
-                  <a
-                    href={project.codeUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="f-label group flex h-9 items-center gap-2 border border-ink px-3 transition-colors hover:bg-ink hover:text-paper"
-                  >
-                    Code source
-                    <ArrowUpRightIcon size={12} weight="bold" className="transition-transform group-hover:rotate-45" />
-                  </a>
-                )}
-                {!project.liveUrl && !project.codeUrl && <span className="text-muted">—</span>}
-              </dd>
-            </div>
           </dl>
-        </FadeIn>
+          <div className="flex flex-wrap gap-3">
+            {project.liveUrl && (
+              <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" className={ctaClass}>
+                Voir le site
+                <ArrowUpRightIcon size={16} weight="bold" className="transition-transform group-hover:rotate-45" />
+              </a>
+            )}
+            {project.codeUrl && (
+              <a
+                href={project.codeUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group inline-flex h-12 items-center gap-2 rounded-full border border-ink px-6 font-semibold transition-colors hover:bg-ink hover:text-paper"
+              >
+                Code source
+                <ArrowUpRightIcon size={16} weight="bold" className="transition-transform group-hover:rotate-45" />
+              </a>
+            )}
+          </div>
+        </div>
       </header>
 
       {/* Couverture */}
-      <div className="shell mt-6">
+      <div className="shell mt-10">
         <Cover project={project} onOpen={() => openLightbox(0)} />
       </div>
 
       {/* Le projet */}
       {paragraphs.length > 0 && (
         <section className="shell mt-24 md:mt-36">
-          <SectionHead title="Le projet" meta={noteLabel} />
-          <div className="grid-12 mt-10 gap-y-8">
-            <FadeIn className="col-span-4 md:col-span-8 md:col-start-5">
-              <p className="text-pretty text-[clamp(1.4rem,2.3vw,2.1rem)] leading-[1.2]">{paragraphs[0]}</p>
-            </FadeIn>
-            {paragraphs.length > 1 && (
-              <div className="col-span-4 columns-1 gap-[var(--gutter)] space-y-4 text-[17px] leading-relaxed text-muted md:col-span-8 md:col-start-5 md:columns-2">
-                {paragraphs.slice(1).map((p, i) => (
-                  <FadeIn key={i} delay={i * 0.06}>
-                    <p className="break-inside-avoid">{p}</p>
-                  </FadeIn>
-                ))}
-              </div>
-            )}
-            <FadeIn className="col-span-4 flex flex-wrap gap-2 md:col-span-8 md:col-start-5">
-              {project.tags.map((t) => (
-                <span key={t} className="f-label border border-line px-2.5 py-1.5">
-                  {t}
-                </span>
+          <div className="grid gap-10 md:grid-cols-12">
+            <div className="md:col-span-4">
+              <SectionIntro eyebrow="Le projet" title="Le besoin" />
+              {noteLabel && <p className="mt-5 inline-flex rounded-full bg-alt px-4 py-2 text-sm text-muted">{noteLabel}</p>}
+            </div>
+            <div className="space-y-5 md:col-span-7 md:col-start-6">
+              <FadeIn>
+                <p className="text-pretty text-[clamp(1.3rem,2vw,1.65rem)] leading-[1.4]">{paragraphs[0]}</p>
+              </FadeIn>
+              {paragraphs.slice(1).map((p, i) => (
+                <FadeIn key={i} delay={0.05 + i * 0.05}>
+                  <p className="leading-relaxed text-muted">{p}</p>
+                </FadeIn>
               ))}
-            </FadeIn>
+              <FadeIn className="flex flex-wrap gap-2 pt-3">
+                {project.tags.map((t) => (
+                  <span key={t} className="rounded-full border border-line px-3.5 py-1.5 text-sm">
+                    {t}
+                  </span>
+                ))}
+              </FadeIn>
+            </div>
           </div>
         </section>
       )}
 
-      {/* Les défis */}
+      {/* Ce qui a été fait */}
       {project.challenges && project.challenges.length > 0 && (
         <section className="shell mt-24 md:mt-36">
-          <SectionHead title="Les défis" />
-          <ul>
+          <SectionIntro eyebrow="La solution" title="Ce qui a été fait" />
+          <ol className="mt-12 border-b border-line">
             {project.challenges.map((c, i) => (
-              <li key={c.title} className="border-b border-line py-8">
-                <FadeIn delay={i * 0.06} className="grid-12 items-baseline gap-y-3">
-                  <h3 className="col-span-4 flex items-baseline gap-4 text-2xl font-medium md:col-span-5">
-                    <span aria-hidden className="opal-fill inline-block h-3 w-3 shrink-0 translate-y-[-0.1em]" />
-                    {c.title}
-                  </h3>
-                  <p className="col-span-4 text-[17px] leading-relaxed text-muted md:col-span-7">{c.description}</p>
-                </FadeIn>
+              <li key={c.title}>
+                <Assemble from={{ x: i % 2 === 0 ? -120 : 120, opacity: 0.15 }} end="start 0.6">
+                  <div className="grid gap-3 border-t border-line py-8 md:grid-cols-[5rem_1fr_1.3fr] md:items-baseline md:gap-8">
+                    <span className="f-display text-[2rem] italic leading-none text-accent [--wght:330]">0{i + 1}</span>
+                    <h3 className="f-display text-[clamp(1.6rem,2.6vw,2.1rem)] leading-[1.1] [--wght:450]">{c.title}</h3>
+                    <p className="leading-relaxed text-muted">{c.description}</p>
+                  </div>
+                </Assemble>
               </li>
             ))}
-          </ul>
+          </ol>
         </section>
       )}
 
       {/* Captures d'écran */}
       {project.screenshots.length > 1 && (
         <section className="shell mt-24 md:mt-36">
-          <SectionHead title="Captures d'écran" meta="Glisser pour parcourir" />
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <SectionIntro eyebrow="En images" title="Captures d'écran" />
+            <p className="text-sm text-muted">Glissez pour parcourir, cliquez pour agrandir.</p>
+          </div>
           <div className="mt-10">
             <Gallery project={project} onOpen={openLightbox} />
           </div>
         </section>
       )}
 
-      {/* Suivant / précédent */}
+      {/* Projet suivant */}
       <nav className="shell mt-28 md:mt-40" aria-label="Autres projets">
-        <div className="border-t border-ink">
-          <Link href={`/projects/${next.slug}`} className="group grid-12 items-end gap-y-4 py-10">
-            <span className="f-label col-span-4 text-muted md:col-span-3">Projet suivant</span>
-            <span className="col-span-4 flex items-end justify-between gap-6 md:col-span-9">
-              <span
-                className="f-display text-[clamp(2.6rem,9vw,9rem)] uppercase transition-[font-variation-settings] duration-700 ease-[var(--ease-expo)] [--wdth:90] group-hover:[--wdth:120]"
-              >
-                <span className="opal-hover">
-                  {next.title}
-                </span>
-              </span>
-              {next.thumbnail && (
-                <span className="relative hidden aspect-[4/3] w-[clamp(140px,16vw,260px)] shrink-0 overflow-hidden md:block">
-                  <Image
-                    src={next.thumbnail}
-                    alt=""
-                    fill
-                    sizes="260px"
-                    className="scale-110 object-cover grayscale transition-all duration-700 ease-[var(--ease-expo)] group-hover:scale-100 group-hover:grayscale-0"
-                  />
-                </span>
-              )}
-            </span>
-          </Link>
-        </div>
         <Link
-          href={`/projects/${prev.slug}`}
-          className="f-label group flex items-center gap-2 border-t border-line py-4 text-muted hover:text-ink"
+          href={`/projects/${next.slug}`}
+          className="group grid items-center gap-8 overflow-hidden rounded-[28px] bg-alt p-6 md:grid-cols-[1.2fr_1fr] md:p-12"
         >
-          <ArrowLeftIcon size={12} className="transition-transform group-hover:-translate-x-1" />
-          Précédent — {prev.title}
+          <div>
+            <p className="f-label text-accent-ink">Projet suivant</p>
+            <p className="f-display mt-3 text-[clamp(2.4rem,5.6vw,5rem)] leading-[1] transition-colors duration-500 [--wght:400] group-hover:text-accent-ink">
+              {next.title}
+            </p>
+            <p className="mt-4 max-w-[40ch] text-muted">{next.description}</p>
+            <span className="mt-6 inline-flex items-center gap-2 font-semibold text-accent-ink">
+              Voir le projet
+              <ArrowRightIcon size={16} weight="bold" className="transition-transform duration-500 ease-[var(--ease-expo)] group-hover:translate-x-1" />
+            </span>
+          </div>
+          {next.thumbnail && (
+            <div className="relative aspect-[4/3] overflow-hidden rounded-card bg-surface shadow-float">
+              <Image
+                src={next.thumbnail}
+                alt=""
+                fill
+                sizes="(min-width: 768px) 480px, 100vw"
+                className="object-cover object-top transition-transform duration-[1.4s] ease-[var(--ease-expo)] group-hover:scale-[1.06]"
+              />
+            </div>
+          )}
+        </Link>
+        <Link href={`/projects/${prev.slug}`} className="group mt-4 inline-flex min-h-11 items-center gap-2 text-[0.9375rem] text-muted hover:text-ink">
+          <ArrowLeftIcon size={14} className="transition-transform group-hover:-translate-x-1" />
+          Précédent : {prev.title}
         </Link>
       </nav>
 

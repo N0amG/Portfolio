@@ -65,10 +65,26 @@ export function getProjectBySlug(slug: string): Project | undefined {
   return projects.find((p) => p.slug === slug);
 }
 
+/** Réalisations mises en avant (parlantes pour un commerçant), dans l'ordre d'affichage. */
+const featuredSlugs = ["sophie-bluel", "nina-carducci", "booki", "kasa", "pixelguessr", "portfolio"];
+
+export const featuredProjects: Project[] = featuredSlugs
+  .map((slug) => projects.find((p) => p.slug === slug))
+  .filter((p): p is Project => Boolean(p));
+
+/** Exercices et projets de formation plus techniques, du plus récent au plus ancien. */
+export const otherProjects: Project[] = [...projects]
+  .filter((p) => !featuredSlugs.includes(p.slug))
+  .sort((a, b) => b.date.localeCompare(a.date));
+
+/** Ordre de navigation entre fiches : sélection d'abord, puis les autres travaux. */
+const browseOrder = [...featuredProjects, ...otherProjects];
+
 export function getAdjacentProjects(slug: string) {
-  const index = projects.findIndex((p) => p.slug === slug);
+  const index = browseOrder.findIndex((p) => p.slug === slug);
+  const last = browseOrder.length - 1;
   return {
-    prev: index > 0 ? projects[index - 1] : projects[projects.length - 1],
-    next: index < projects.length - 1 ? projects[index + 1] : projects[0],
+    prev: index > 0 ? browseOrder[index - 1] : browseOrder[last],
+    next: index < last ? browseOrder[index + 1] : browseOrder[0],
   };
 }

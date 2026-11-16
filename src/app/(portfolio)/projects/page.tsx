@@ -1,139 +1,120 @@
-"use client";
+import type { Metadata } from "next";
+import Link from "next/link";
+import Image from "next/image";
+import { ArrowRightIcon, ArrowUpRightIcon } from "@phosphor-icons/react/dist/ssr";
+import Assemble from "@/components/scroll/Assemble";
+import SectionIntro from "@/components/SectionIntro";
+import { FadeIn } from "@/components/Reveal";
+import { featuredProjects, otherProjects } from "@/data/portfolio/projects";
 
-import { useMemo, useState } from "react";
-import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
-import * as ToggleGroup from "@radix-ui/react-toggle-group";
-import { ArrowDownIcon, RowsIcon, SquaresFourIcon } from "@phosphor-icons/react";
-import ProjectCard from "@/components/ProjectCard";
-import ProjectIndex from "@/components/ProjectIndex";
-import { FadeIn, MaskLines, DrawRule } from "@/components/Reveal";
-import { projects, allCategories, categoryName } from "@/data/portfolio/projects";
-import { ease } from "@/lib/site";
-
-const filters = ["Tous", ...allCategories] as const;
-type View = "list" | "grid";
-
-const chip =
-  "f-label relative flex h-9 items-center gap-1.5 border border-line px-3 transition-colors hover:border-ink data-[state=on]:border-ink data-[state=on]:text-paper";
+export const metadata: Metadata = {
+  title: "Réalisations | Noam Guez",
+  description:
+    "Sites vitrines, réservation en ligne, optimisation : une sélection de réalisations de Noam Guez, développeur web freelance à Lyon.",
+};
 
 export default function ProjectsPage() {
-  const [filter, setFilter] = useState<string>("Tous");
-  const [desc, setDesc] = useState(true);
-  const [view, setView] = useState<View>("list");
-
-  const counts = useMemo(() => {
-    const c: Record<string, number> = { Tous: projects.length };
-    for (const cat of allCategories) c[cat] = projects.filter((p) => p.categories.includes(cat)).length;
-    return c;
-  }, []);
-
-  const list = useMemo(() => {
-    const out = filter === "Tous" ? [...projects] : projects.filter((p) => p.categories.includes(filter));
-    out.sort((a, b) => (desc ? b.date.localeCompare(a.date) : a.date.localeCompare(b.date)));
-    return out;
-  }, [filter, desc]);
-
   return (
-    <div className="shell pb-24 pt-28 md:pb-36 md:pt-40">
+    <div className="pb-24 pt-32 md:pb-36 md:pt-40">
       {/* En-tête */}
-      <div className="grid-12 items-end gap-y-8">
-        <div className="col-span-4 md:col-span-12">
-          <MaskLines
-            as="h1"
-            className="f-display whitespace-nowrap text-[clamp(3.4rem,13.2vw,15rem)] uppercase [--wdth:128] [--wght:880]"
-            lines={[
-              <span key="t" className="flex items-start gap-[0.08em]">
-                <span className="opal-text">Projets</span>
-                <span className="f-label mt-[0.35em] text-[clamp(0.75rem,1.4vw,1rem)] text-signal">({projects.length})</span>
-              </span>,
-            ]}
+      <header className="shell">
+        <p className="hero-up f-label flex items-center gap-2 text-accent-ink" style={{ animationDelay: "0.05s" }}>
+          <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
+          Réalisations
+        </p>
+        <h1 className="f-display mt-6 text-[clamp(2.75rem,6.6vw,6.25rem)] leading-[1.02] tracking-[-0.025em] [--wght:390]">
+          {[
+            <>Des sites pensés</>,
+            <>
+              pour <em className="text-accent">ceux</em> qui les utilisent.
+            </>,
+          ].map((line, i) => (
+            <span key={i} className="-my-[0.1em] block overflow-hidden py-[0.1em]">
+              <span className="hero-rise block" style={{ animationDelay: `${0.06 + i * 0.09}s` }}>
+                {line}
+              </span>
+              {i === 0 && " "}
+            </span>
+          ))}
+        </h1>
+        <p className="hero-up mt-8 max-w-[52ch] text-lg leading-relaxed text-muted md:text-[1.25rem]" style={{ animationDelay: "0.3s" }}>
+          Sites vitrines, réservation, optimisation : une sélection de projets réalisés en agence, en formation et pour moi.
+          Chaque fiche raconte le besoin, ce qui a été fait et le résultat.
+        </p>
+      </header>
+
+      {/* Sélection : lignes alternées, l'image vient s'emboîter au scroll */}
+      <ol className="shell mt-20 space-y-24 md:mt-28 md:space-y-36">
+        {featuredProjects.map((p, i) => {
+          const flip = i % 2 === 1;
+          return (
+            <li key={p.slug}>
+              <Link href={`/projects/${p.slug}`} className="group grid items-center gap-8 md:grid-cols-12 md:gap-12">
+                <Assemble
+                  from={{ x: flip ? 160 : -160, rotate: flip ? 3 : -3, opacity: 0.2 }}
+                  end="start 0.45"
+                  className={`md:col-span-7 ${flip ? "md:order-2" : ""}`}
+                >
+                  <div className="relative aspect-[16/11] overflow-hidden rounded-card bg-surface shadow-float">
+                    {p.thumbnail && (
+                      <Image
+                        src={p.thumbnail}
+                        alt=""
+                        fill
+                        sizes="(min-width: 768px) 700px, 100vw"
+                        className="object-cover object-top transition-transform duration-[1.4s] ease-[var(--ease-expo)] group-hover:scale-[1.05]"
+                      />
+                    )}
+                    <span className="absolute right-4 top-4 grid h-12 w-12 scale-75 place-items-center rounded-full bg-paper text-ink opacity-0 transition-all duration-500 ease-[var(--ease-expo)] group-hover:scale-100 group-hover:opacity-100">
+                      <ArrowUpRightIcon size={20} weight="bold" />
+                    </span>
+                  </div>
+                </Assemble>
+                <FadeIn className={`md:col-span-5 ${flip ? "md:order-1" : ""}`}>
+                  <span className="f-display block text-[2.25rem] italic leading-none text-accent [--wght:330]">0{i + 1}</span>
+                  <p className="f-label mt-6 text-accent-ink">{p.categoryLabel}</p>
+                  <h2 className="f-display mt-2 text-[clamp(2.2rem,4vw,3.5rem)] leading-[1.02] [--wght:420]">{p.title}</h2>
+                  <p className="mt-4 max-w-[44ch] text-lg leading-relaxed text-muted">{p.description}</p>
+                  <span className="mt-6 inline-flex min-h-11 items-center gap-2 font-semibold text-accent-ink">
+                    Voir le projet
+                    <ArrowRightIcon size={16} weight="bold" className="transition-transform duration-500 ease-[var(--ease-expo)] group-hover:translate-x-1" />
+                  </span>
+                </FadeIn>
+              </Link>
+            </li>
+          );
+        })}
+      </ol>
+
+      {/* Autres travaux : liste compacte */}
+      {otherProjects.length > 0 && (
+        <section className="shell mt-32 md:mt-44">
+          <SectionIntro
+            eyebrow="Autres travaux"
+            title="Exercices et projets de formation"
+            intro="Des projets plus techniques, réalisés pendant mes formations : programmes, outils de gestion, parties serveur."
           />
-        </div>
-        <FadeIn delay={0.3} className="col-span-4 md:col-span-5 md:col-start-8">
-          <p className="text-pretty max-w-[42ch] text-lg leading-snug text-muted">
-            Sites et applications web réalisés en agence, en formation et en projet personnel. Chaque fiche explique le
-            besoin, ce qui a été fait et le résultat.
-          </p>
-        </FadeIn>
-      </div>
-
-      {/* Barre d'outils */}
-      <div className="mt-14 md:mt-20">
-        <DrawRule />
-        <div className="flex flex-wrap items-center justify-between gap-4 py-4">
-          <LayoutGroup id="filters">
-            <ToggleGroup.Root
-              type="single"
-              value={filter}
-              onValueChange={(v) => v && setFilter(v)}
-              aria-label="Filtrer par catégorie"
-              className="flex flex-wrap gap-2"
-            >
-              {filters.map((f) => (
-                <ToggleGroup.Item key={f} value={f} className={chip}>
-                  {filter === f && (
-                    <motion.span layoutId="filter-pill" className="absolute inset-0 -z-0 bg-ink" transition={{ duration: 0.5, ease }} />
-                  )}
-                  <span className="relative">{categoryName(f)}</span>
-                  <span className="relative opacity-50">{counts[f]}</span>
-                </ToggleGroup.Item>
-              ))}
-            </ToggleGroup.Root>
-          </LayoutGroup>
-
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setDesc((v) => !v)}
-              className={`${chip} gap-2`}
-              aria-label={desc ? "Trier du plus ancien au plus récent" : "Trier du plus récent au plus ancien"}
-            >
-              {desc ? "Récents" : "Anciens"}
-              <motion.span animate={{ rotate: desc ? 0 : 180 }} transition={{ duration: 0.4, ease }}>
-                <ArrowDownIcon size={12} />
-              </motion.span>
-            </button>
-            <ToggleGroup.Root
-              type="single"
-              value={view}
-              onValueChange={(v) => v && setView(v as View)}
-              aria-label="Affichage"
-              className="flex"
-            >
-              <ToggleGroup.Item value="list" aria-label="Vue liste" className={`${chip} -mr-px data-[state=on]:bg-ink`}>
-                <RowsIcon size={14} />
-              </ToggleGroup.Item>
-              <ToggleGroup.Item value="grid" aria-label="Vue grille" className={`${chip} data-[state=on]:bg-ink`}>
-                <SquaresFourIcon size={14} />
-              </ToggleGroup.Item>
-            </ToggleGroup.Root>
-          </div>
-        </div>
-      </div>
-
-      {/* Contenu */}
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={view}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-          className="mt-6"
-        >
-          {view === "list" ? (
-            <ProjectIndex key={`${filter}-${desc}`} projects={list} />
-          ) : (
-            <motion.div layout className="grid gap-x-[var(--gutter)] gap-y-14 sm:grid-cols-2 lg:grid-cols-3">
-              <AnimatePresence mode="popLayout">
-                {list.map((p, i) => (
-                  <ProjectCard key={p.slug} project={p} index={i} />
-                ))}
-              </AnimatePresence>
-            </motion.div>
-          )}
-        </motion.div>
-      </AnimatePresence>
+          <ul className="mt-10 border-t border-line">
+            {otherProjects.map((p) => (
+              <li key={p.slug}>
+                <Link
+                  href={`/projects/${p.slug}`}
+                  className="group grid grid-cols-[1fr_auto] items-baseline gap-x-6 gap-y-1 border-b border-line py-5 md:grid-cols-[1.2fr_1fr_auto]"
+                >
+                  <span className="f-display text-[1.5rem] transition-colors duration-300 [--wght:430] group-hover:text-accent-ink">
+                    {p.title}
+                  </span>
+                  <span className="flex items-center gap-3 text-sm text-muted md:order-last">
+                    {p.date.slice(0, 4)}
+                    <ArrowRightIcon size={14} weight="bold" className="transition-transform duration-500 group-hover:translate-x-1" />
+                  </span>
+                  <span className="col-span-2 text-[0.9375rem] text-muted md:col-span-1">{p.categoryLabel}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }
