@@ -55,7 +55,7 @@ export default function VelocityMarquee({ items, className }: { items: string[];
       {items.map((it, i) => (
         <span key={i} className="flex items-center">
           <span>{it}</span>
-          <span className="opal-fire opal-still mx-[0.35em] inline-block h-[0.18em] w-[0.18em] translate-y-[-0.05em]" />
+          <span className="mx-[0.4em] inline-block not-italic text-accent">✻</span>
         </span>
       ))}
     </span>

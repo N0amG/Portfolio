@@ -22,11 +22,16 @@
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
   --color-on-accent: var(--on-accent);
+  --color-overlay: var(--overlay);
+  --color-band: var(--band);
+  --color-on-band: var(--on-band);
+  --color-on-overlay: var(--on-overlay);
 
   --radius-card: 18px;
   --radius-media: 12px;
   --shadow-card: 0 1px 2px rgb(31 30 28 / 0.06);
   --shadow-card-hover: 0 18px 40px -20px color-mix(in oklab, var(--accent) 45%, transparent);
+  --shadow-float: 0 24px 60px -28px color-mix(in oklab, var(--overlay) 50%, transparent);
 
   --ease-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-quart: cubic-bezier(0.76, 0, 0.24, 1);
@@ -79,6 +84,10 @@
   --accent: #c2562f;       /* terracotta : surfaces et grands titres (4.1:1) */
   --accent-ink: #a9441f;   /* terracotta foncée : liens, petit texte, boutons — 5.4:1 */
   --on-accent: #ffffff;    /* texte sur --accent-ink — 5.9:1 */
+  --overlay: #1f1e1c;      /* voile sombre sur les images (identique dans les 2 thèmes) */
+  --on-overlay: #f7f3ec;   /* texte posé sur ce voile */
+  --band: var(--accent-ink);  /* grande bande de couleur */
+  --on-band: var(--on-accent);
   --signal: var(--accent-ink);
   --on-signal: var(--ink);
   --gutter: clamp(1.25rem, 4vw, 3rem);
@@ -116,6 +125,8 @@
   --accent: #e07a52;       /* 6.3:1 */
   --accent-ink: #e8906c;   /* 7.7:1 */
   --on-accent: #1f1e1c;    /* texte sur --accent — 5.6:1 */
+  --band: #8a3a1d;         /* terracotta profonde, plus chic que le saumon en sombre */
+  --on-band: #f7f3ec;      /* 7.0:1 */
   --line: color-mix(in oklab, var(--ink) 12%, transparent);
   --opal-c1: #e07a52;
   --opal-c2: #e8906c;

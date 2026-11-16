@@ -14,10 +14,10 @@ function Word({
   range: [number, number];
   accent?: boolean;
 }) {
-  const opacity = useTransform(progress, range, [0.14, 1]);
+  const opacity = useTransform(progress, range, [0.18, 1]);
   return (
     <>
-      <motion.span style={{ opacity }} className={`inline-block ${accent ? "opal-text" : ""}`}>
+      <motion.span style={{ opacity }} className={`inline-block ${accent ? "italic" : ""}`}>
         {children}
       </motion.span>{" "}
     </>
@@ -26,7 +26,7 @@ function Word({
 
 /**
  * Paragraphe dont chaque mot passe de l'ombre à l'encre au rythme du scroll.
- * Les mots entourés de *astérisques* sont mis en couleur signal.
+ * Les mots entourés de *astérisques* passent en italique.
  */
 export default function ScrollStatement({ text, className }: { text: string; className?: string }) {
   const ref = useRef<HTMLParagraphElement>(null);

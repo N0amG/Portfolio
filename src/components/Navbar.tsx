@@ -99,7 +99,7 @@ export default function Navbar() {
 
           <div className="flex items-center gap-2">
             <ThemeToggle className="h-11 w-11" />
-            <Link href="/contact" className={`${ctaClass} hidden h-11 px-5 text-[0.9375rem] sm:inline-flex`}>
+            <Link href="/contact" className={`${ctaClass.replace("inline-flex", "hidden sm:inline-flex")} h-11 px-5 text-[0.9375rem]`}>
               Demander un devis
               <ArrowRightIcon size={16} weight="bold" className="transition-transform duration-500 ease-[var(--ease-expo)] group-hover:translate-x-1" />
             </Link>
