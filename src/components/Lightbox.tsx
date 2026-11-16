@@ -1,127 +1,130 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import * as Dialog from "@radix-ui/react-dialog";
+import useEmblaCarousel from "embla-carousel-react";
+import { AnimatePresence, motion } from "framer-motion";
+import { ArrowLeftIcon, ArrowRightIcon } from "@phosphor-icons/react";
+import { useLenisLock } from "./SmoothScroll";
+import { pad, ease } from "@/lib/site";
 
 interface LightboxProps {
   images: string[];
-  initialIndex: number;
+  index: number | null;
   alt: string;
   onClose: () => void;
 }
 
-export default function Lightbox({ images, initialIndex, alt, onClose }: LightboxProps) {
-  const [index, setIndex] = useState(initialIndex);
-  const [direction, setDirection] = useState(0);
-
-  const goTo = useCallback(
-    (next: number, dir: number) => {
-      setDirection(dir);
-      setIndex(((next % images.length) + images.length) % images.length);
-    },
-    [images.length],
-  );
-
-  const goPrev = useCallback(() => goTo(index - 1, -1), [goTo, index]);
-  const goNext = useCallback(() => goTo(index + 1, 1), [goTo, index]);
+function Slides({ images, start, alt, onClose }: { images: string[]; start: number; alt: string; onClose: () => void }) {
+  const [emblaRef, embla] = useEmblaCarousel({ startIndex: start, loop: images.length > 1, duration: 28 });
+  const [current, setCurrent] = useState(start);
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-      if (e.key === "ArrowLeft") goPrev();
-      if (e.key === "ArrowRight") goNext();
-    };
-    document.addEventListener("keydown", onKey);
-    document.body.style.overflow = "hidden";
+    if (!embla) return;
+    const onSelect = () => setCurrent(embla.selectedScrollSnap());
+    embla.on("select", onSelect);
     return () => {
-      document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = "";
+      embla.off("select", onSelect);
     };
-  }, [onClose, goPrev, goNext]);
+  }, [embla]);
 
-  const slideVariants = {
-    enter: (dir: number) => ({ x: dir > 0 ? 400 : -400, opacity: 0, scale: 0.92 }),
-    center: { x: 0, opacity: 1, scale: 1 },
-    exit: (dir: number) => ({ x: dir > 0 ? -400 : 400, opacity: 0, scale: 0.92 }),
-  };
+  const prev = useCallback(() => embla?.scrollPrev(), [embla]);
+  const next = useCallback(() => embla?.scrollNext(), [embla]);
 
   return (
-    <motion.div
-      className="fixed inset-0 z-50 flex items-center justify-center"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.25 }}
+    <div
+      className="flex h-full flex-col"
+      onKeyDown={(e) => {
+        if (e.key === "ArrowLeft") prev();
+        if (e.key === "ArrowRight") next();
+      }}
     >
-      {/* Backdrop */}
-      <motion.div
-        className="absolute inset-0 bg-black/85 backdrop-blur-md"
-        onClick={onClose}
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-      />
-
-      {/* Close button */}
-      <button
-        onClick={onClose}
-        className="absolute top-5 right-5 z-10 h-10 w-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white transition-colors cursor-pointer"
-        aria-label="Fermer"
-      >
-        <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-        </svg>
-      </button>
-
-      {/* Counter */}
-      <span className="absolute top-6 left-1/2 -translate-x-1/2 z-10 text-white/60 text-sm font-medium tracking-wide">
-        {index + 1} / {images.length}
-      </span>
-
-      {/* Previous arrow */}
-      {images.length > 1 && (
-        <button
-          onClick={goPrev}
-          className="absolute left-4 md:left-8 z-10 h-12 w-12 rounded-full bg-black/10 hover:bg-white/25 flex items-center justify-center text-white/70 hover:text-white transition-all cursor-pointer"
-          aria-label="Image précédente"
-        >
-          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-          </svg>
-        </button>
-      )}
-
-      {/* Next arrow */}
-      {images.length > 1 && (
-        <button
-          onClick={goNext}
-          className="absolute right-4 md:right-8 z-10 h-12 w-12 rounded-full bg-black/10 hover:bg-white/25 flex items-center justify-center text-white/70 hover:text-white transition-all cursor-pointer"
-          aria-label="Image suivante"
-        >
-          <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      )}
-
-      {/* Image */}
-      <div className="relative w-[90vw] h-[80vh] flex items-center justify-center">
-        <AnimatePresence custom={direction} mode="popLayout">
-          <motion.img
-            key={index}
-            src={images[index]}
-            alt={`${alt} - screenshot ${index + 1}`}
-            custom={direction}
-            variants={slideVariants}
-            initial="enter"
-            animate="center"
-            exit="exit"
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className="max-w-full max-h-full object-contain rounded-lg shadow-2xl select-none"
-            draggable={false}
-          />
-        </AnimatePresence>
+      <div className="shell f-label flex items-center justify-between py-4 text-paper/70">
+        <span>
+          {alt} — <span className="text-paper">{pad(current + 1)}</span> / {pad(images.length)}
+        </span>
+        <Dialog.Close className="flex items-center gap-2 text-paper hover:text-signal">
+          Fermer
+          <span className="relative block h-3 w-3">
+            <span className="absolute top-1/2 block h-px w-full rotate-45 bg-current" />
+            <span className="absolute top-1/2 block h-px w-full -rotate-45 bg-current" />
+          </span>
+        </Dialog.Close>
       </div>
-    </motion.div>
+
+      <div className="min-h-0 flex-1 overflow-hidden" ref={emblaRef}>
+        <div className="flex h-full touch-pan-y">
+          {images.map((src, i) => (
+            <div key={src} className="flex h-full min-w-0 flex-[0_0_100%] items-center justify-center px-[var(--gutter)]">
+              <img
+                src={src}
+                alt={`${alt} — capture ${i + 1}`}
+                draggable={false}
+                onClick={(e) => e.stopPropagation()}
+                className="max-h-full max-w-full select-none object-contain"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="shell flex items-center justify-between py-4">
+        <div className="flex gap-1.5">
+          {images.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => embla?.scrollTo(i)}
+              aria-label={`Capture ${i + 1}`}
+              className="h-6 w-6 p-[10px]"
+            >
+              <span className={`block h-full w-full transition-colors ${i === current ? "bg-signal" : "bg-paper/30"}`} />
+            </button>
+          ))}
+        </div>
+        {images.length > 1 && (
+          <div className="flex gap-2 text-paper">
+            <button type="button" onClick={prev} aria-label="Précédente" className="grid h-11 w-11 place-items-center border border-paper/30 hover:border-paper">
+              <ArrowLeftIcon size={18} />
+            </button>
+            <button type="button" onClick={next} aria-label="Suivante" className="grid h-11 w-11 place-items-center border border-paper/30 hover:border-paper">
+              <ArrowRightIcon size={18} />
+            </button>
+          </div>
+        )}
+      </div>
+      <button type="button" className="sr-only" onClick={onClose}>
+        Fermer
+      </button>
+    </div>
+  );
+}
+
+export default function Lightbox({ images, index, alt, onClose }: LightboxProps) {
+  const open = index !== null;
+  useLenisLock(open);
+
+  return (
+    <Dialog.Root open={open} onOpenChange={(o) => !o && onClose()}>
+      <AnimatePresence>
+        {open && (
+          <Dialog.Portal forceMount>
+            <Dialog.Content asChild forceMount aria-describedby={undefined}>
+              <motion.div
+                data-lenis-prevent
+                className="fixed inset-0 z-[90] bg-ink text-paper"
+                initial={{ clipPath: "inset(50% 0 50% 0)" }}
+                animate={{ clipPath: "inset(0% 0 0% 0)" }}
+                exit={{ clipPath: "inset(50% 0 50% 0)" }}
+                transition={{ duration: 0.6, ease }}
+              >
+                <Dialog.Title className="sr-only">{alt} — captures d&apos;écran</Dialog.Title>
+                <Slides images={images} start={index ?? 0} alt={alt} onClose={onClose} />
+              </motion.div>
+            </Dialog.Content>
+          </Dialog.Portal>
+        )}
+      </AnimatePresence>
+    </Dialog.Root>
   );
 }

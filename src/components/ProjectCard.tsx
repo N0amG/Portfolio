@@ -2,66 +2,55 @@
 
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Project } from "@/data/portfolio/projects";
+import { ArrowUpRightIcon } from "@phosphor-icons/react";
+import { Project, getProjectNumber, formatProjectDate } from "@/data/portfolio/projects";
+import { pad, ease } from "@/lib/site";
 
-interface Props {
-  project: Project;
-  index: number;
-}
+export default function ProjectCard({ project, index }: { project: Project; index: number }) {
+  const n = pad(getProjectNumber(project.slug));
 
-export default function ProjectCard({ project, index }: Props) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 40, scale: 0.95 }}
-      whileInView={{ opacity: 1, y: 0, scale: 1 }}
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.6, delay: index * 0.12}}
-      whileHover={{ y: -8 }}
+    <motion.article
+      layout
+      initial={{ opacity: 0, y: 40 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, scale: 0.96 }}
+      transition={{ duration: 0.7, delay: Math.min(index, 8) * 0.04, ease }}
     >
-      <Link
-        href={`/projects/${project.slug}`}
-        className="group glass-card overflow-hidden rounded-2xl flex flex-col h-full block"
-      >
-        <div className="aspect-video overflow-hidden relative bg-base-200">
-        <div className="absolute top-3 right-3 z-10 flex flex-col items-end gap-1">
-          {project.categories.map((cat) => (
-            <span key={cat} className="badge badge-primary font-bold text-xs">
-              {cat}
-            </span>
-          ))}
-        </div>
-          {project.thumbnail ? (
+      <Link href={`/projects/${project.slug}`} className="group block">
+        <div className="relative aspect-[4/3] overflow-hidden bg-surface">
+          {project.thumbnail && (
             <img
               src={project.thumbnail}
               alt={project.title}
-              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+              loading="lazy"
+              className="h-full w-full object-cover transition-transform duration-[1.2s] ease-[var(--ease-expo)] group-hover:scale-[1.06]"
             />
-          ) : (
-            <div className="h-full w-full bg-gradient-to-br from-base-200 to-base-300 transition-transform duration-700 group-hover:scale-110" />
           )}
-        </div>
-        <div className="p-8 flex-1 flex flex-col">
-          <span className="text-xs font-bold text-primary uppercase tracking-widest mb-3">
-            {project.categoryLabel}
+          {/* volet signal qui balaie au survol */}
+          <span
+            aria-hidden
+            className="absolute inset-0 origin-left scale-x-0 bg-signal mix-blend-multiply transition-transform duration-700 ease-[var(--ease-expo)] group-hover:scale-x-100"
+          />
+          <span className="f-label absolute left-0 top-0 bg-paper px-2 py-1">{n}</span>
+          <span className="absolute bottom-3 right-3 grid h-11 w-11 translate-y-3 place-items-center bg-ink text-paper opacity-0 transition-all duration-500 ease-[var(--ease-expo)] group-hover:translate-y-0 group-hover:opacity-100">
+            <ArrowUpRightIcon size={20} weight="bold" />
           </span>
-          <h4 className="text-2xl font-bold text-base-content mb-4 group-hover:text-primary transition-colors">
-            {project.title}
-          </h4>
-          <p className="text-base-content/60 text-sm leading-relaxed mb-6">
-            {project.description}
-          </p>
-          <div className="mt-auto flex flex-wrap gap-2">
-            {project.tags.map((tag) => (
-              <span
-                key={tag}
-                className="rounded bg-base-content/5 px-2 py-1 text-[10px] text-base-content/50 uppercase tracking-wider font-bold"
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
         </div>
+        <div className="mt-4 flex items-start justify-between gap-4 border-t border-line pt-3">
+          <div className="min-w-0">
+            <h3
+              className="f-display text-[clamp(1.6rem,2.4vw,2.4rem)] uppercase transition-[font-variation-settings] duration-700 ease-[var(--ease-expo)] [--wdth:92] group-hover:[--wdth:125]"
+              style={{ "--wght": 760 } as React.CSSProperties}
+            >
+              {project.title}
+            </h3>
+            <p className="mt-2 text-[15px] text-muted">{project.categoryLabel}</p>
+          </div>
+          <span className="f-label shrink-0 pt-1 text-muted">{formatProjectDate(project.date)}</span>
+        </div>
+        <p className="f-label mt-3 text-muted">{project.tags.slice(0, 4).join(" / ")}</p>
       </Link>
-    </motion.div>
+    </motion.article>
   );
 }

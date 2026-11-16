@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import Providers from "@/components/Providers";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import ThemeProvider from "@/components/ThemeProvider";
+import CommandMenu from "@/components/CommandMenu";
 
 export const metadata: Metadata = {
   title: "Noam Guez | Développeur Web",
@@ -10,24 +11,24 @@ export const metadata: Metadata = {
     "Portfolio de Noam Guez – Développeur Web passionné par la création d'applications web modernes avec React, Next.js, Python et Django.",
 };
 
-const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t==='winter'||t==='night'){document.documentElement.setAttribute('data-theme',t)}else{document.documentElement.setAttribute('data-theme','night')}}catch(e){document.documentElement.setAttribute('data-theme','night')}})()`;
-
-export default function PortfolioLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function PortfolioLayout({ children }: { children: React.ReactNode }) {
   return (
-    <>
-      <script dangerouslySetInnerHTML={{ __html: themeScript }} />
-      <ThemeProvider>
-        <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-base-100 text-base-content">
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
-        </div>
-      </ThemeProvider>
+    <Providers>
+      <div className="grain relative flex min-h-svh w-full flex-col overflow-x-clip bg-paper text-ink">
+        <a
+          href="#contenu"
+          className="f-label fixed left-3 top-3 z-[100] -translate-y-20 bg-signal px-3 py-2 text-on-signal focus:translate-y-0"
+        >
+          Aller au contenu
+        </a>
+        <Navbar />
+        <main id="contenu" className="flex-1">
+          {children}
+        </main>
+        <Footer />
+        <CommandMenu />
+      </div>
       <SpeedInsights />
-    </>
+    </Providers>
   );
 }

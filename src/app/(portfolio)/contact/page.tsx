@@ -1,236 +1,224 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
-import AnimatedSection from "@/components/AnimatedSection";
+import { AnimatePresence, motion } from "framer-motion";
+import { toast } from "sonner";
+import { ArrowUpRightIcon, CopyIcon, ArrowRightIcon } from "@phosphor-icons/react";
+import { FadeIn, MaskLines, DrawRule } from "@/components/Reveal";
+import LocalTime from "@/components/LocalTime";
+import { copyEmail } from "@/components/CommandMenu";
+import { site } from "@/lib/site";
+
+type Status = "idle" | "loading" | "success" | "error" | "ratelimit";
+
+function Field({
+  n,
+  label,
+  children,
+}: {
+  n: string;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <label className="group block">
+      <span className="f-label flex items-center gap-3 text-muted transition-colors group-focus-within:text-signal">
+        <span>{n}</span>
+        <span className="h-px w-6 bg-current" />
+        <span>{label}</span>
+      </span>
+      {children}
+    </label>
+  );
+}
 
 export default function ContactPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [isError, setIsError] = useState(false);
-  const [rateLimitError, setRateLimitError] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState<Status>("idle");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
-    setRateLimitError(false);
-    setIsError(false);
-    setIsSuccess(false);
-
-    const res = await fetch("/api/contact", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name, email, message }),
-    });
-
-    setIsLoading(false);
-
-    if (res.ok) {
-      setName("");
-      setEmail("");
-      setMessage("");
-      setIsSuccess(true);
-      setIsError(false);
-    } else {
-      if (res.status === 429) setRateLimitError(true);
-      setIsError(true);
-      setIsSuccess(false);
+    setStatus("loading");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, message }),
+      });
+      if (res.ok) {
+        setName("");
+        setEmail("");
+        setMessage("");
+        setStatus("success");
+        toast("Message envoyé", { description: "Merci ! Je vous réponds rapidement." });
+      } else if (res.status === 429) {
+        setStatus("ratelimit");
+        toast("Limite d'envoi atteinte", { description: "Merci de patienter 5 minutes." });
+      } else {
+        setStatus("error");
+        toast("Échec de l'envoi", { description: "Réessayez, ou écrivez directement par email." });
+      }
+    } catch {
+      setStatus("error");
+      toast("Échec de l'envoi", { description: "Réessayez, ou écrivez directement par email." });
     }
   };
 
+  const disabled = status === "loading" || status === "ratelimit";
+
   return (
-    <div className="pt-24">
-      <div className="w-full max-w-7xl mx-auto px-6 lg:px-10 py-12 lg:py-24">
-        <div className="grid lg:grid-cols-2 gap-16 items-start">
-          {/* Left side */}
-          <div className="space-y-12">
-            <AnimatedSection animation="fade-right">
-              <div className="max-w-md">
-                <h2 className="text-5xl lg:text-6xl font-black tracking-tighter mb-6 leading-[1.1] text-base-content">
-                  Construisons quelque chose{" "}
-                  <span className="text-primary">d&apos;extraordinaire</span>{" "}
-                  ensemble.
-                </h2>
-                <p className="text-base-content/60 text-lg leading-relaxed">
-                  Je suis actuellement en recherche d&apos;une alternance. Si mon profil vous intéresse et que vous souhaitez échanger, n&apos;hésitez pas à me contacter.
-                </p>
-              </div>
-            </AnimatedSection>
+    <div className="shell pb-24 pt-28 md:pb-36 md:pt-40">
+      <p className="f-label mb-6 text-muted">
+        <span className="text-signal">(Contact)</span>&nbsp;&nbsp;{site.status}
+      </p>
+      <MaskLines
+        as="h1"
+        className="f-display text-[clamp(3.4rem,13vw,14rem)] uppercase [--wght:880]"
+        lines={[
+          <span key="1" className="f-display" style={{ "--wdth": 64 } as React.CSSProperties}>
+            Écrivez-
+          </span>,
+          <span key="2" className="f-display flex items-baseline" style={{ "--wdth": 140 } as React.CSSProperties}>
+            moi<span className="text-signal">.</span>
+          </span>,
+        ]}
+      />
 
-            <AnimatedSection delay={0.1} animation="fade-left">
-              <div className="space-y-8">
-                <motion.div
-                  className="flex items-start gap-4"
-                  whileHover={{ x: 6 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <div className="bg-primary/10 p-3 rounded-lg text-primary">
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16.5 12a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zm0 0c0 1.657 1.007 3 2.25 3S21 13.657 21 12a9 9 0 10-2.636 6.364M16.5 12V8.25" />
-                    </svg>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-base-content/50 uppercase tracking-widest">
-                      Email
-                    </p>
-                    <a
-                      className="text-xl font-semibold text-base-content hover:text-primary transition-colors"
-                      href="mailto:noamguez0@gmail.com"
-                    >
-                      noamguez0@gmail.com
+      <div className="grid-12 mt-16 gap-y-16 md:mt-24">
+        {/* Colonne infos */}
+        <aside className="col-span-4 md:col-span-4">
+          <FadeIn>
+            <p className="text-pretty max-w-[34ch] text-lg leading-snug">
+              Je cherche actuellement une alternance. Si mon profil vous intéresse, écrivez-moi : je réponds en général sous
+              24 heures.
+            </p>
+          </FadeIn>
+          <FadeIn delay={0.1} className="mt-12">
+            <DrawRule />
+            <dl className="f-label divide-y divide-line">
+              <div className="flex items-center justify-between gap-4 py-4">
+                <dt className="text-muted">Email</dt>
+                <dd className="flex items-center gap-3 normal-case">
+                  <a href={`mailto:${site.email}`} className="u-link">
+                    {site.email}
+                  </a>
+                  <button type="button" onClick={copyEmail} aria-label="Copier l'adresse email" className="text-muted hover:text-signal">
+                    <CopyIcon size={14} />
+                  </button>
+                </dd>
+              </div>
+              {site.socials.map((s) => (
+                <div key={s.href} className="flex items-center justify-between gap-4 py-4">
+                  <dt className="text-muted">{s.label}</dt>
+                  <dd>
+                    <a href={s.href} target="_blank" rel="noopener noreferrer" className="u-link inline-flex items-center gap-1 normal-case">
+                      {s.handle} <ArrowUpRightIcon size={11} />
                     </a>
-                  </div>
-                </motion.div>
-
-                <motion.div
-                  className="flex items-start gap-4"
-                  whileHover={{ x: 6 }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <div className="bg-secondary/10 p-3 rounded-lg text-secondary">
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" />
-                    </svg>
-                  </div>
-                  <div className="space-y-3">
-                    <p className="text-sm font-medium text-base-content/50 uppercase tracking-widest">
-                      Réseaux sociaux
-                    </p>
-                    <div className="flex gap-4">
-                      {[
-                        {
-                          label: "GitHub",
-                          href: "https://github.com/N0amG",
-                          hoverClass: "hover:bg-primary hover:border-primary hover:text-primary-content",
-                          icon: (
-                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.041-1.416-4.041-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                          ),
-                        },
-                        {
-                          label: "LinkedIn",
-                          href: "https://www.linkedin.com/in/noam-guez-0ba691261/",
-                          hoverClass: "hover:bg-secondary hover:border-secondary hover:text-secondary-content",
-                          icon: (
-                            <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
-                          ),
-                        },
-
-                      ].map((social, i) => (
-                        <motion.a
-                          key={social.label}
-                          className={`h-10 w-10 flex items-center justify-center rounded-full border border-base-content/10 ${social.hoverClass} transition-all text-base-content/60`}
-                          href={social.href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          aria-label={social.label}
-                          whileHover={{ scale: 1.15, rotate: i % 2 === 0 ? 5 : -5 }}
-                          whileTap={{ scale: 0.9 }}
-                        >
-                          <svg className="h-5 w-5 fill-current" viewBox="0 0 24 24">
-                            {social.icon}
-                          </svg>
-                        </motion.a>
-                      ))}
-                    </div>
-                  </div>
-                </motion.div>
+                  </dd>
+                </div>
+              ))}
+              <div className="flex items-center justify-between gap-4 py-4">
+                <dt className="text-muted">Lyon</dt>
+                <dd>
+                  <LocalTime />
+                </dd>
               </div>
-            </AnimatedSection>
-          </div>
+            </dl>
+          </FadeIn>
+        </aside>
 
-          {/* Right side - Form */}
-          <AnimatedSection delay={0.15} animation="fade-left">
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="bg-base-200/50 p-8 lg:p-12 rounded-2xl border border-base-content/10 shadow-2xl shadow-primary/5"
-            >
-              <form className="space-y-6" onSubmit={handleSubmit}>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold ml-1 text-base-content">
-                      Nom complet
-                    </label>
-                    <input
-                      className="input input-bordered w-full"
-                      placeholder="John Doe"
-                      type="text"
-                      required
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold ml-1 text-base-content">
-                      Adresse email
-                    </label>
-                    <input
-                      className="input input-bordered w-full"
-                      placeholder="john@example.com"
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold ml-1 text-base-content">
-                    Message
-                  </label>
-                  <textarea
-                    className="textarea textarea-bordered w-full resize-none"
-                    placeholder="Parlez-moi de votre projet..."
-                    rows={6}
-                    required
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                  />
-                </div>
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`btn btn-primary w-full shadow-xl shadow-primary/20 group ${isLoading || rateLimitError ? "btn-disabled" : ""
-                    }`}
-                  type="submit"
-                  disabled={isLoading || rateLimitError}
-                >
-                  {isLoading ? "Envoi en cours..." : "Envoyer le message"}
-                  <svg
-                    className="h-5 w-5 group-hover:translate-x-1 transition-transform"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
+        {/* Formulaire */}
+        <FadeIn delay={0.15} className="col-span-4 md:col-span-7 md:col-start-6">
+          <form onSubmit={handleSubmit} className="space-y-12">
+            <div className="grid gap-12 md:grid-cols-2 md:gap-[var(--gutter)]">
+              <Field n="01" label="Votre nom">
+                <input
+                  className="field"
+                  placeholder="Jeanne Martin"
+                  type="text"
+                  autoComplete="name"
+                  required
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                />
+              </Field>
+              <Field n="02" label="Votre email">
+                <input
+                  className="field"
+                  placeholder="jeanne@studio.fr"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </Field>
+            </div>
+            <Field n="03" label="Votre message">
+              <textarea
+                className="field min-h-40 resize-none leading-snug"
+                placeholder="Le contexte, le poste, le projet…"
+                rows={5}
+                required
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+              />
+            </Field>
+
+            <div className="flex flex-col-reverse items-start justify-between gap-6 sm:flex-row sm:items-center">
+              <p className="f-label text-muted" aria-live="polite">
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={status}
+                    initial={{ opacity: 0, y: 6 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -6 }}
+                    transition={{ duration: 0.3 }}
+                    className={`block ${status === "success" ? "text-ink" : status === "error" || status === "ratelimit" ? "text-signal" : ""}`}
                   >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-                  </svg>
-                </motion.button>
-                {isSuccess && (
-                  <p className="text-center text-sm text-success mt-2">
-                    Message envoyé avec succès !
-                  </p>
-                )}
-                {isError && !rateLimitError && (
-                  <p className="text-center text-sm text-error mt-2">
-                    Erreur lors de l&apos;envoi. Veuillez réessayer.
-                  </p>
-                )}
-                {rateLimitError && (
-                  <p className="text-center text-sm text-error mt-2">
-                    Limite d&apos;envoi atteinte. Merci de patienter 5 minutes.
-                  </p>
-                )}
-                <p className="text-center text-xs text-base-content/40 mt-4">
-                  Temps de réponse habituel : sous 24 heures.
-                </p>
-              </form>
-            </motion.div>
-          </AnimatedSection>
-        </div>
+                    {
+                      {
+                        idle: "Tous les champs sont requis",
+                        loading: "Envoi en cours…",
+                        success: "Message envoyé — merci !",
+                        error: "Erreur lors de l'envoi. Réessayez.",
+                        ratelimit: "Limite atteinte — patientez 5 minutes",
+                      }[status]
+                    }
+                  </motion.span>
+                </AnimatePresence>
+              </p>
+
+              <motion.button
+                type="submit"
+                disabled={disabled}
+                whileTap={{ scale: 0.97 }}
+                className="group relative flex h-16 items-center gap-6 overflow-hidden bg-ink pl-7 pr-5 text-paper disabled:opacity-50"
+              >
+                <span
+                  aria-hidden
+                  className="absolute inset-0 origin-left scale-x-0 bg-signal transition-transform duration-500 ease-[var(--ease-expo)] group-hover:scale-x-100"
+                />
+                <span
+                  className="f-display relative text-2xl uppercase transition-colors group-hover:text-on-signal"
+                  style={{ "--wdth": 110, "--wght": 760 } as React.CSSProperties}
+                >
+                  {status === "loading" ? "Envoi…" : "Envoyer"}
+                </span>
+                <span className="relative grid h-9 w-9 place-items-center overflow-hidden transition-colors group-hover:text-on-signal">
+                  <ArrowRightIcon size={20} weight="bold" className="transition-transform duration-500 ease-[var(--ease-expo)] group-hover:translate-x-10" />
+                  <ArrowRightIcon
+                    size={20}
+                    weight="bold"
+                    className="absolute -translate-x-10 transition-transform duration-500 ease-[var(--ease-expo)] group-hover:translate-x-0"
+                  />
+                </span>
+              </motion.button>
+            </div>
+          </form>
+        </FadeIn>
       </div>
     </div>
   );
