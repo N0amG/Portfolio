@@ -61,7 +61,7 @@ export default function ContactPage() {
   const disabled = status === "loading" || status === "ratelimit";
 
   return (
-    <div className="shell pb-24 pt-32 md:pb-36 md:pt-40">
+    <div className="shell pb-16 pt-28 md:pb-24 md:pt-36">
       <div className="grid gap-14 md:grid-cols-12 md:gap-12">
         {/* Colonne infos */}
         <aside className="md:col-span-5">

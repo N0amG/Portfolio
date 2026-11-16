@@ -33,7 +33,7 @@ const milestones = [
 
 export default function AboutPage() {
   return (
-    <div className="pb-24 pt-32 md:pb-36 md:pt-40">
+    <div className="pb-16 pt-28 md:pb-24 md:pt-36">
       {/* En-tête */}
       <section className="shell grid items-center gap-12 md:grid-cols-[1.3fr_1fr] md:gap-16">
         <div>
@@ -68,9 +68,9 @@ export default function AboutPage() {
       </section>
 
       {/* Repères */}
-      <section className="shell mt-28 md:mt-40">
+      <section className="shell mt-20 md:mt-28">
         <SectionIntro title="Mon parcours" />
-        <ol className="mt-12 grid gap-6 md:grid-cols-3">
+        <ol className="mt-10 grid gap-6 md:grid-cols-3">
           {milestones.map((m, i) => (
             <li key={m.title}>
               <Assemble from={{ y: 120, rotate: i === 1 ? 0 : i === 0 ? -3 : 3, opacity: 0.1 }} end="start 0.55" className="h-full">
@@ -86,7 +86,7 @@ export default function AboutPage() {
       </section>
 
       {/* Hors travail + appel */}
-      <section className="shell mt-28 md:mt-40">
+      <section className="shell mt-20 md:mt-28">
         <div className="grid items-end gap-10 border-t border-line pt-12 md:grid-cols-[1.4fr_1fr]">
           <FadeIn>
             <p className="f-label text-muted">En dehors du travail</p>

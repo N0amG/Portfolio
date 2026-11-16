@@ -144,7 +144,7 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
   ];
 
   return (
-    <article className="pb-24 pt-32 md:pb-36 md:pt-40">
+    <article className="pb-16 pt-28 md:pb-24 md:pt-36">
       {/* En-tête */}
       <header className="shell">
         <Link
@@ -209,7 +209,7 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
 
       {/* Le projet */}
       {paragraphs.length > 0 && (
-        <section className="shell mt-24 md:mt-36">
+        <section className="shell mt-16 md:mt-24">
           <div className="grid gap-10 md:grid-cols-12">
             <div className="md:col-span-4">
               <SectionIntro title="Le besoin" />
@@ -238,9 +238,9 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
 
       {/* Ce qui a été fait */}
       {project.challenges && project.challenges.length > 0 && (
-        <section className="shell mt-24 md:mt-36">
+        <section className="shell mt-16 md:mt-24">
           <SectionIntro title="Ce qui a été fait" />
-          <ol className="mt-12 border-b border-line">
+          <ol className="mt-8 border-b border-line">
             {project.challenges.map((c, i) => (
               <li key={c.title}>
                 <Assemble from={{ x: i % 2 === 0 ? -120 : 120, opacity: 0.15 }} end="start 0.6">
@@ -257,7 +257,7 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
 
       {/* Captures d'écran */}
       {project.screenshots.length > 1 && (
-        <section className="shell mt-24 md:mt-36">
+        <section className="shell mt-16 md:mt-24">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <SectionIntro title="Captures d'écran" />
             <p className="text-sm text-muted">Glissez pour parcourir, cliquez pour agrandir.</p>
@@ -269,7 +269,7 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
       )}
 
       {/* Projet suivant */}
-      <nav className="shell mt-28 md:mt-40" aria-label="Autres projets">
+      <nav className="shell mt-20 md:mt-28" aria-label="Autres projets">
         <Link
           href={`/projects/${next.slug}`}
           className="group grid items-center gap-8 overflow-hidden rounded-[28px] bg-alt p-6 md:grid-cols-[1.2fr_1fr] md:p-12"

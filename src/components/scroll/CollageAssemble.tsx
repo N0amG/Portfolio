@@ -61,7 +61,7 @@ export default function CollageAssemble({ title, caption }: { title: string; cap
   const textScale = useTransform(scrollYProgress, [0.25, 0.7], [reduce ? 1 : 0.92, 1]);
 
   return (
-    <section ref={ref} className="relative h-[280vh] motion-reduce:h-auto" aria-label={title}>
+    <section ref={ref} className="relative h-[200vh] motion-reduce:h-auto" aria-label={title}>
       <div className="sticky top-0 h-svh overflow-hidden motion-reduce:relative motion-reduce:h-[100svh]">
         {pieces.map((p, i) => (
           <PieceTile key={p.src} piece={p} progress={scrollYProgress} k={k} index={i} />

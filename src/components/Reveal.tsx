@@ -77,19 +77,3 @@ export function FadeIn({
     </motion.div>
   );
 }
-
-/** Trait horizontal qui se dessine de gauche à droite. */
-export function DrawRule({ className, delay = 0 }: { className?: string; delay?: number }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, margin: "-5% 0px" });
-  return (
-    <div ref={ref} className={`h-px w-full overflow-hidden ${className ?? ""}`}>
-      <motion.div
-        className="h-px w-full origin-left bg-line"
-        initial={{ scaleX: 0 }}
-        animate={inView ? { scaleX: 1 } : { scaleX: 0 }}
-        transition={{ duration: 1.4, delay, ease }}
-      />
-    </div>
-  );
-}

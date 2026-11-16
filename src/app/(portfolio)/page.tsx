@@ -8,7 +8,7 @@ import Assemble from "@/components/scroll/Assemble";
 import RevealBand from "@/components/scroll/RevealBand";
 import CollageAssemble from "@/components/scroll/CollageAssemble";
 import SectionIntro from "@/components/SectionIntro";
-import { DrawRule, FadeIn } from "@/components/Reveal";
+import { FadeIn } from "@/components/Reveal";
 import { ctaClass } from "@/components/Navbar";
 import { getProjectBySlug, type Project } from "@/data/portfolio/projects";
 
@@ -44,11 +44,11 @@ const steps = [
 const faq = [
   {
     q: "Combien coûte un site ?",
-    a: "Chaque commerce a des besoins différents. Après un premier échange, je vous envoie un devis détaillé, sans engagement.",
+    a: "Je propose des prix compétitifs, adaptés au volume du projet : un site vitrine de quelques pages ne coûte pas le prix d'une application complète. Après un premier échange, je vous envoie un devis détaillé et sans engagement.",
   },
   {
     q: "En combien de temps est-il prêt ?",
-    a: "Le délai dépend du projet et des contenus à préparer (textes, photos). Il est fixé ensemble dans le devis, avant de commencer.",
+    a: "Comptez environ 10 jours pour un site vitrine, et 1 mois pour une application web complète, une fois vos textes et photos réunis. Le délai exact est écrit dans le devis, avant de commencer.",
   },
   {
     q: "Pourrai-je modifier mon site moi-même ?",
@@ -101,7 +101,7 @@ export default function Home() {
   return (
     <>
       {/* ───────── Hero ───────── */}
-      <section className="shell pb-16 pt-32 md:pb-24 md:pt-40">
+      <section className="shell pb-12 pt-28 md:pb-16 md:pt-36">
         <p className="hero-up f-label text-muted" style={{ animationDelay: "0.05s" }}>
           Noam Guez, développeur web freelance à Lyon
         </p>
@@ -109,7 +109,7 @@ export default function Home() {
           <HeroTitle />
         </div>
 
-        <div className="mt-12 border-t border-line pt-10 md:mt-16">
+        <div className="mt-10 border-t border-line pt-8 md:mt-12">
           <div className="hero-up" style={{ animationDelay: "0.35s" }}>
             <p className="max-w-[44ch] text-lg leading-relaxed md:text-[1.25rem]">
               Je construis le site de votre commerce, de la première maquette à la mise en ligne. Vous n&apos;avez qu&apos;un
@@ -141,9 +141,9 @@ export default function Home() {
       </section>
 
       {/* ───────── Offres : lignes qui s'assemblent ───────── */}
-      <section className="shell py-24 md:py-36">
+      <section className="shell py-16 md:py-24">
         <SectionIntro title="Ce que je peux faire pour vous" />
-        <ol className="mt-14 border-b border-line">
+        <ol className="mt-8 border-b border-line">
           {offers.map((o, i) => (
             <li key={o.title}>
               <Assemble from={{ x: i % 2 === 0 ? -160 : 160, opacity: 0.15 }} end="start 0.55">
@@ -152,7 +152,7 @@ export default function Home() {
                     aria-hidden
                     className="absolute inset-0 origin-bottom scale-y-0 bg-accent-ink transition-transform duration-700 ease-[var(--ease-expo)] group-hover:scale-y-100"
                   />
-                  <div className="relative grid gap-4 px-1 py-10 transition-colors duration-500 group-hover:text-on-accent md:grid-cols-[1fr_1.15fr] md:items-baseline md:gap-10 md:px-6 md:py-12">
+                  <div className="relative grid gap-4 px-1 py-7 transition-colors duration-500 group-hover:text-on-accent md:grid-cols-[1fr_1.15fr] md:items-baseline md:gap-10 md:px-6 md:py-8">
                     <h3 className="f-display text-[clamp(2.1rem,3.8vw,3.4rem)] leading-[1.02] [--wght:420]">{o.title}</h3>
                     <div>
                       <p className="text-lg leading-relaxed">{o.text}</p>
@@ -169,7 +169,7 @@ export default function Home() {
       </section>
 
       {/* ───────── Phrase choc : bande terracotta qui s'ouvre ───────── */}
-      <RevealBand className="bg-band py-28 text-on-band md:py-40">
+      <RevealBand className="bg-band py-20 text-on-band md:py-28">
         <div className="shell">
           <ScrollStatement
             className="f-display text-[clamp(2.1rem,4.6vw,4.4rem)] leading-[1.08] [--wght:380]"
@@ -185,7 +185,7 @@ export default function Home() {
       />
 
       {/* ───────── Réalisations : tuiles qui s'emboîtent ───────── */}
-      <section id="realisations" className="shell scroll-mt-24 py-24 md:py-36">
+      <section id="realisations" className="shell scroll-mt-24 py-16 md:py-24">
         <div className="flex flex-wrap items-end justify-between gap-6">
           <SectionIntro title="Quelques réalisations" />
           <Link href="/projects" className="group inline-flex min-h-11 items-center gap-2 font-semibold text-accent-ink">
@@ -194,11 +194,11 @@ export default function Home() {
           </Link>
         </div>
         {featured.length === 3 && (
-          <div className="mt-14 grid gap-12 md:grid-cols-12 md:gap-x-10">
+          <div className="mt-10 grid gap-10 md:grid-cols-12 md:gap-x-10">
             <Assemble from={tileFrom[0]} className="md:col-span-7">
               <Tile project={featured[0]} big />
             </Assemble>
-            <div className="grid gap-12 md:col-span-5">
+            <div className="grid gap-10 md:col-span-5">
               <Assemble from={tileFrom[1]}>
                 <Tile project={featured[1]} />
               </Assemble>
@@ -210,46 +210,44 @@ export default function Home() {
         )}
       </section>
 
-      {/* ───────── Étapes ───────── */}
-      <section className="bg-alt py-24 md:py-36">
-        <div className="shell">
-          <SectionIntro title="Comment on travaille ensemble" />
-          <DrawRule className="mt-14" />
-          <ol className="grid md:grid-cols-3">
-            {steps.map((s, i) => (
-              <li key={s.title} className={`pt-10 md:pr-10 ${i > 0 ? "md:border-l md:border-line md:pl-10" : ""}`}>
-                <Assemble from={{ y: 90, opacity: 0 }} end="start 0.6">
-                  <span className="f-display block text-[clamp(4.5rem,8vw,7rem)] italic leading-[0.8] text-accent [--wght:300]">
-                    {i + 1}
-                  </span>
-                  <h3 className="f-display mt-6 text-[1.75rem] [--wght:480]">{s.title}</h3>
-                  <p className="mt-3 leading-relaxed text-muted">{s.text}</p>
-                </Assemble>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
-      {/* ───────── FAQ ───────── */}
-      <section className="shell py-24 md:py-36">
-        <div className="grid gap-12 md:grid-cols-[1fr_1.6fr] md:gap-16">
-          <SectionIntro title="Questions fréquentes" />
-          <FadeIn>
-            <div className="border-t border-line">
-              {faq.map((f) => (
-                <details key={f.q} className="group border-b border-line [&_summary::-webkit-details-marker]:hidden">
-                  <summary className="f-display flex min-h-11 cursor-pointer list-none items-center justify-between gap-6 py-6 text-[1.375rem] [--wght:450]">
-                    {f.q}
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-line transition-[transform,background-color,color] duration-500 ease-[var(--ease-expo)] group-open:rotate-45 group-open:bg-accent-ink group-open:text-on-accent">
-                      <PlusIcon size={16} weight="bold" />
-                    </span>
-                  </summary>
-                  <p className="max-w-[60ch] pb-7 leading-relaxed text-muted">{f.a}</p>
-                </details>
+      {/* ───────── Étapes + FAQ, côte à côte sur desktop ───────── */}
+      <section className="bg-alt py-16 md:py-24">
+        <div className="shell grid gap-14 md:grid-cols-2 md:gap-16">
+          <div>
+            <SectionIntro title="Comment on travaille ensemble" />
+            <ol className="mt-8 border-t border-line">
+              {steps.map((s, i) => (
+                <li key={s.title} className="border-b border-line">
+                  <Assemble from={{ y: 60, opacity: 0 }} end="start 0.7" className="grid grid-cols-[3.25rem_1fr] gap-4 py-6">
+                    <span className="f-display text-[3rem] italic leading-[0.85] text-accent [--wght:300]">{i + 1}</span>
+                    <div>
+                      <h3 className="f-display text-[1.5rem] [--wght:480]">{s.title}</h3>
+                      <p className="mt-2 leading-relaxed text-muted">{s.text}</p>
+                    </div>
+                  </Assemble>
+                </li>
               ))}
-            </div>
-          </FadeIn>
+            </ol>
+          </div>
+
+          <div>
+            <SectionIntro title="Questions fréquentes" />
+            <FadeIn className="mt-8">
+              <div className="border-t border-line">
+                {faq.map((f) => (
+                  <details key={f.q} className="group border-b border-line [&_summary::-webkit-details-marker]:hidden">
+                    <summary className="f-display flex min-h-11 cursor-pointer list-none items-center justify-between gap-6 py-5 text-[1.3rem] [--wght:450]">
+                      {f.q}
+                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-line transition-[transform,background-color,color] duration-500 ease-[var(--ease-expo)] group-open:rotate-45 group-open:bg-accent-ink group-open:text-on-accent">
+                        <PlusIcon size={16} weight="bold" />
+                      </span>
+                    </summary>
+                    <p className="max-w-[60ch] pb-6 leading-relaxed text-muted">{f.a}</p>
+                  </details>
+                ))}
+              </div>
+            </FadeIn>
+          </div>
         </div>
       </section>
     </>

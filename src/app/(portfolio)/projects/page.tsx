@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function ProjectsPage() {
   return (
-    <div className="pb-24 pt-32 md:pb-36 md:pt-40">
+    <div className="pb-16 pt-28 md:pb-24 md:pt-36">
       {/* En-tête */}
       <header className="shell">
         <h1 className="f-display text-[clamp(2.75rem,6.6vw,6.25rem)] leading-[1.02] tracking-[-0.025em] [--wght:390]">
@@ -40,7 +40,7 @@ export default function ProjectsPage() {
       </header>
 
       {/* Sélection : lignes alternées, l'image vient s'emboîter au scroll */}
-      <ol className="shell mt-20 space-y-24 md:mt-28 md:space-y-36">
+      <ol className="shell mt-14 space-y-16 md:mt-20 md:space-y-24">
         {featuredProjects.map((p, i) => {
           const flip = i % 2 === 1;
           return (
@@ -49,15 +49,15 @@ export default function ProjectsPage() {
                 <Assemble
                   from={{ x: flip ? 160 : -160, rotate: flip ? 3 : -3, opacity: 0.2 }}
                   end="start 0.45"
-                  className={`md:col-span-7 ${flip ? "md:order-2" : ""}`}
+                  className={`md:col-span-6 ${flip ? "md:order-2" : ""}`}
                 >
-                  <div className="relative aspect-[16/11] overflow-hidden rounded-card bg-surface shadow-float">
+                  <div className="relative aspect-[16/10] overflow-hidden rounded-card bg-surface shadow-float">
                     {p.thumbnail && (
                       <Image
                         src={p.thumbnail}
                         alt=""
                         fill
-                        sizes="(min-width: 768px) 700px, 100vw"
+                        sizes="(min-width: 768px) 600px, 100vw"
                         className="object-cover object-top transition-transform duration-[1.4s] ease-[var(--ease-expo)] group-hover:scale-[1.05]"
                       />
                     )}
@@ -66,7 +66,7 @@ export default function ProjectsPage() {
                     </span>
                   </div>
                 </Assemble>
-                <FadeIn className={`md:col-span-5 ${flip ? "md:order-1" : ""}`}>
+                <FadeIn className={`md:col-span-6 ${flip ? "md:order-1" : ""}`}>
                   <p className="f-label text-accent-ink">{p.categoryLabel}</p>
                   <h2 className="f-display mt-2 text-[clamp(2.2rem,4vw,3.5rem)] leading-[1.02] [--wght:420]">{p.title}</h2>
                   <p className="mt-4 max-w-[44ch] text-lg leading-relaxed text-muted">{p.description}</p>
@@ -83,12 +83,12 @@ export default function ProjectsPage() {
 
       {/* Autres travaux : liste compacte */}
       {otherProjects.length > 0 && (
-        <section className="shell mt-32 md:mt-44">
+        <section className="shell mt-24 md:mt-32">
           <SectionIntro
             title="Exercices et projets de formation"
             intro="Des projets plus techniques, réalisés pendant mes formations : programmes, outils de gestion, parties serveur."
           />
-          <ul className="mt-10 border-t border-line">
+          <ul className="mt-8 border-t border-line">
             {otherProjects.map((p) => (
               <li key={p.slug}>
                 <Link
