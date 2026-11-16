@@ -23,7 +23,7 @@ export default function Template({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <div aria-hidden className="page-curtain opal-fill opal-still pointer-events-none fixed inset-0 z-[80] origin-top" />
+      <div aria-hidden className="page-curtain bg-alt pointer-events-none fixed inset-0 z-[80] origin-top" />
       <div className="page-enter">{children}</div>
     </>
   );

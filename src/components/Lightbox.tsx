@@ -43,7 +43,7 @@ function Slides({ images, start, alt, onClose }: { images: string[]; start: numb
         <span>
           {alt} — <span className="text-paper">{pad(current + 1)}</span> / {pad(images.length)}
         </span>
-        <Dialog.Close className="flex items-center gap-2 text-paper hover:text-signal">
+        <Dialog.Close className="flex items-center gap-2 text-paper hover:text-accent">
           Fermer
           <span className="relative block h-3 w-3">
             <span className="absolute top-1/2 block h-px w-full rotate-45 bg-current" />
@@ -78,7 +78,7 @@ function Slides({ images, start, alt, onClose }: { images: string[]; start: numb
               aria-label={`Capture ${i + 1}`}
               className="h-6 w-6 p-[10px]"
             >
-              <span className={`block h-full w-full transition-colors ${i === current ? "bg-signal" : "bg-paper/30"}`} />
+              <span className={`block h-full w-full transition-colors ${i === current ? "bg-accent" : "bg-paper/30"}`} />
             </button>
           ))}
         </div>

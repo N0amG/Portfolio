@@ -8,15 +8,12 @@
 @theme inline {
   --font-display: var(--ff-display), Georgia, "Times New Roman", serif;
   --font-sans: var(--ff-sans), "Helvetica Neue", Arial, sans-serif;
-  --font-mono: var(--ff-sans), "Helvetica Neue", Arial, sans-serif;
 
   --color-paper: var(--paper);
   --color-surface: var(--surface);
   --color-ink: var(--ink);
   --color-muted: var(--muted);
   --color-line: var(--line);
-  --color-signal: var(--signal);
-  --color-on-signal: var(--on-signal);
   --color-card: var(--card);
   --color-alt: var(--alt);
   --color-accent: var(--accent);
@@ -28,8 +25,7 @@
   --color-on-overlay: var(--on-overlay);
 
   --radius-card: 18px;
-  --radius-media: 12px;
-  --shadow-card: 0 1px 2px rgb(31 30 28 / 0.06);
+  --shadow-card: 0 1px 2px color-mix(in oklab, var(--overlay) 6%, transparent);
   --shadow-card-hover: 0 18px 40px -20px color-mix(in oklab, var(--accent) 45%, transparent);
   --shadow-float: 0 24px 60px -28px color-mix(in oklab, var(--overlay) 50%, transparent);
 
@@ -37,38 +33,7 @@
   --ease-quart: cubic-bezier(0.76, 0, 0.24, 1);
 }
 
-
-/* ───────────────────────── Opale ─────────────────────────
-   Les couleurs sont des jetons statiques sur :root (aucune animation globale :
-   animer :root forçait un recalcul de style de toute la page à chaque frame).
-   Seuls les éléments opale animent leur propre angle --opal-a. */
-
-@property --opal-a {
-  syntax: "<angle>";
-  inherits: true;
-  initial-value: 0deg;
-}
-@property --mx {
-  syntax: "<length-percentage>";
-  inherits: true;
-  initial-value: 30%;
-}
-@property --my {
-  syntax: "<length-percentage>";
-  inherits: true;
-  initial-value: 35%;
-}
-
-/* ~30 mises à jour / s : imperceptible sur une rotation de 22 s, 2× moins de repaints */
-@keyframes opal-spin {
-  to { --opal-a: 360deg; }
-}
-@keyframes opal-orbit {
-  0%, 100% { --mx: 12%; --my: 30%; }
-  25% { --mx: 52%; --my: 82%; }
-  50% { --mx: 90%; --my: 38%; }
-  75% { --mx: 46%; --my: 8%; }
-}
+/* ───────────────────────── Couleurs ───────────────────────── */
 
 :root {
   color-scheme: light;
@@ -88,30 +53,7 @@
   --on-overlay: #f7f3ec;   /* texte posé sur ce voile */
   --band: var(--accent-ink);  /* grande bande de couleur */
   --on-band: var(--on-accent);
-  --signal: var(--accent-ink);
-  --on-signal: var(--ink);
   --gutter: clamp(1.25rem, 4vw, 3rem);
-
-  /* Plus de reflets ni de grain : fond uni */
-  --sheen: none;
-  --grain-opacity: 0;
-
-  /* Anciens jetons "opale" ramenés à la terracotta (supprimés à l'étape de nettoyage) */
-  --opal-c1: #c2562f;
-  --opal-c2: #a9441f;
-  --opal-c3: #c2562f;
-  --opal-c4: #a9441f;
-  --opal-c5: #c2562f;
-  --opal-c6: #a9441f;
-  --opal-sheen: transparent;
-  --opal-milk: transparent;
-  --opal-p1: #efe8dc;
-  --opal-p2: #efe8dc;
-  --opal-p3: #efe8dc;
-  --opal-p4: #efe8dc;
-  --opal-p5: #efe8dc;
-  --opal-p6: #efe8dc;
-  --opal-facets: linear-gradient(transparent, transparent);
 }
 
 :root[data-theme="dark"] {
@@ -128,123 +70,6 @@
   --band: #8a3a1d;         /* terracotta profonde, plus chic que le saumon en sombre */
   --on-band: #f7f3ec;      /* 7.0:1 */
   --line: color-mix(in oklab, var(--ink) 12%, transparent);
-  --opal-c1: #e07a52;
-  --opal-c2: #e8906c;
-  --opal-c3: #e07a52;
-  --opal-c4: #e8906c;
-  --opal-c5: #e07a52;
-  --opal-c6: #e8906c;
-  --opal-p1: #2a221c;
-  --opal-p2: #2a221c;
-  --opal-p3: #2a221c;
-  --opal-p4: #2a221c;
-  --opal-p5: #2a221c;
-  --opal-p6: #2a221c;
-}
-
-/* Les dégradés sont composés dans chaque classe (et non sur :root) pour que
-   --opal-a, --mx et --my soient lus sur l'élément lui-même. */
-
-/* Texte opale : dégradé vivant clippé dans les lettres
-   (.opal-hover : la même matière, appliquée seulement au survol du groupe) */
-.opal-text,
-.group:hover .opal-hover,
-.group:focus-visible .opal-hover {
-  background-image:
-    radial-gradient(circle at var(--mx) var(--my), var(--opal-sheen) 0, transparent 18%),
-    var(--opal-facets),
-    linear-gradient(var(--opal-milk), var(--opal-milk)),
-    radial-gradient(38% 60% at 78% 22%, color-mix(in oklab, var(--opal-c2) 75%, transparent), transparent 70%),
-    radial-gradient(30% 55% at 18% 78%, color-mix(in oklab, var(--opal-c1) 70%, transparent), transparent 70%),
-    repeating-conic-gradient(
-      from var(--opal-a) at -10% 115%,
-      var(--opal-c1) 0deg, var(--opal-c2) 12deg, var(--opal-c3) 24deg, var(--opal-c4) 36deg,
-      var(--opal-c5) 48deg, var(--opal-c6) 60deg, var(--opal-c1) 72deg
-    );
-  background-size: 100% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: opal-spin 22s steps(660) infinite;
-}
-
-/* Teinte d'opale vive (barres, calques) */
-.opal-fire {
-  background-image:
-    linear-gradient(var(--opal-milk), var(--opal-milk)),
-    repeating-conic-gradient(
-      from var(--opal-a) at -10% 115%,
-      var(--opal-c1) 0deg, var(--opal-c2) 12deg, var(--opal-c3) 24deg, var(--opal-c4) 36deg,
-      var(--opal-c5) 48deg, var(--opal-c6) 60deg, var(--opal-c1) 72deg
-    );
-  animation: opal-spin 22s steps(660) infinite;
-}
-
-/* Aplats nacrés (sous du texte encre) */
-.opal-fill {
-  background-image:
-    var(--opal-facets),
-    repeating-conic-gradient(
-      from var(--opal-a) at -10% 115%,
-      var(--opal-p1) 0deg, var(--opal-p2) 30deg, var(--opal-p3) 60deg, var(--opal-p4) 90deg,
-      var(--opal-p5) 120deg, var(--opal-p6) 150deg, var(--opal-p1) 180deg
-    );
-  animation: opal-spin 22s steps(660) infinite;
-}
-
-/* Portrait : halo nacré très léger, pour fondre la photo dans la matière opale.
-   .opal-halo (cadre extérieur) : lueur floutée et figée derrière la photo.
-   .opal-veil (conteneur de l'image) : voile opale en lumière douce, qui tourne
-   comme la police. */
-.opal-halo {
-  isolation: isolate;
-}
-.opal-halo::before {
-  content: "";
-  position: absolute;
-  inset: -4%;
-  z-index: -1;
-  pointer-events: none;
-  background-image: repeating-conic-gradient(
-    from 30deg at 50% 50%,
-    var(--opal-c1) 0deg, var(--opal-c2) 60deg, var(--opal-c3) 120deg,
-    var(--opal-c5) 180deg, var(--opal-c6) 240deg, var(--opal-c4) 300deg, var(--opal-c1) 360deg
-  );
-  filter: blur(14px);
-  opacity: 0.22;
-  /* n'apparaît qu'une fois la photo dévoilée (opacité seule : composée) */
-  animation: opal-halo-in 0.9s ease-out 0.9s both;
-}
-@keyframes opal-halo-in {
-  from { opacity: 0; }
-}
-.opal-veil::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  pointer-events: none;
-  background-image:
-    radial-gradient(60% 45% at 22% 12%, var(--opal-sheen), transparent 70%),
-    repeating-conic-gradient(
-      from var(--opal-a) at -10% 115%,
-      var(--opal-c1) 0deg, var(--opal-c2) 12deg, var(--opal-c3) 24deg, var(--opal-c4) 36deg,
-      var(--opal-c5) 48deg, var(--opal-c6) 60deg, var(--opal-c1) 72deg
-    );
-  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.18);
-  mix-blend-mode: soft-light;
-  opacity: 0.32;
-  animation: opal-spin 22s steps(660) infinite;
-}
-
-/* Variante figée : aplats cachés la plupart du temps (survols, rideau) */
-.opal-still {
-  animation: none;
-}
-/* …qui reprennent vie au survol */
-.group:hover .opal-fill.opal-still,
-.group:focus-visible .opal-fill.opal-still {
-  animation: opal-spin 22s steps(660) infinite;
 }
 
 /* ───────────────────────── Base ───────────────────────── */
@@ -253,17 +78,6 @@ html {
   background: var(--paper);
   color: var(--ink);
   -webkit-text-size-adjust: 100%;
-}
-
-/* Reflets nacrés : calque fixe composité (un background-attachment: fixed
-   forcerait un repeint de toute la page à chaque scroll). */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background: var(--sheen);
 }
 
 body {
@@ -313,14 +127,6 @@ img {
   font-weight: 600;
 }
 
-.f-mono {
-  font-family: var(--font-mono);
-  font-variation-settings: "wght" 380;
-}
-
-.text-balance {
-  text-wrap: balance;
-}
 
 .text-pretty {
   text-wrap: pretty;
@@ -333,22 +139,6 @@ img {
   max-width: calc(1200px + 2 * var(--gutter));
   margin-inline: auto;
   padding-inline: var(--gutter);
-}
-
-.grid-12 {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  column-gap: var(--gutter);
-}
-
-@media (min-width: 768px) {
-  .grid-12 {
-    grid-template-columns: repeat(12, minmax(0, 1fr));
-  }
-}
-
-.rule {
-  border-top: 1px solid var(--line);
 }
 
 /* ───────────────────────── Détails ───────────────────────── */
@@ -366,45 +156,7 @@ img {
   background-size: 100% 1px;
 }
 
-
-
-/* Accent dont la teinte tourne en continu — animé uniquement sur les éléments
-   qui l'utilisent (et non sur :root, qui recalculait toute la page). */
-@property --opal-h {
-  syntax: "<number>";
-  inherits: true;
-  initial-value: 296;
-}
-/* La teinte oscille entre bleu (255) et magenta (350), sans sortir de la palette */
-@keyframes opal-hue {
-  from { --opal-h: 255; }
-  to { --opal-h: 350; }
-}
-/* Accent : statique (plus de teinte qui tourne) */
-
-/* Point "en direct" */
-.live-dot {
-  position: relative;
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 999px;
-  background: var(--signal);
-}
-.live-dot::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: inherit;
-  animation: ping 1.8s var(--ease-expo) infinite;
-}
-@keyframes ping {
-  0% { transform: scale(1); opacity: 0.8; }
-  100% { transform: scale(3.2); opacity: 0; }
-}
-
-/* Champs de formulaire : un seul trait, pas de boîte */
+/* Champs de formulaire : boîte arrondie, anneau terracotta au focus */
 .field {
   width: 100%;
   background: var(--paper);
@@ -442,16 +194,6 @@ img {
   to { opacity: 1; transform: none; }
 }
 
-/* Palette ⌘K */
-[cmdk-group-heading] {
-  font-family: var(--font-mono);
-  font-size: 0.6875rem;
-  letter-spacing: 0.02em;
-  text-transform: uppercase;
-  color: var(--muted);
-  padding: 0.875rem 1.25rem 0.375rem;
-}
-
 /* Transition de thème — révélation circulaire (View Transitions API) */
 ::view-transition-old(root),
 ::view-transition-new(root) {
@@ -460,59 +202,6 @@ img {
 }
 ::view-transition-new(root) {
   z-index: 2;
-}
-
-/* Nom du hero : taille fixée en CSS à partir de la mesure de la police
-   (ligne "NOAM" = 4,557 em en lettres séparées à wdth 138 / wght 840).
-   Aucun recalcul en JS → aucun décalage de mise en page. */
-.hero-name {
-  container-type: inline-size;
-}
-.hero-name > h1 {
-  font-size: 21.6cqw;
-}
-.hero-name > h1:not(.is-tracking) {
-  animation: opal-orbit 16s ease-in-out infinite;
-}
-
-/* Lettres du nom. Tactile : boîte de largeur fixe (glyphe invisible à l'état
-   de base) + glyphe visible en absolu → l'onde ne déplace rien (CLS = 0).
-   La marge autour du glyphe laisse au dégradé clippé la place des jambages. */
-.hero-box {
-  position: relative;
-  display: inline-block;
-}
-.hero-sizer {
-  visibility: hidden;
-}
-.hero-glyph {
-  position: absolute;
-  inset: -0.12em -0.25em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-/* Souris : le glyphe repasse dans le flux, sa largeur réelle (axes wdth / wght)
-   pilote la mise en page → la lettre survolée pousse ses voisines.
-   À l'état de base, même largeur que le glyphe de dimensionnement. */
-@media (pointer: fine) {
-  .hero-sizer {
-    display: none;
-  }
-  .hero-glyph {
-    position: static;
-    display: inline-block;
-    padding: 0.12em 0.25em;
-    margin: -0.12em -0.25em;
-  }
-}
-
-/* Nom géant du footer : "NOAM GUEZ" = 9,53 em à wdth 150 / wght 900 */
-.footer-name {
-  container-type: inline-size;
-}
-.footer-name > p {
-  font-size: 10.35cqw;
 }
 
 /* Montée des lettres du hero (transform uniquement : composée, sans CLS) */
@@ -560,21 +249,11 @@ img {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .opal-text,
-  .opal-fill,
-  .opal-fire,
-  .opal-veil::after,
-  .opal-halo::before,
-  .hero-name > h1:not(.is-tracking),
   .hero-rise,
   .hero-up,
   .hero-reveal,
   .cover-reveal,
-  .text-signal,
-  .bg-signal,
   .marquee-track,
-  .grain::after,
-  .live-dot::after,
   .page-curtain,
   .page-enter {
     animation: none;

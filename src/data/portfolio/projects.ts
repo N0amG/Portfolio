@@ -33,34 +33,6 @@ export const projects: Project[] = (generatedProjects as RawProject[]).map((p) =
   };
 });
 
-/** Ordre chronologique (le plus ancien = n°01) : sert de numérotation stable. */
-const chronological = [...projects].sort((a, b) => a.date.localeCompare(b.date));
-
-export function getProjectNumber(slug: string): number {
-  return chronological.findIndex((p) => p.slug === slug) + 1;
-}
-
-/** Projets du plus récent au plus ancien. */
-export const latestProjects: Project[] = [...chronological].reverse();
-
-export function formatProjectDate(date: string): string {
-  const [y, m] = date.split("-");
-  return `${m}.${y}`;
-}
-
-export const allCategories = ["Frontend", "Backend", "Fullstack", "Python", "Gestion de projet"] as const;
-
-/** Libellés affichés : compréhensibles sans être développeur. */
-const categoryNames: Record<string, string> = {
-  Frontend: "Interface",
-  Backend: "Serveur",
-  Fullstack: "Interface + serveur",
-};
-
-export function categoryName(category: string): string {
-  return categoryNames[category] ?? category;
-}
-
 export function getProjectBySlug(slug: string): Project | undefined {
   return projects.find((p) => p.slug === slug);
 }

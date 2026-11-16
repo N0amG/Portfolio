@@ -39,14 +39,12 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F7F3EC" },
-    { media: "(prefers-color-scheme: dark)", color: "#16120F" },
-  ],
+  // Thème clair par défaut, quel que soit le réglage du système
+  themeColor: "#F7F3EC",
 };
 
 /* Appliqué avant le premier paint : pas de flash de thème */
-const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t==='night')t='dark';if(t==='winter')t='light';if(t!=='dark'&&t!=='light'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','dark')}})()`;
+const themeScript = `(function(){try{var t=localStorage.getItem('theme');if(t==='night')t='dark';if(t==='winter')t='light';if(t!=='dark')t='light';document.documentElement.setAttribute('data-theme',t)}catch(e){document.documentElement.setAttribute('data-theme','light')}})()`;
 
 export default function RootLayout({
   children,
@@ -56,7 +54,7 @@ export default function RootLayout({
   return (
     <html
       lang="fr"
-      data-theme="dark"
+      data-theme="light"
       suppressHydrationWarning
       className={`${display.variable} ${sans.variable}`}
     >

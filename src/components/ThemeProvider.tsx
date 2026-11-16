@@ -8,15 +8,15 @@ export type Theme = "light" | "dark";
 const ThemeContext = createContext<{
   theme: Theme;
   toggleTheme: (origin?: { x: number; y: number }) => void;
-}>({ theme: "dark", toggleTheme: () => {} });
+}>({ theme: "light", toggleTheme: () => {} });
 
 export function useTheme() {
   return useContext(ThemeContext);
 }
 
 function readTheme(): Theme {
-  if (typeof document === "undefined") return "dark";
-  return document.documentElement.getAttribute("data-theme") === "light" ? "light" : "dark";
+  if (typeof document === "undefined") return "light";
+  return document.documentElement.getAttribute("data-theme") === "dark" ? "dark" : "light";
 }
 
 function subscribe(cb: () => void) {
@@ -27,7 +27,7 @@ function subscribe(cb: () => void) {
 
 export default function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Le script inline de <head> pose data-theme avant le paint : l'attribut fait foi.
-  const theme = useSyncExternalStore(subscribe, readTheme, () => "dark" as Theme);
+  const theme = useSyncExternalStore(subscribe, readTheme, () => "light" as Theme);
 
   const apply = useCallback((next: Theme) => {
     document.documentElement.setAttribute("data-theme", next);

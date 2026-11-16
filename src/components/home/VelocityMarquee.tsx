@@ -55,7 +55,7 @@ export default function VelocityMarquee({ items, className }: { items: string[];
       {items.map((it, i) => (
         <span key={i} className="flex items-center">
           <span>{it}</span>
-          <span className="mx-[0.4em] inline-block not-italic text-accent">✻</span>
+          <span aria-hidden className="mx-[0.45em] inline-block h-[0.13em] w-[0.13em] -translate-y-[0.2em] rounded-full bg-accent" />
         </span>
       ))}
     </span>
