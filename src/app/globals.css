@@ -443,6 +443,38 @@ img {
   animation: opal-orbit 16s ease-in-out infinite;
 }
 
+/* Lettres du nom. Tactile : boîte de largeur fixe (glyphe invisible à l'état
+   de base) + glyphe visible en absolu → l'onde ne déplace rien (CLS = 0).
+   La marge autour du glyphe laisse au dégradé clippé la place des jambages. */
+.hero-box {
+  position: relative;
+  display: inline-block;
+}
+.hero-sizer {
+  visibility: hidden;
+}
+.hero-glyph {
+  position: absolute;
+  inset: -0.12em -0.25em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Souris : le glyphe repasse dans le flux, sa largeur réelle (axes wdth / wght)
+   pilote la mise en page → la lettre survolée pousse ses voisines.
+   À l'état de base, même largeur que le glyphe de dimensionnement. */
+@media (pointer: fine) {
+  .hero-sizer {
+    display: none;
+  }
+  .hero-glyph {
+    position: static;
+    display: inline-block;
+    padding: 0.12em 0.25em;
+    margin: -0.12em -0.25em;
+  }
+}
+
 /* Nom géant du footer : "NOAM GUEZ" = 9,53 em à wdth 150 / wght 900 */
 .footer-name {
   container-type: inline-size;
