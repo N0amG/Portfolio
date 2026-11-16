@@ -168,7 +168,7 @@ export default function ContactPage() {
                   >
                     {
                       {
-                        idle: "Tous les champs sont requis",
+                        idle: "Tous les champs sont obligatoires",
                         loading: "Envoi en cours…",
                         success: "Message envoyé — je reviens vers vous rapidement.",
                         error: "Erreur lors de l'envoi. Réessayez.",

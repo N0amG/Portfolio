@@ -32,7 +32,7 @@ export default function ProjectIndex({ projects }: { projects: Project[] }) {
       <div className="f-label grid-12 hidden border-b border-line pb-3 text-muted md:grid">
         <span className="col-span-6">Projet</span>
         <span className="col-span-3">Type</span>
-        <span className="col-span-2">Stack</span>
+        <span className="col-span-2 hidden md:block">Technologies</span>
         <span className="col-span-1 text-right">Année</span>
       </div>
 

@@ -14,60 +14,60 @@ const experiences = [
     period: "2026 — aujourd'hui",
     title: "Développeur web",
     company: "Elissar",
-    description: "Migration complète vers React et Node.js d'un logiciel commercialisé auprès de clients.",
+    description: "Modernisation complète d'un logiciel professionnel vendu à des entreprises (React, Node.js).",
   },
   {
     period: "2026 — aujourd'hui",
     title: "Master DevOps (Bac +5)",
     company: "EPSI",
-    description: "Infrastructure, conteneurisation, CI/CD et automatisation des déploiements.",
+    description: "Hébergement, mise en ligne et automatisation : faire tourner des applications de façon fiable.",
   },
   {
     period: "Aujourd'hui",
     title: "Développeur web freelance",
     company: "Indépendant",
-    description: "Sites, applications et API pour particuliers et entreprises.",
+    description: "Sites internet et applications web pour particuliers et entreprises.",
   },
   {
     period: "2025",
-    title: "Développeur fullstack",
+    title: "Développeur web & mobile",
     company: "JVAIS Agence Web",
     description:
-      "Développement d'applications fullstack au sein de l'équipe technique : React Native, Tailwind, TypeScript et NestJS, intégration d'APIs d'IA.",
+      "Applications web et mobiles au sein de l'équipe technique, dont des fonctionnalités d'intelligence artificielle (React Native, TypeScript, NestJS).",
   },
   {
     period: "2025 — 2026",
     title: "Développeur Web (Bac +3)",
     company: "OpenClassrooms — Python / Django",
     description:
-      "Formation diplômante axée sur le développement backend avec Python et Django, à travers des projets professionnalisants.",
+      "Formation diplômante centrée sur la partie serveur des applications (Python, Django), à travers des projets concrets.",
   },
   {
     period: "2024 — 2025",
     title: "Développeur Web (Bac +2)",
     company: "OpenClassrooms — React / Node.js",
-    description: "Formation diplômante axée sur le développement frontend et backend avec React et Node.js.",
+    description: "Formation diplômante : créer des sites et des applications web complets (React, Node.js).",
   },
   {
     period: "Juil. 2024",
     title: "Piscine de développement",
     company: "École 42 Lyon",
-    description: "Un mois d'immersion intensive en langage C, avec des rushs en équipe et des projets sous pression.",
+    description: "Un mois d'immersion intensive en programmation (langage C), avec des projets en équipe à rendre en temps limité.",
   },
 ];
 
 const stack = [
-  { domain: "Interface", items: ["React", "Next.js", "TypeScript", "Tailwind CSS", "React Native"] },
-  { domain: "Serveur", items: ["Node.js", "NestJS", "Express", "Python", "Django"] },
+  { domain: "Ce que vous voyez", items: ["React", "Next.js", "TypeScript", "Tailwind CSS", "React Native"] },
+  { domain: "En coulisses", items: ["Node.js", "NestJS", "Express", "Python", "Django"] },
   { domain: "Données", items: ["PostgreSQL", "MongoDB", "SQLite", "SQLAlchemy"] },
-  { domain: "Outillage", items: ["Git", "Docker", "CI/CD", "Tests", "Sentry"] },
+  { domain: "Qualité & mise en ligne", items: ["Git", "Docker", "CI/CD", "Tests", "Sentry"] },
 ];
 
 const education = [
   { title: "Master DevOps (Bac +5)", sub: "EPSI", date: "2026 — 2028", current: true },
   { title: "Bac +3 Développeur Web", sub: "OpenClassrooms — Python / Django", date: "2025 — 2026" },
   { title: "Bac +2 Développeur Web", sub: "OpenClassrooms — React / Node.js", date: "2024 — 2025" },
-  { title: "Baccalauréat, mention Bien", sub: "Lycée Déborde, Lyon — Spé Maths / NSI", date: "2021 — 2023" },
+  { title: "Baccalauréat, mention Bien", sub: "Lycée Déborde, Lyon — spécialités Maths et Informatique", date: "2021 — 2023" },
 ];
 
 const certifications = [
@@ -103,19 +103,21 @@ export default function AboutPage() {
         </div>
 
         <div className="grid-12 mt-16 gap-y-8 md:mt-24">
-          <FadeIn className="col-span-4 md:col-span-5 md:col-start-5">
-            <p className="text-pretty text-[clamp(1.25rem,1.9vw,1.6rem)] leading-[1.3]">
-              Je suis Noam, développeur web freelance à Lyon. Je conçois des sites et des applications web complets, de
-              l&apos;interface au serveur. Je ne pars pas de zéro : chez Elissar, je mène la migration complète vers React
-              et Node.js d&apos;un logiciel vendu à des clients. Avant ça, j&apos;ai travaillé en équipe chez JVAIS, une
-              agence web, sur des projets fullstack (React Native, NestJS, intégration d&apos;IA). Côté formation : un Bac
-              +3 Développeur web, et un Master DevOps (Bac +5) en cours à l&apos;EPSI.
+          <FadeIn className="col-span-4 space-y-5 md:col-span-5 md:col-start-5">
+            <p className="text-pretty text-[clamp(1.25rem,1.9vw,1.6rem)] leading-[1.35]">
+              Je suis Noam, développeur web freelance à Lyon. Je crée des sites et des applications web de A à Z : ce
+              que vous voyez à l&apos;écran comme ce qui tourne en coulisses.
+            </p>
+            <p className="text-pretty text-[clamp(1.25rem,1.9vw,1.6rem)] leading-[1.35]">
+              Je ne pars pas de zéro : chez Elissar, je modernise un logiciel professionnel utilisé par des entreprises.
+              Avant ça, j&apos;ai travaillé dans une agence web, JVAIS, sur des applications web et mobiles. Côté
+              formation : un Bac +3 en développement web, et un Master (Bac +5) en cours à l&apos;EPSI.
             </p>
           </FadeIn>
           <FadeIn delay={0.1} className="col-span-4 md:col-span-3">
             <p className="text-[17px] leading-relaxed text-muted">
-              Ce qui m&apos;intéresse : les interfaces soignées, les architectures simples à maintenir, et l&apos;IA quand
-              elle sert vraiment le produit. Hors code : culture japonaise, jeux vidéo, physique.
+              Ce qui m&apos;intéresse : les interfaces soignées, les projets simples à faire évoluer, et l&apos;IA quand
+              elle est vraiment utile. En dehors du travail : culture japonaise, jeux vidéo, physique.
             </p>
             <ul className="mt-6 flex flex-wrap gap-1.5">
               {interests.map((it) => (
@@ -153,7 +155,7 @@ export default function AboutPage() {
 
       {/* Outils */}
       <section className="shell mt-28 md:mt-40">
-        <SectionHead title="Outils" meta="Au quotidien" />
+        <SectionHead title="Outils" meta="Les technologies que j'utilise" />
         <div className="grid grid-cols-2 md:grid-cols-4">
           {stack.map((s, i) => (
             <FadeIn
@@ -176,7 +178,7 @@ export default function AboutPage() {
 
       {/* Activité */}
       <section className="shell mt-28 md:mt-40">
-        <SectionHead title="Activité GitHub" meta="Derniers commits" />
+        <SectionHead title="Activité GitHub" meta="Mes dernières modifications de code" />
         <div className="grid-12 mt-10">
           <FadeIn className="col-span-4 md:col-span-10 md:col-start-3">
             <GithubActivity />

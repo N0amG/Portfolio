@@ -6,8 +6,8 @@
     "categories": [
       "Frontend"
     ],
-    "categoryLabel": "Intégration Web/Mobile",
-    "description": "Intégration responsive d'une plateforme de réservation d'hébergements, fidèle à la maquette sur mobile, tablette et desktop.",
+    "categoryLabel": "Site responsive",
+    "description": "Mise en page d'un site de réservation d'hébergements, fidèle à la maquette sur téléphone, tablette et ordinateur.",
     "tags": [
       "HTML",
       "CSS",
@@ -36,8 +36,8 @@
     "categories": [
       "Frontend"
     ],
-    "categoryLabel": "Portfolio Dynamique",
-    "description": "Portfolio d'architecte d'intérieur avec espace admin : connexion, ajout et suppression de projets sans rechargement.",
+    "categoryLabel": "Site avec espace admin",
+    "description": "Site d'une architecte d'intérieur, avec un espace privé pour ajouter ou retirer ses réalisations sans recharger la page.",
     "tags": [
       "HTML",
       "CSS",
@@ -69,8 +69,8 @@
     "categories": [
       "Frontend"
     ],
-    "categoryLabel": "Optimisation & SEO",
-    "description": "Audit et optimisation du site d'une photographe : performances, accessibilité et référencement naturel.",
+    "categoryLabel": "Optimisation & référencement",
+    "description": "Audit et amélioration du site d'une photographe : plus rapide, plus accessible et mieux référencé sur Google.",
     "tags": [
       "HTML",
       "CSS",
@@ -112,8 +112,8 @@
     "categories": [
       "Frontend"
     ],
-    "categoryLabel": "Application React",
-    "description": "Application React de location entre particuliers : routing, composants réutilisables, design responsive en Sass.",
+    "categoryLabel": "Application web",
+    "description": "Site de location de logements entre particuliers, adapté à tous les écrans (React).",
     "tags": [
       "React",
       "CSS",
@@ -147,8 +147,8 @@
       "Backend",
       "Fullstack"
     ],
-    "categoryLabel": "API REST Node.js",
-    "description": "API REST Node.js / MongoDB pour un site de notation de livres : authentification, upload et optimisation d'images.",
+    "categoryLabel": "Serveur & base de données",
+    "description": "Partie serveur d'un site de notation de livres : connexion des utilisateurs, envoi et optimisation des images (Node.js, MongoDB).",
     "tags": [
       "Node.js",
       "Express",
@@ -186,8 +186,8 @@
     "categories": [
       "Gestion de projet"
     ],
-    "categoryLabel": "Planification & Spécifications",
-    "description": "Cadrage d'un outil de création de menus : veille technique, spécifications et pilotage en Kanban.",
+    "categoryLabel": "Gestion de projet",
+    "description": "Préparation d'un outil de création de menus : veille technique, cahier des charges et suivi des tâches.",
     "tags": [
       "Feedly",
       "Notion"
@@ -220,8 +220,8 @@
       "Fullstack",
       "Frontend"
     ],
-    "categoryLabel": "Next.js & Tailwind",
-    "description": "Ce site : Next.js, animations Motion, polices auto-hébergées, palette de commandes et thème clair / sombre.",
+    "categoryLabel": "Site vitrine",
+    "description": "Ce site : animations, thème clair ou sombre, recherche rapide et chargement quasi instantané (Next.js).",
     "tags": [
       "Next.js",
       "Tailwind",
@@ -252,8 +252,8 @@
       "Python",
       "Backend"
     ],
-    "categoryLabel": "Pipeline ETL / Scraping",
-    "description": "Pipeline de scraping qui collecte, nettoie et exporte en CSV les données de 1 000 livres.",
+    "categoryLabel": "Collecte de données",
+    "description": "Programme qui récupère automatiquement, nettoie et exporte dans un tableur les données de 1 000 livres.",
     "tags": [
       "Python",
       "BeautifulSoup",
@@ -291,8 +291,8 @@
     "categories": [
       "Python"
     ],
-    "categoryLabel": "Application Console MVC",
-    "description": "Logiciel de gestion de tournois d'échecs en console, architecture MVC et sauvegarde JSON.",
+    "categoryLabel": "Logiciel de gestion",
+    "description": "Logiciel de gestion de tournois d'échecs, sans interface graphique, avec sauvegarde des données.",
     "tags": [
       "Python",
       "MVC",
@@ -326,8 +326,8 @@
     "categories": [
       "Python"
     ],
-    "categoryLabel": "Algorithmique & Optimisation",
-    "description": "Sélection du meilleur portefeuille d'actions sous contrainte de budget : force brute contre approche gloutonne.",
+    "categoryLabel": "Algorithmes",
+    "description": "Programme qui choisit le meilleur portefeuille d'actions pour un budget donné, en comparant une méthode exhaustive et une méthode rapide.",
     "tags": [
       "Python",
       "Algorithmique",
@@ -362,8 +362,8 @@
       "Fullstack",
       "Backend"
     ],
-    "categoryLabel": "Application Django",
-    "description": "Application Django de partage et de critique de livres, avec flux personnalisé et abonnements entre utilisateurs.",
+    "categoryLabel": "Application web",
+    "description": "Site communautaire de critiques de livres, avec fil d'actualité personnalisé et abonnements entre membres (Django).",
     "tags": [
       "Python",
       "Django",
@@ -398,8 +398,8 @@
       "Python",
       "Backend"
     ],
-    "categoryLabel": "CRM en ligne de commande",
-    "description": "CRM en ligne de commande pour gérer clients, contrats et événements, avec permissions par rôle et suivi d'erreurs Sentry.",
+    "categoryLabel": "Logiciel de gestion (CRM)",
+    "description": "Outil de gestion des clients, contrats et événements d'une entreprise, avec des droits d'accès selon le rôle de chacun.",
     "tags": [
       "Python",
       "PostgreSQL",
@@ -442,7 +442,7 @@
       "Frontend",
       "Backend"
     ],
-    "categoryLabel": "Mini-jeu Temps Réel",
+    "categoryLabel": "Jeu en ligne multijoueur",
     "description": "Jeu multijoueur en temps réel : retrouver une œuvre à partir d'une image qui se dépixélise, le plus vite possible.",
     "tags": [
       "Next.js",

@@ -7,7 +7,7 @@ import { ArrowDownIcon, RowsIcon, SquaresFourIcon } from "@phosphor-icons/react"
 import ProjectCard from "@/components/ProjectCard";
 import ProjectIndex from "@/components/ProjectIndex";
 import { FadeIn, MaskLines, DrawRule } from "@/components/Reveal";
-import { projects, allCategories } from "@/data/portfolio/projects";
+import { projects, allCategories, categoryName } from "@/data/portfolio/projects";
 import { ease } from "@/lib/site";
 
 const filters = ["Tous", ...allCategories] as const;
@@ -51,8 +51,8 @@ export default function ProjectsPage() {
         </div>
         <FadeIn delay={0.3} className="col-span-4 md:col-span-5 md:col-start-8">
           <p className="text-pretty max-w-[42ch] text-lg leading-snug text-muted">
-            Sites, applications et API réalisés en agence, en formation et en projet personnel. Chaque fiche détaille le
-            besoin, les choix techniques et le résultat.
+            Sites et applications web réalisés en agence, en formation et en projet personnel. Chaque fiche explique le
+            besoin, ce qui a été fait et le résultat.
           </p>
         </FadeIn>
       </div>
@@ -74,7 +74,7 @@ export default function ProjectsPage() {
                   {filter === f && (
                     <motion.span layoutId="filter-pill" className="absolute inset-0 -z-0 bg-ink" transition={{ duration: 0.5, ease }} />
                   )}
-                  <span className="relative">{f}</span>
+                  <span className="relative">{categoryName(f)}</span>
                   <span className="relative opacity-50">{counts[f]}</span>
                 </ToggleGroup.Item>
               ))}

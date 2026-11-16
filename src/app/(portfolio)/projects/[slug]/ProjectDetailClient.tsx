@@ -11,7 +11,7 @@ import { ArrowLeftIcon, ArrowRightIcon, ArrowUpRightIcon, ArrowsOutSimpleIcon } 
 // Chargée seulement quand on ouvre une capture.
 const Lightbox = dynamic(() => import("@/components/Lightbox"), { ssr: false });
 import { FadeIn, MaskLines, SectionHead } from "@/components/Reveal";
-import { Project, projects, getProjectNumber, formatProjectDate } from "@/data/portfolio/projects";
+import { Project, projects, getProjectNumber, formatProjectDate, categoryName } from "@/data/portfolio/projects";
 import { pad } from "@/lib/site";
 
 interface Props {
@@ -150,7 +150,7 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
     { k: "Rôle", v: project.role ?? "—" },
     { k: "Date", v: formatProjectDate(project.date) },
     { k: "Type", v: project.categoryLabel },
-    { k: "Catégories", v: project.categories.join(", ") },
+    { k: "Catégories", v: project.categories.map(categoryName).join(", ") },
   ];
 
   return (

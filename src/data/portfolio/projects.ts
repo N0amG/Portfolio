@@ -50,6 +50,17 @@ export function formatProjectDate(date: string): string {
 
 export const allCategories = ["Frontend", "Backend", "Fullstack", "Python", "Gestion de projet"] as const;
 
+/** Libellés affichés : compréhensibles sans être développeur. */
+const categoryNames: Record<string, string> = {
+  Frontend: "Interface",
+  Backend: "Serveur",
+  Fullstack: "Interface + serveur",
+};
+
+export function categoryName(category: string): string {
+  return categoryNames[category] ?? category;
+}
+
 export function getProjectBySlug(slug: string): Project | undefined {
   return projects.find((p) => p.slug === slug);
 }

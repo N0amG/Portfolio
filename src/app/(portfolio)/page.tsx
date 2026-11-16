@@ -12,35 +12,35 @@ const stack = ["React", "Next.js", "TypeScript", "Node.js", "NestJS", "Python", 
 
 const services = [
   {
-    title: "Sites vitrines & landing pages",
-    text: "Rapides, bien référencés, faciles à faire évoluer.",
+    title: "Sites vitrines",
+    text: "Pour présenter votre activité : un site rapide, bien placé sur Google, que vous pouvez faire évoluer.",
   },
   {
     title: "Applications web",
-    text: "Espaces clients, back-offices, outils internes : interface et API sur mesure.",
+    text: "Espace client, outil de gestion, plateforme de réservation : une application conçue pour votre activité.",
   },
   {
-    title: "API & back-end",
-    text: "Node.js, NestJS ou Django, base de données, authentification, déploiement automatisé (Docker, CI/CD).",
+    title: "Coulisses & données",
+    text: "Comptes utilisateurs, base de données, connexion à vos outils existants : tout ce qui fait tourner le site, hébergé et mis à jour sans effort.",
   },
   {
-    title: "Optimisation",
-    text: "Performance, accessibilité et SEO d'un site existant.",
+    title: "Amélioration d'un site existant",
+    text: "Un site plus rapide, mieux référencé sur Google et facile à utiliser pour tous.",
   },
 ];
 
 const steps = [
   {
-    title: "Cadrage",
-    text: "On définit ensemble le besoin, le périmètre et le délai. Vous recevez un devis clair.",
+    title: "1. On en parle",
+    text: "On définit ensemble votre besoin, ce qui est inclus et le délai. Vous recevez un devis clair.",
   },
   {
-    title: "Développement",
-    text: "Vous suivez l'avancement sur une version en ligne, mise à jour au fil du projet.",
+    title: "2. Je le construis",
+    text: "Vous suivez l'avancement sur une version en ligne, mise à jour au fil du projet, et vous donnez votre avis.",
   },
   {
-    title: "Livraison",
-    text: "Mise en ligne, transmission des accès, et je reste joignable après.",
+    title: "3. Mise en ligne",
+    text: "Votre site est publié, je vous transmets tous les accès, et je reste joignable après.",
   },
 ];
 
@@ -56,9 +56,9 @@ export default function Home() {
             Particuliers & entreprises
           </span>
           <span className="col-span-2 md:col-span-3">
-            Sites, applications,
+            Sites internet
             <br />
-            API
+            Applications web
           </span>
           <span className="col-span-2 hidden md:col-span-3 md:block">{"Lyon, France"}</span>
           <span className="col-span-2 hidden text-right md:col-span-3 md:block">
@@ -76,8 +76,8 @@ export default function Home() {
         <div className="grid-12 mt-8 items-end gap-y-6 md:mt-10">
           <div className="hero-up col-span-4 md:col-span-6" style={{ animationDelay: "0.2s" }}>
             <p className="text-pretty max-w-[40ch] text-lg leading-snug md:text-[1.375rem]">
-              Je conçois et développe votre site ou votre application web, de la maquette à la mise en ligne. Un seul
-              interlocuteur, du code propre, et un résultat rapide à charger.
+              Je crée votre site ou votre application web, de la première maquette à la mise en ligne. Un seul
+              interlocuteur, un travail soigné, et un site qui s&apos;affiche vite, même sur mobile.
             </p>
           </div>
           <div
@@ -115,12 +115,12 @@ export default function Home() {
           <div className="col-span-4 md:col-span-10 md:col-start-3">
             <ScrollStatement
               className="f-display text-[clamp(2rem,4.6vw,4.6rem)] leading-[1.06] [--wdth:96] [--wght:560]"
-              text="Je travaille en direct avec vous, du premier échange à la mise en ligne. React et Next.js pour l'interface, Node.js ou Django pour le serveur, et un code *pensé* *pour* *durer.*"
+              text="Je travaille en direct avec vous, du premier échange à la mise en ligne. Des outils modernes et éprouvés, un site rapide et sécurisé, et un travail *pensé* *pour* *durer.*"
             />
           </div>
         </div>
 
-        <SectionHead title="Ce que je fais" meta="Sites · Applications · API" className="mt-24 md:mt-36" />
+        <SectionHead title="Ce que je fais" meta="Sites · Applications · Améliorations" className="mt-24 md:mt-36" />
         <ul className="grid md:grid-cols-2">
           {services.map((s, i) => (
             <li
