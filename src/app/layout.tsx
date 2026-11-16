@@ -61,7 +61,7 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
-      <body className="antialiased">{children}</body>
+      <body className="antialiased" suppressHydrationWarning>{children}</body>
     </html>
   );
 }
