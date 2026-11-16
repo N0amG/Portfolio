@@ -566,7 +566,7 @@ img {
 
 /* Bandeau défilant : animation CSS composée (aucun travail JS par frame) */
 .marquee-track {
-  animation: marquee 10.4s linear infinite;
+  animation: marquee 20.8s linear infinite;
 }
 @keyframes marquee {
   to { transform: translate3d(-50%, 0, 0); }
