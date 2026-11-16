@@ -5,8 +5,8 @@ import { useState } from "react";
 import { useMediaQuery } from "@/lib/useMediaQuery";
 import { AnimatePresence, motion, useMotionValue, useSpring } from "framer-motion";
 import { ArrowUpRightIcon } from "@phosphor-icons/react";
-import { Project, getProjectNumber } from "@/data/portfolio/projects";
-import { pad, ease } from "@/lib/site";
+import { Project } from "@/data/portfolio/projects";
+import { ease } from "@/lib/site";
 
 /**
  * Index des projets façon catalogue. Au survol (souris), une vignette suit le
@@ -29,8 +29,7 @@ export default function ProjectIndex({ projects }: { projects: Project[] }) {
   return (
     <div onPointerMove={onMove} onPointerLeave={() => setActive(null)} className="relative">
       <div className="f-label grid-12 hidden border-b border-line pb-3 text-muted md:grid">
-        <span className="col-span-1">N°</span>
-        <span className="col-span-5">Projet</span>
+        <span className="col-span-6">Projet</span>
         <span className="col-span-3">Type</span>
         <span className="col-span-2">Stack</span>
         <span className="col-span-1 text-right">Année</span>
@@ -57,13 +56,10 @@ export default function ProjectIndex({ projects }: { projects: Project[] }) {
               {/* remplissage signal depuis le bas */}
               <span
                 aria-hidden
-                className="absolute inset-0 origin-bottom scale-y-0 bg-signal transition-transform duration-500 ease-[var(--ease-expo)] group-hover:scale-y-100 group-focus-visible:scale-y-100"
+                className="opal-fill absolute inset-0 origin-bottom scale-y-0 transition-transform duration-500 ease-[var(--ease-expo)] group-hover:scale-y-100 group-focus-visible:scale-y-100"
               />
               <span className="grid-12 relative items-center py-5 transition-colors duration-300 group-hover:text-on-signal md:py-6">
-                <span className="f-label col-span-1 text-muted transition-colors group-hover:text-on-signal">
-                  {pad(getProjectNumber(p.slug))}
-                </span>
-                <span className="col-span-3 flex items-center gap-3 md:col-span-5">
+                <span className="col-span-4 flex items-center gap-3 md:col-span-6 md:pl-1">
                   <span
                     className="f-display text-[clamp(1.8rem,3.9vw,4rem)] uppercase transition-[font-variation-settings] duration-700 ease-[var(--ease-expo)] [--wdth:80] group-hover:[--wdth:104]"
                     style={{ "--wght": 760 } as React.CSSProperties}
@@ -124,9 +120,7 @@ export default function ProjectIndex({ projects }: { projects: Project[] }) {
                     transition={{ duration: 0.6, ease }}
                   />
                 </AnimatePresence>
-                <span className="f-label absolute bottom-0 left-0 bg-ink px-2 py-1 text-paper">
-                  {pad(getProjectNumber(projects[active].slug))} — {projects[active].title}
-                </span>
+                <span className="f-label absolute bottom-0 left-0 bg-ink px-2 py-1 text-paper">{projects[active].title}</span>
               </motion.div>
             )}
           </AnimatePresence>

@@ -22,27 +22,118 @@
   --ease-quart: cubic-bezier(0.76, 0, 0.24, 1);
 }
 
+/* ───────────────────────── Opale ─────────────────────────
+   Deux propriétés typées tournent en continu sur :root :
+   --opal-h (teinte de l'accent) et --opal-a (angle des dégradés).
+   Tout ce qui est "signal" ou "opal-*" change donc de couleur en direct. */
+
+@property --opal-h {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 300;
+}
+@property --opal-a {
+  syntax: "<angle>";
+  inherits: true;
+  initial-value: 0deg;
+}
+
+@keyframes opal-spin {
+  from { --opal-h: 300; --opal-a: 0deg; }
+  to { --opal-h: 660; --opal-a: 360deg; }
+}
+
 :root {
   color-scheme: light;
-  --paper: #ece9e1;
-  --surface: #e2ded4;
-  --ink: #121210;
-  --muted: #6c6a63;
-  --line: color-mix(in oklab, var(--ink) 16%, transparent);
-  --signal: #ff4a1c;
-  --on-signal: #121210;
+  animation: opal-spin 22s linear infinite;
+
+  /* Nacre */
+  --paper: #f3f0f2;
+  --surface: #e9e4ea;
+  --ink: #17161b;
+  --muted: #6e6a77;
+  --line: color-mix(in oklab, var(--ink) 15%, transparent);
+  --signal: oklch(0.6 0.17 var(--opal-h));
+  --on-signal: #17161b;
   --gutter: clamp(1rem, 2.6vw, 2.5rem);
-  --grain-opacity: 0.09;
+  --grain-opacity: 0.07;
+
+  /* Reflets de fond (statiques, peu coûteux) */
+  --sheen:
+    radial-gradient(55% 45% at 88% 0%, #e6dcff 0%, transparent 70%),
+    radial-gradient(45% 40% at 0% 38%, #ffe0ef 0%, transparent 70%),
+    radial-gradient(50% 45% at 100% 72%, #d6f4ea 0%, transparent 70%),
+    radial-gradient(45% 40% at 10% 100%, #dceeff 0%, transparent 70%);
+
+  /* Feu d'opale : teintes vives, pour le texte et les photos */
+  --opal-c1: #8f6bff;
+  --opal-c2: #ff5fae;
+  --opal-c3: #ff9a5a;
+  --opal-c4: #e9c53c;
+  --opal-c5: #2fcf9c;
+  --opal-c6: #3fa4ff;
+  --opal-sheen: rgb(255 255 255 / 0.6);
+  --opal-milk: rgb(255 255 255 / 0.12);
+
+  /* Nacre pâle : pour les aplats sous du texte encre */
+  --opal-p1: #e6dbff;
+  --opal-p2: #ffd5ea;
+  --opal-p3: #ffe2cc;
+  --opal-p4: #fff2c2;
+  --opal-p5: #cff6e6;
+  --opal-p6: #d3ebff;
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  --paper: #0e0e0c;
-  --surface: #181816;
-  --ink: #ece9e1;
-  --muted: #8b8980;
-  --signal: #ff5a2b;
-  --grain-opacity: 0.06;
+  /* Opale noire */
+  --paper: #0c0b0f;
+  --surface: #17161c;
+  --ink: #efecf3;
+  --muted: #8d8a97;
+  --signal: oklch(0.8 0.13 var(--opal-h));
+  --grain-opacity: 0.05;
+  --sheen:
+    radial-gradient(55% 45% at 88% 0%, #241c3d 0%, transparent 70%),
+    radial-gradient(45% 40% at 0% 40%, #2c1526 0%, transparent 70%),
+    radial-gradient(50% 45% at 100% 75%, #0f2a24 0%, transparent 70%);
+  --opal-c1: #b59bff;
+  --opal-c2: #ff86c8;
+  --opal-c3: #ffb27a;
+  --opal-c4: #ffe48a;
+  --opal-c5: #6ff0c6;
+  --opal-c6: #7cc8ff;
+  --opal-sheen: rgb(255 255 255 / 0.85);
+  --opal-milk: rgb(255 255 255 / 0.04);
+}
+
+:root {
+  /* Centre du conique hors champ + motif répété tous les 180° :
+     on voit de larges bandes irisées qui balaient la surface, pas un moulinet. */
+  --opal-fire:
+    linear-gradient(var(--opal-milk), var(--opal-milk)),
+    radial-gradient(38% 60% at 78% 22%, color-mix(in oklab, var(--opal-c2) 75%, transparent), transparent 70%),
+    radial-gradient(30% 55% at 18% 78%, color-mix(in oklab, var(--opal-c1) 70%, transparent), transparent 70%),
+    repeating-conic-gradient(
+      from var(--opal-a) at -10% 115%,
+      var(--opal-c1) 0deg, var(--opal-c2) 12deg, var(--opal-c3) 24deg, var(--opal-c4) 36deg,
+      var(--opal-c5) 48deg, var(--opal-c6) 60deg, var(--opal-c1) 72deg
+    );
+  --opal-pearl: repeating-conic-gradient(
+    from var(--opal-a) at -10% 115%,
+    var(--opal-p1) 0deg, var(--opal-p2) 30deg, var(--opal-p3) 60deg, var(--opal-p4) 90deg,
+    var(--opal-p5) 120deg, var(--opal-p6) 150deg, var(--opal-p1) 180deg
+  );
+  /* Facettes : des éclats clairs en biais, comme une opale fracturée */
+  --opal-facets: repeating-linear-gradient(
+    118deg,
+    transparent 0 9%,
+    rgb(255 255 255 / 0.22) 11%,
+    transparent 13.5%,
+    transparent 17%,
+    rgb(255 255 255 / 0.12) 18%,
+    transparent 21%
+  );
 }
 
 /* ───────────────────────── Base ───────────────────────── */
@@ -55,7 +146,8 @@ html {
 
 body {
   font-family: var(--font-sans);
-  background: var(--paper);
+  background: var(--sheen), var(--paper);
+  background-attachment: fixed;
   color: var(--ink);
   font-size: 1rem;
   line-height: 1.5;
@@ -174,23 +266,45 @@ img {
   100% { transform: translate(0, 0); }
 }
 
-/* Portrait bichrome encre / signal */
-.duotone {
+/* Texte opale (dégradé vivant clippé dans les lettres) */
+.opal-text {
+  /* composé ici (et non sur :root) pour que --mx / --my soient lus sur l'élément */
+  background-image:
+    radial-gradient(circle at var(--mx, 30%) var(--my, 35%), var(--opal-sheen) 0, transparent 18%),
+    var(--opal-facets),
+    var(--opal-fire);
+  background-size: 100% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Aplats nacrés (sous du texte encre) */
+.opal-fill {
+  background-image: var(--opal-facets), var(--opal-pearl);
+}
+
+/* Teinte d'opale vive (calque en mode "color") */
+.opal-fire {
+  background-image: var(--opal-fire);
+}
+
+/* Photo irisée : niveaux de gris + calque d'opale en mode couleur */
+.opal-photo {
   position: relative;
   isolation: isolate;
-  background: var(--signal);
+  background: var(--surface);
 }
-.duotone img {
-  filter: grayscale(1) contrast(1.25) brightness(1.05);
-  mix-blend-mode: multiply;
+.opal-photo img {
+  filter: grayscale(1) contrast(1.1) brightness(1.05);
 }
-.duotone::after {
+.opal-photo::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: var(--ink);
-  mix-blend-mode: lighten;
-  opacity: 0.08;
+  background-image: var(--opal-facets), var(--opal-fire);
+  mix-blend-mode: color;
+  opacity: 0.85;
   pointer-events: none;
 }
 
@@ -274,6 +388,7 @@ img {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  :root,
   .grain::after,
   .live-dot::after,
   .page-curtain,

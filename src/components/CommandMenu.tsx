@@ -13,8 +13,8 @@ import {
   MagnifyingGlassIcon,
   CircleHalfIcon,
 } from "@phosphor-icons/react";
-import { latestProjects, getProjectNumber } from "@/data/portfolio/projects";
-import { site, pad, ease } from "@/lib/site";
+import { latestProjects } from "@/data/portfolio/projects";
+import { site, ease } from "@/lib/site";
 import { useTheme } from "./ThemeProvider";
 import { useLenisLock } from "./SmoothScroll";
 
@@ -86,7 +86,7 @@ export default function CommandMenu() {
             <Dialog.Content asChild forceMount aria-describedby={undefined}>
               <motion.div
                 data-lenis-prevent
-                className="fixed left-1/2 top-[12vh] z-[96] w-[min(94vw,640px)] -translate-x-1/2 border border-ink bg-paper shadow-[10px_10px_0_0_var(--signal)]"
+                className="fixed left-1/2 top-[12vh] z-[96] w-[min(94vw,640px)] -translate-x-1/2 border border-ink bg-paper shadow-[0_30px_80px_-20px_color-mix(in_oklab,var(--signal)_55%,transparent)]"
                 initial={{ opacity: 0, y: -16, scale: 0.98 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: -10, scale: 0.98 }}
@@ -124,7 +124,7 @@ export default function CommandMenu() {
                           onSelect={() => run(() => router.push(`/projects/${p.slug}`))}
                           className={itemCls}
                         >
-                          <span className="f-label w-6 text-signal">{pad(getProjectNumber(p.slug))}</span>
+                          <span className="f-label w-9 text-signal">{p.date.slice(0, 4)}</span>
                           <span className="flex-1">{p.title}</span>
                           <span className="f-label hidden opacity-50 sm:inline">{p.categoryLabel}</span>
                         </Command.Item>

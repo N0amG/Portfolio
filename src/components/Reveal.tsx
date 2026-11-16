@@ -87,25 +87,25 @@ export function DrawRule({ className, delay = 0 }: { className?: string; delay?:
   );
 }
 
-/** En-tête de section : "(01) Titre ———— meta" */
+/** En-tête de section : un vrai titre, une info discrète à droite, un trait. */
 export function SectionHead({
-  index,
   title,
   meta,
   className,
 }: {
-  index: string;
   title: string;
   meta?: React.ReactNode;
   className?: string;
 }) {
   return (
     <div className={className}>
-      <div className="f-label flex items-baseline justify-between gap-6 pb-3 text-muted">
-        <span>
-          <span className="text-signal">({index})</span>&nbsp;&nbsp;{title}
-        </span>
-        {meta && <span className="text-right">{meta}</span>}
+      <div className="flex items-end justify-between gap-6 pb-4">
+        <MaskLines
+          as="h2"
+          className="f-display text-[clamp(1.9rem,3.6vw,3.4rem)] uppercase [--wdth:96] [--wght:720]"
+          lines={[title]}
+        />
+        {meta && <span className="f-label pb-1 text-right text-muted">{meta}</span>}
       </div>
       <DrawRule />
     </div>

@@ -33,10 +33,7 @@ export default function Footer() {
       <div className="shell pt-24 md:pt-36">
         {pathname !== "/contact" && (
           <div className="grid-12 gap-y-10 pb-20 md:pb-28">
-            <div className="f-label col-span-4 text-paper/50 md:col-span-3">
-              <span className="text-signal">(→)</span>&nbsp;&nbsp;Prochaine étape
-            </div>
-            <div className="col-span-4 md:col-span-9">
+            <div className="col-span-4 md:col-span-9 md:col-start-4">
               <Link href="/contact" className="group block">
                 <MaskLines
                   as="p"
@@ -45,11 +42,11 @@ export default function Footer() {
                     <span key="a" style={{ "--wdth": 70 } as React.CSSProperties} className="f-display">
                       Un projet ?
                     </span>,
-                    <span key="b" className="f-display inline-flex items-center gap-[0.15em] text-signal" style={{ "--wdth": 112 } as React.CSSProperties}>
-                      Parlons-en
+                    <span key="b" className="f-display inline-flex items-center gap-[0.15em]" style={{ "--wdth": 112 } as React.CSSProperties}>
+                      <span className="opal-text">Parlons-en</span>
                       <ArrowUpRightIcon
                         weight="bold"
-                        className="h-[0.7em] w-[0.7em] transition-transform duration-700 ease-[var(--ease-expo)] group-hover:rotate-45"
+                        className="h-[0.7em] w-[0.7em] text-signal transition-transform duration-700 ease-[var(--ease-expo)] group-hover:rotate-45"
                       />
                     </span>,
                   ]}
@@ -69,7 +66,7 @@ export default function Footer() {
 
         <div className="grid-12 gap-y-8 border-t border-paper/15 py-10">
           <div className="f-label col-span-2 md:col-span-3">
-            <p className="text-paper/40">Pages</p>
+            <p className="text-paper/40">Navigation</p>
             <ul className="mt-3 space-y-1.5">
               {[{ href: "/", label: "Accueil" }, ...site.nav].map((l) => (
                 <li key={l.href}>
@@ -81,7 +78,7 @@ export default function Footer() {
             </ul>
           </div>
           <div className="f-label col-span-2 md:col-span-3">
-            <p className="text-paper/40">Ailleurs</p>
+            <p className="text-paper/40">Réseaux</p>
             <ul className="mt-3 space-y-1.5">
               {site.socials.map((s) => (
                 <li key={s.href}>
@@ -93,19 +90,12 @@ export default function Footer() {
             </ul>
           </div>
           <div className="f-label col-span-2 md:col-span-3">
-            <p className="text-paper/40">Basé à</p>
+            <p className="text-paper/40">{site.city}</p>
             <p className="mt-3">
-              {site.city}
-              <br />
-              <LocalTime /> CET
+              <LocalTime />
             </p>
           </div>
-          <div className="f-label col-span-2 flex flex-col items-start justify-between gap-4 md:col-span-3 md:items-end">
-            <p className="text-paper/40 md:text-right">
-              Anybody · Instrument Sans
-              <br />
-              Martian Mono — auto-hébergées
-            </p>
+          <div className="f-label col-span-2 flex flex-col items-start justify-end gap-4 md:col-span-3 md:items-end">
             <button type="button" onClick={toTop} className="group flex items-center gap-2">
               Haut de page
               <ArrowUpIcon size={12} className="transition-transform group-hover:-translate-y-0.5" />
@@ -117,14 +107,14 @@ export default function Footer() {
       {/* Nom géant qui s'étire en arrivant en bas de page */}
       <div ref={nameRef} className="mx-[calc(var(--gutter)*0.5)] overflow-hidden text-[10vw]" aria-hidden>
         <motion.p
-          className="f-display whitespace-nowrap text-center uppercase leading-[0.78] text-paper"
+          className="f-display opal-text whitespace-nowrap pb-[0.06em] text-center uppercase leading-[0.86]"
           style={{ y: nameY, fontVariationSettings: fvs }}
         >
           Noam Guez
         </motion.p>
       </div>
       <div className="shell f-label flex justify-between py-4 text-paper/40">
-        <span>© {new Date().getFullYear()} Noam Guez</span>
+        <span>© {new Date().getFullYear()} Noam Guez — {site.role}</span>
         <span>Tous droits réservés</span>
       </div>
     </footer>

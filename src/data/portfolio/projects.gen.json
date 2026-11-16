@@ -7,7 +7,7 @@
       "Frontend"
     ],
     "categoryLabel": "Intégration Web/Mobile",
-    "description": "Application web/mobile de réservation hôtelière permettant aux usagers de trouver des hébergements et activités.",
+    "description": "Intégration responsive d'une plateforme de réservation d'hébergements, fidèle à la maquette sur mobile, tablette et desktop.",
     "tags": [
       "HTML",
       "CSS",
@@ -37,7 +37,7 @@
       "Frontend"
     ],
     "categoryLabel": "Portfolio Dynamique",
-    "description": "Portfolio d'une architecte d'intérieur avec gestion dynamique des projets et authentification.",
+    "description": "Portfolio d'architecte d'intérieur avec espace admin : connexion, ajout et suppression de projets sans rechargement.",
     "tags": [
       "HTML",
       "CSS",
@@ -70,7 +70,7 @@
       "Frontend"
     ],
     "categoryLabel": "Optimisation & SEO",
-    "description": "Optimisation des performances, de l'accessibilité et du SEO du site web d'une photographe.",
+    "description": "Audit et optimisation du site d'une photographe : performances, accessibilité et référencement naturel.",
     "tags": [
       "HTML",
       "CSS",
@@ -113,7 +113,7 @@
       "Frontend"
     ],
     "categoryLabel": "Application React",
-    "description": "Site de location d'appartements entre particuliers développé avec React et Sass.",
+    "description": "Application React de location entre particuliers : routing, composants réutilisables, design responsive en Sass.",
     "tags": [
       "React",
       "CSS",
@@ -148,7 +148,7 @@
       "Fullstack"
     ],
     "categoryLabel": "API REST Node.js",
-    "description": "Site de référencement et de notation de livres avec une API Express et une base MongoDB.",
+    "description": "API REST Node.js / MongoDB pour un site de notation de livres : authentification, upload et optimisation d'images.",
     "tags": [
       "Node.js",
       "Express",
@@ -187,7 +187,7 @@
       "Gestion de projet"
     ],
     "categoryLabel": "Planification & Spécifications",
-    "description": "Planification du projet \"Menu Maker\" : veille technologique, spécifications techniques et organisation Kanban.",
+    "description": "Cadrage d'un outil de création de menus : veille technique, spécifications et pilotage en Kanban.",
     "tags": [
       "Feedly",
       "Notion"
@@ -221,7 +221,7 @@
       "Frontend"
     ],
     "categoryLabel": "Next.js & Tailwind",
-    "description": "Portfolio personnel conçu avec Next.js et Tailwind CSS, hébergé sur Vercel.",
+    "description": "Ce site : Next.js, animations Motion, polices auto-hébergées, palette de commandes et thème clair / sombre.",
     "tags": [
       "Next.js",
       "Tailwind",
@@ -253,7 +253,7 @@
       "Backend"
     ],
     "categoryLabel": "Pipeline ETL / Scraping",
-    "description": "Pipeline ETL complet pour collecter, nettoyer et organiser les données de 1000 livres depuis Books to Scrape.",
+    "description": "Pipeline de scraping qui collecte, nettoie et exporte en CSV les données de 1 000 livres.",
     "tags": [
       "Python",
       "BeautifulSoup",
@@ -292,7 +292,7 @@
       "Python"
     ],
     "categoryLabel": "Application Console MVC",
-    "description": "Logiciel de gestion de tournois d'échecs en console avec architecture MVC et persistance JSON.",
+    "description": "Logiciel de gestion de tournois d'échecs en console, architecture MVC et sauvegarde JSON.",
     "tags": [
       "Python",
       "MVC",
@@ -327,7 +327,7 @@
       "Python"
     ],
     "categoryLabel": "Algorithmique & Optimisation",
-    "description": "Algorithme d'optimisation de portefeuille financier comparant force brute et algorithme glouton.",
+    "description": "Sélection du meilleur portefeuille d'actions sous contrainte de budget : force brute contre approche gloutonne.",
     "tags": [
       "Python",
       "Algorithmique",
@@ -363,7 +363,7 @@
       "Backend"
     ],
     "categoryLabel": "Application Django",
-    "description": "Application web Django de partage et de critique de livres avec système d'abonnements.",
+    "description": "Application Django de partage et de critique de livres, avec flux personnalisé et abonnements entre utilisateurs.",
     "tags": [
       "Python",
       "Django",
@@ -399,7 +399,7 @@
       "Backend"
     ],
     "categoryLabel": "CRM en ligne de commande",
-    "description": "Application CRM en ligne de commande pour la gestion de clients, contrats et événements avec permissions par rôle.",
+    "description": "CRM en ligne de commande pour gérer clients, contrats et événements, avec permissions par rôle et suivi d'erreurs Sentry.",
     "tags": [
       "Python",
       "PostgreSQL",
@@ -443,7 +443,7 @@
       "Backend"
     ],
     "categoryLabel": "Mini-jeu Temps Réel",
-    "description": "Mini-jeu multijoueur de pop culture en temps réel : devinez des œuvres à partir d'images progressivement dépixélisées le plus rapidement, et gagnez un maximum de points pour être le gagnant !",
+    "description": "Jeu multijoueur en temps réel : retrouver une œuvre à partir d'une image qui se dépixélise, le plus vite possible.",
     "tags": [
       "Next.js",
       "React",

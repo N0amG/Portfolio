@@ -89,7 +89,6 @@ function Gallery({ project, onOpen }: { project: Project; onOpen: (i: number) =>
                   draggable={false}
                   className="h-full w-full object-cover object-top transition-transform duration-[1.2s] ease-[var(--ease-expo)] group-hover:scale-[1.04]"
                 />
-                <span className="f-label absolute left-0 top-0 bg-paper px-2 py-1">{pad(i + 1)}</span>
               </button>
             </div>
           ))}
@@ -130,6 +129,11 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
   const overview = project.overview ?? [];
   const note = overview.find((p) => /^\(.*\)$/.test(p.trim()));
   const paragraphs = overview.filter((p) => p !== note);
+  const noteLabel = note
+    ? /fictif/i.test(note)
+      ? "Projet de formation — scénario fictif"
+      : note.replace(/[()]/g, "").trim()
+    : undefined;
 
   const spec: { k: string; v: React.ReactNode }[] = [
     { k: "Rôle", v: project.role ?? "—" },
@@ -144,10 +148,10 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
       <header className="shell">
         <FadeIn y={0} className="f-label flex items-center justify-between text-muted">
           <Link href="/projects" className="group flex items-center gap-2 hover:text-ink">
-            <ArrowLeftIcon size={12} className="transition-transform group-hover:-translate-x-1" /> Index des projets
+            <ArrowLeftIcon size={12} className="transition-transform group-hover:-translate-x-1" /> Tous les projets
           </Link>
           <span>
-            Projet <span className="text-signal">{n}</span> / {pad(projects.length)}
+            <span className="text-signal">{n}</span> / {pad(projects.length)}
           </span>
         </FadeIn>
 
@@ -179,7 +183,7 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
                     href={project.liveUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="f-label group flex h-9 items-center gap-2 bg-signal px-3 text-on-signal"
+                    className="f-label opal-fill group flex h-9 items-center gap-2 px-3 text-on-signal"
                   >
                     Voir le site
                     <ArrowUpRightIcon size={12} weight="bold" className="transition-transform group-hover:rotate-45" />
@@ -208,10 +212,10 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
         <Cover project={project} onOpen={() => setLightbox(0)} />
       </div>
 
-      {/* 01 Aperçu */}
+      {/* Le projet */}
       {paragraphs.length > 0 && (
         <section className="shell mt-24 md:mt-36">
-          <SectionHead index="01" title="Aperçu" meta={note?.replace(/[()]/g, "")} />
+          <SectionHead title="Le projet" meta={noteLabel} />
           <div className="grid-12 mt-10 gap-y-8">
             <FadeIn className="col-span-4 md:col-span-8 md:col-start-5">
               <p className="text-pretty text-[clamp(1.4rem,2.3vw,2.1rem)] leading-[1.2]">{paragraphs[0]}</p>
@@ -236,33 +240,30 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
         </section>
       )}
 
-      {/* 02 Défis */}
+      {/* Les défis */}
       {project.challenges && project.challenges.length > 0 && (
         <section className="shell mt-24 md:mt-36">
-          <SectionHead index="02" title="Défis" meta={`${pad(project.challenges.length)} points`} />
-          <ol className="mt-4">
+          <SectionHead title="Les défis" />
+          <ul>
             {project.challenges.map((c, i) => (
-              <FadeIn key={c.title} delay={i * 0.06}>
-                <li className="grid-12 items-baseline gap-y-3 border-b border-line py-8">
-                  <span
-                    className="f-display col-span-1 text-[clamp(2rem,4vw,3.5rem)] text-signal [--wdth:70] md:col-span-2"
-                    aria-hidden
-                  >
-                    {pad(i + 1)}
-                  </span>
-                  <h3 className="col-span-3 text-2xl font-medium md:col-span-4">{c.title}</h3>
-                  <p className="col-span-4 text-[17px] leading-relaxed text-muted md:col-span-6">{c.description}</p>
-                </li>
-              </FadeIn>
+              <li key={c.title} className="border-b border-line py-8">
+                <FadeIn delay={i * 0.06} className="grid-12 items-baseline gap-y-3">
+                  <h3 className="col-span-4 flex items-baseline gap-4 text-2xl font-medium md:col-span-5">
+                    <span aria-hidden className="opal-fill inline-block h-3 w-3 shrink-0 translate-y-[-0.1em]" />
+                    {c.title}
+                  </h3>
+                  <p className="col-span-4 text-[17px] leading-relaxed text-muted md:col-span-7">{c.description}</p>
+                </FadeIn>
+              </li>
             ))}
-          </ol>
+          </ul>
         </section>
       )}
 
-      {/* 03 Captures */}
+      {/* Captures d'écran */}
       {project.screenshots.length > 1 && (
         <section className="shell mt-24 md:mt-36">
-          <SectionHead index="03" title="Captures" meta="Glisser pour parcourir" />
+          <SectionHead title="Captures d'écran" meta="Glisser pour parcourir" />
           <div className="mt-10">
             <Gallery project={project} onOpen={setLightbox} />
           </div>
@@ -273,14 +274,14 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
       <nav className="shell mt-28 md:mt-40" aria-label="Autres projets">
         <div className="border-t border-ink">
           <Link href={`/projects/${next.slug}`} className="group grid-12 items-end gap-y-4 py-10">
-            <span className="f-label col-span-4 text-muted md:col-span-3">
-              <span className="text-signal">(→)</span>&nbsp;&nbsp;Projet suivant — {pad(getProjectNumber(next.slug))}
-            </span>
+            <span className="f-label col-span-4 text-muted md:col-span-3">Projet suivant</span>
             <span className="col-span-4 flex items-end justify-between gap-6 md:col-span-9">
               <span
-                className="f-display text-[clamp(2.6rem,9vw,9rem)] uppercase transition-[font-variation-settings,color] duration-700 ease-[var(--ease-expo)] [--wdth:90] group-hover:text-signal group-hover:[--wdth:140]"
+                className="f-display text-[clamp(2.6rem,9vw,9rem)] uppercase transition-[font-variation-settings] duration-700 ease-[var(--ease-expo)] [--wdth:90] group-hover:[--wdth:120]"
               >
-                {next.title}
+                <span className="bg-clip-text transition-colors duration-500 group-hover:text-transparent group-hover:[background-image:var(--opal-facets),var(--opal-fire)]">
+                  {next.title}
+                </span>
               </span>
               {next.thumbnail && (
                 <span className="relative hidden aspect-[4/3] w-[clamp(140px,16vw,260px)] shrink-0 overflow-hidden md:block">
