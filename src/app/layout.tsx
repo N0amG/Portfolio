@@ -41,8 +41,8 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   // Suit le thème de l'appareil (le bouton du site prend ensuite le relais)
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F6F3EA" },
-    { media: "(prefers-color-scheme: dark)", color: "#121A16" },
+    { media: "(prefers-color-scheme: light)", color: "#FAF5E8" },
+    { media: "(prefers-color-scheme: dark)", color: "#001219" },
   ],
 };
 

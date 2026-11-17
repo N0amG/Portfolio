@@ -40,41 +40,43 @@
 :root {
   color-scheme: light;
 
-  /* Vert sapin et moutarde — clair (contrastes WCAG mesurés) */
-  --paper: #f6f3ea;        /* fond ivoire */
-  --card: #ffffff;         /* cartes */
-  --alt: #ede8d9;          /* sections alternées */
+  /* Palette : Ink Black #001219 · Dark Teal #005F73 · Dark Cyan #0A9396 ·
+     Pearl Aqua #94D2BD · Vanilla Custard #E9D8A6 · Golden Orange #EE9B00
+     Clair (contrastes WCAG mesurés) */
+  --paper: #faf5e8;        /* fond : Vanilla Custard très éclairci */
+  --card: #fffdf7;         /* cartes */
+  --alt: #f1e6c6;          /* sections alternées : Vanilla Custard */
   --surface: var(--alt);   /* fonds d'images en attente */
-  --ink: #1d2925;          /* texte — 13.6:1 (12.3 sur --alt) */
-  --muted: #56605b;        /* texte secondaire — 5.9:1 (5.3 sur --alt) */
+  --ink: #001219;          /* Ink Black — 17.5:1 (15.3 sur --alt) */
+  --muted: #3d5660;        /* texte secondaire — 7.2:1 (6.3 sur --alt) */
   --line: color-mix(in oklab, var(--ink) 12%, transparent);
-  --accent: #2d6a55;       /* sapin clair : grands titres, survols — 5.7:1 */
-  --accent-ink: #1f4d3f;   /* vert sapin : liens, petit texte, boutons — 8.6:1 */
-  --on-accent: #ffffff;    /* texte sur --accent-ink 9.6:1, sur --accent 6.4:1 */
-  --touch: #d8a12a;        /* moutarde : aplats et points décoratifs (jamais en petit texte) */
-  --on-touch: #1d2925;     /* texte sur la moutarde — 6.5:1 */
-  --overlay: #1d2925;      /* voile sombre sur les images (identique dans les 2 thèmes) */
-  --on-overlay: #f6f3ea;   /* texte posé sur ce voile */
-  --band: var(--touch);    /* grande bande de couleur : moutarde */
+  --accent: #0a7e81;       /* Dark Cyan (un cran plus profond) : grands titres, survols — 4.5:1 */
+  --accent-ink: #005f73;   /* Dark Teal : liens, petit texte, boutons — 6.7:1 */
+  --on-accent: #ffffff;    /* texte sur --accent-ink 7.3:1, sur --accent 4.9:1 */
+  --touch: #ee9b00;        /* Golden Orange : aplats et points décoratifs (jamais en petit texte) */
+  --on-touch: #001219;     /* texte sur Golden Orange — 8.5:1 */
+  --overlay: #001219;      /* voile sombre sur les images (identique dans les 2 thèmes) */
+  --on-overlay: #faf5e8;   /* texte posé sur ce voile */
+  --band: var(--touch);    /* grande bande de couleur : Golden Orange */
   --on-band: var(--on-touch);
   --gutter: clamp(1.25rem, 4vw, 3rem);
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
-  /* Vert sapin et moutarde — sombre (vert très profond, accent moutarde) */
-  --paper: #121a16;
-  --card: #1a2520;
-  --alt: #1d2a23;          /* sections alternées, nettement distinctes du fond */
-  --ink: #eef0e8;          /* 15.4:1 */
-  --muted: #a7b2ab;        /* 8.1:1 */
-  --accent: #d8a12a;       /* 7.6:1 */
-  --accent-ink: #e6b54e;   /* 9.4:1 */
-  --on-accent: #1d2925;    /* texte sur --accent-ink 7.9:1, sur --accent 6.5:1 */
-  --touch: #d8a12a;
-  --on-touch: #1d2925;
-  --band: #1f4d3f;         /* bande vert sapin */
-  --on-band: #f6f3ea;      /* 8.6:1 */
+  /* Sombre : fond Ink Black, titres Pearl Aqua, boutons Golden Orange */
+  --paper: #001219;        /* Ink Black */
+  --card: #03202a;
+  --alt: #062a35;          /* sections alternées, nettement distinctes du fond */
+  --ink: #f4ecd6;          /* vanille clair — 16.2:1 */
+  --muted: #a3c2bb;        /* 10:1 (7.9 sur --alt) */
+  --accent: #94d2bd;       /* Pearl Aqua : grands titres, survols — 11.1:1 */
+  --accent-ink: #ee9b00;   /* Golden Orange : liens, boutons — 8.5:1 */
+  --on-accent: #001219;    /* texte sur --accent-ink 8.5:1, sur --accent 11.1:1 */
+  --touch: #ee9b00;
+  --on-touch: #001219;
+  --band: #005f73;         /* bande Dark Teal */
+  --on-band: #f4ecd6;      /* 6.2:1 */
   --line: color-mix(in oklab, var(--ink) 12%, transparent);
 }
 
