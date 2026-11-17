@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
+import { site } from "@/lib/site";
+import { defaultDescription, defaultTitle, keywords, seoRole, siteUrl, titleTemplate } from "@/lib/seo";
 
 /* ───────────────────────────────────────────────────────────
    Polices auto-hébergées (SIL OFL 1.1 — voir src/fonts/LICENSES.txt)
@@ -30,11 +32,38 @@ const sans = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Noam Guez — Creative developer",
-  description: "Noam Guez, creative developer en France : sites et applications web sur mesure.",
-  icons: {
-    icon: "/img/avatar.webp",
-    apple: "/img/avatar.webp",
+  metadataBase: new URL(siteUrl),
+  title: { default: defaultTitle, template: titleTemplate },
+  description: defaultDescription,
+  keywords,
+  applicationName: site.name,
+  authors: [{ name: site.name, url: siteUrl }],
+  creator: site.name,
+  publisher: site.name,
+  category: "technology",
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    locale: "fr_FR",
+    url: siteUrl,
+    siteName: `${site.name}, ${seoRole.toLowerCase()}`,
+    title: defaultTitle,
+    description: defaultDescription,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: defaultTitle,
+    description: defaultDescription,
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true, "max-image-preview": "large", "max-snippet": -1, "max-video-preview": -1 },
+  },
+  formatDetection: { telephone: false, address: false, email: false },
+  other: {
+    "geo.region": "FR-69",
+    "geo.placename": "Lyon",
   },
 };
 

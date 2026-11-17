@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRightIcon, ArrowUpRightIcon, PlusIcon } from "@phosphor-icons/react/dist/ssr";
@@ -12,6 +13,14 @@ import { FadeIn } from "@/components/Reveal";
 import { ctaLargeClass } from "@/lib/ui";
 import { getProjectBySlug, type Project } from "@/data/portfolio/projects";
 import { site } from "@/lib/site";
+import { defaultDescription, defaultTitle } from "@/lib/seo";
+import JsonLd, { faqPage } from "@/components/JsonLd";
+
+export const metadata: Metadata = {
+  title: { absolute: defaultTitle },
+  description: defaultDescription,
+  alternates: { canonical: "/" },
+};
 
 const offers = [
   {
@@ -94,11 +103,12 @@ function Tile({ project, big }: { project: Project; big?: boolean }) {
 export default function Home() {
   return (
     <>
+      <JsonLd data={faqPage(faq)} />
       {/* ───────── Hero : une promesse, un seul appel à l'action ───────── */}
       <section className="shell pb-14 pt-28 md:pb-20 md:pt-36">
-        <p className="hero-up f-label text-muted" style={{ animationDelay: "0.05s" }}>
-          {site.name} · {site.role} · {site.city}
-        </p>
+        <h1 className="hero-up f-label text-muted" style={{ animationDelay: "0.05s" }}>
+          {site.name} · Développeur web freelance à Lyon · {site.role}
+        </h1>
         <div className="mt-8">
           <HeroTitle />
         </div>

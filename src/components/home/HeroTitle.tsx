@@ -33,7 +33,7 @@ export default function HeroTitle() {
   ];
 
   return (
-    <h1 className="f-display text-[clamp(2.75rem,7.4vw,7.25rem)] leading-[1] tracking-[-0.03em] [--wght:380]">
+    <p className="f-display text-[clamp(2.75rem,7.4vw,7.25rem)] leading-[1] tracking-[-0.03em] [--wght:380]">
       {lines.map((line, i) => (
         <motion.span
           key={i}
@@ -46,6 +46,6 @@ export default function HeroTitle() {
           {i < lines.length - 1 && " "}
         </motion.span>
       ))}
-    </h1>
+    </p>
   );
 }

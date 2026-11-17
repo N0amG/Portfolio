@@ -6,11 +6,14 @@ import Assemble from "@/components/scroll/Assemble";
 import SectionIntro from "@/components/SectionIntro";
 import { FadeIn } from "@/components/Reveal";
 import { ctaClass } from "@/lib/ui";
+import JsonLd, { breadcrumb } from "@/components/JsonLd";
 
 export const metadata: Metadata = {
-  title: "À propos | Noam Guez",
+  title: "À propos",
   description:
-    "Noam Guez, creative developer : bachelor et master en développement, plusieurs années d'expérience en entreprise.",
+    "Noam Guez, développeur web freelance et creative developer à Lyon : bachelor et master en développement, plusieurs années d'expérience en entreprise. Création de sites pour commerçants et indépendants.",
+  alternates: { canonical: "/about" },
+  openGraph: { url: "/about" },
 };
 
 const milestones = [
@@ -34,6 +37,7 @@ const milestones = [
 export default function AboutPage() {
   return (
     <div className="pb-16 pt-28 md:pb-24 md:pt-36">
+      <JsonLd data={breadcrumb([{ name: "À propos", path: "/about" }])} />
       {/* En-tête */}
       <section className="shell grid items-center gap-12 md:grid-cols-[1.3fr_1fr] md:gap-16">
         <div>

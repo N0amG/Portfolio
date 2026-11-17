@@ -6,16 +6,20 @@ import Assemble from "@/components/scroll/Assemble";
 import SectionIntro from "@/components/SectionIntro";
 import { FadeIn } from "@/components/Reveal";
 import { featuredProjects, otherProjects } from "@/data/portfolio/projects";
+import JsonLd, { breadcrumb } from "@/components/JsonLd";
 
 export const metadata: Metadata = {
-  title: "Réalisations | Noam Guez",
+  title: "Réalisations : sites vitrines et applications web",
   description:
-    "Sites vitrines, réservation en ligne, applications web : une sélection de réalisations de Noam Guez, creative developer.",
+    "Sites vitrines, réservation en ligne, applications web : les réalisations de Noam Guez, développeur web freelance à Lyon, pour des commerces, des indépendants et des entreprises.",
+  alternates: { canonical: "/projects" },
+  openGraph: { url: "/projects" },
 };
 
 export default function ProjectsPage() {
   return (
     <div className="pb-16 pt-28 md:pb-24 md:pt-36">
+      <JsonLd data={breadcrumb([{ name: "Réalisations", path: "/projects" }])} />
       {/* En-tête */}
       <header className="shell">
         <h1 className="f-display text-[clamp(2.75rem,6.6vw,6.25rem)] leading-[1.02] tracking-[-0.025em] [--wght:390]">
