@@ -12,8 +12,8 @@ import { defaultDescription, defaultTitle, keywords, seoRole, siteUrl, titleTemp
    ─────────────────────────────────────────────────────────── */
 const display = localFont({
   src: [
-    { path: "../fonts/Fraunces-Variable.woff2", style: "normal" },
-    { path: "../fonts/Fraunces-Variable-Italic.woff2", style: "italic" },
+    { path: "../../fonts/Fraunces-Variable.woff2", style: "normal" },
+    { path: "../../fonts/Fraunces-Variable-Italic.woff2", style: "italic" },
   ],
   variable: "--ff-display",
   weight: "100 900",
@@ -23,7 +23,7 @@ const display = localFont({
 });
 
 const sans = localFont({
-  src: [{ path: "../fonts/Manrope-Variable.woff2", style: "normal" }],
+  src: [{ path: "../../fonts/Manrope-Variable.woff2", style: "normal" }],
   variable: "--ff-sans",
   weight: "200 800",
   display: "swap",
