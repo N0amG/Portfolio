@@ -28,6 +28,12 @@ function RouteReset() {
       lenis?.resize();
       return;
     }
+    // Arrivée sur /#section depuis une autre page : on se place sur la section
+    const hash = window.location.hash;
+    if (hash.length > 1 && document.querySelector(hash)) {
+      const id = window.setTimeout(() => lenis?.scrollTo(hash, { immediate: true, force: true }), 60);
+      return () => window.clearTimeout(id);
+    }
     lenis?.scrollTo(0, { immediate: true, force: true });
   }, [pathname, lenis]);
   return null;

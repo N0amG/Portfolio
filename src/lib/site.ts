@@ -10,9 +10,10 @@ export const site = {
     { label: "LinkedIn", href: "https://www.linkedin.com/in/noam-guez-0ba691261/", handle: "/in/noam-guez" },
   ],
   nav: [
-    { href: "/projects", label: "Réalisations" },
-    { href: "/about", label: "À propos" },
-    { href: "/contact", label: "Contact" },
+    { href: "/#services", label: "Services" },
+    { href: "/#realisations", label: "Réalisations" },
+    { href: "/#a-propos", label: "À propos" },
+    { href: "/#contact", label: "Contact" },
   ],
 } as const;
 

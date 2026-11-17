@@ -15,8 +15,8 @@ export default function Footer() {
 
   return (
     <footer className="mt-auto">
-      {/* Bandeau d'appel au contact (absent de la page Contact) */}
-      {pathname !== "/contact" && (
+      {/* Bandeau d'appel au contact (l'accueil a déjà sa section Contact) */}
+      {pathname !== "/" && (
         <div className="shell pb-12 md:pb-16">
           <div className="rounded-[28px] bg-alt px-6 py-10 md:px-12 md:py-12">
             <div className="grid gap-10 md:grid-cols-[1.4fr_1fr] md:items-end">
@@ -43,7 +43,7 @@ export default function Footer() {
           <div className="col-span-2 md:col-span-1">
             <p className="f-display text-[1.375rem] leading-none [--wght:520]">Noam Guez</p>
             <p className="mt-3 max-w-[34ch] text-[0.9375rem] text-muted">
-              Creative developer : sites et applications web sur mesure, partout en France.
+              Développeur web freelance à Lyon : sites et applications web sur mesure, partout en France.
             </p>
           </div>
           <nav aria-label="Pages">

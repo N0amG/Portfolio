@@ -39,7 +39,7 @@ export default async function ProjectDetailPage({ params }: { params: Promise<{ 
       <JsonLd
         data={[
           breadcrumb([
-            { name: "Réalisations", path: "/projects" },
+            { name: "Réalisations", path: "/#realisations" },
             { name: project.title, path: `/projects/${project.slug}` },
           ]),
           {

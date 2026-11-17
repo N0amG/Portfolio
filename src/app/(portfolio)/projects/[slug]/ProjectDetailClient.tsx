@@ -27,8 +27,6 @@ interface Props {
 /** Libellé du retour selon la page d'où l'on vient. */
 function backLabel(path: string): string {
   if (path === "/") return "Retour à l'accueil";
-  if (path === "/projects") return "Retour aux réalisations";
-  if (path === "/about") return "Retour à « À propos »";
   if (path.startsWith("/projects/")) return "Retour au projet précédent";
   return "Retour";
 }
@@ -51,7 +49,7 @@ function BackLink() {
 
   return (
     <Link
-      href={prev ?? "/projects"}
+      href={prev ?? "/#realisations"}
       onClick={(e) => {
         if (!prev) return;
         e.preventDefault();
