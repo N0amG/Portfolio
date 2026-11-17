@@ -6,7 +6,7 @@ import { site } from "./site";
  * un développeur web / une création de site à Lyon, puis en France à distance.
  */
 
-export const siteUrl = "https://www.noam-guez.com";
+export const siteUrl = "https://noamguez.fr";
 
 /** Intitulé qui porte le SEO ("Creative developer" reste l'intitulé du design). */
 export const seoRole = "Développeur web freelance";

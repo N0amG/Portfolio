@@ -23,7 +23,7 @@ export default function OpengraphImage() {
       >
         <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 30, color: "#94d2bd" }}>
           <div style={{ width: 14, height: 14, borderRadius: 999, background: "#ee9b00" }} />
-          noam-guez.com
+          noamguez.fr
         </div>
         <div style={{ display: "flex", flexDirection: "column" }}>
           <div style={{ fontSize: 84, lineHeight: 1.05, letterSpacing: -2 }}>Développeur web freelance</div>
