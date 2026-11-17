@@ -5,29 +5,29 @@ import AboutPortrait from "@/components/about/AboutPortrait";
 import Assemble from "@/components/scroll/Assemble";
 import SectionIntro from "@/components/SectionIntro";
 import { FadeIn } from "@/components/Reveal";
-import { ctaClass } from "@/components/Navbar";
+import { ctaClass } from "@/lib/ui";
 
 export const metadata: Metadata = {
   title: "À propos | Noam Guez",
   description:
-    "Noam Guez, développeur web freelance à Lyon : des sites simples et soignés pour les commerçants, une expérience en entreprise et en agence.",
+    "Noam Guez, creative developer : bachelor et master en développement, plusieurs années d'expérience en entreprise.",
 };
 
 const milestones = [
   {
-    when: "Depuis 2026",
-    title: "Développeur web chez Elissar",
-    text: "Je participe à la modernisation d'un logiciel professionnel vendu à des entreprises.",
+    when: "Formation",
+    title: "Bachelor & Master",
+    text: "En développement web, de l'interface jusqu'à l'hébergement.",
   },
   {
-    when: "2025",
-    title: "Agence web JVAIS",
-    text: "Des applications web et mobiles construites en équipe pour des clients, dont des fonctionnalités d'intelligence artificielle.",
+    when: "Expérience",
+    title: "Plusieurs années en entreprise",
+    text: "En agence et en entreprise, sur des applications web et mobiles livrées à de vrais clients.",
   },
   {
-    when: "2024 à 2028",
-    title: "Bac +3, Master en cours",
-    text: "Diplômé développeur web (Bac +3), en Master à l'EPSI, orienté hébergement et mise en ligne.",
+    when: "Méthode",
+    title: "Du design au déploiement",
+    text: "Maquette, développement, mise en ligne : je m'occupe de tout, avec un seul interlocuteur.",
   },
 ];
 
@@ -55,12 +55,10 @@ export default function AboutPage() {
           </h1>
           <div className="hero-up mt-10 max-w-[48ch] space-y-5" style={{ animationDelay: "0.3s" }}>
             <p className="text-pretty text-[clamp(1.2rem,1.7vw,1.45rem)] leading-[1.45]">
-              Je suis Noam, développeur web freelance à Lyon. Je crée des sites et des applications web de A à Z : ce que
-              vous voyez à l&apos;écran comme ce qui tourne en coulisses.
+              Je suis Noam, creative developer. Je conçois et développe des sites et des applications web de A à Z.
             </p>
             <p className="leading-relaxed text-muted">
-              Je travaille surtout pour des commerçants et des indépendants. Je m&apos;occupe de tout, de la maquette à
-              l&apos;hébergement, et c&apos;est moi qui vous réponds du début à la fin.
+              J&apos;analyse votre besoin, je comprends votre activité, et je construis ce qui vous correspond.
             </p>
           </div>
         </div>
@@ -69,7 +67,7 @@ export default function AboutPage() {
 
       {/* Repères */}
       <section className="shell mt-20 md:mt-28">
-        <SectionIntro title="Mon parcours" />
+        <SectionIntro title="En bref" />
         <ol className="mt-10 grid gap-6 md:grid-cols-3">
           {milestones.map((m, i) => (
             <li key={m.title}>

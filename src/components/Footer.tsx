@@ -3,10 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useLenis } from "lenis/react";
-import { ArrowRightIcon, ArrowUpIcon, ArrowUpRightIcon, CopyIcon } from "@phosphor-icons/react";
+import { ArrowUpIcon, ArrowUpRightIcon } from "@phosphor-icons/react";
 import { FadeIn, MaskLines } from "./Reveal";
-import { ctaClass } from "./Navbar";
-import { copyEmail } from "@/lib/copyEmail";
+import EmailActions from "./EmailActions";
 import { site } from "@/lib/site";
 
 export default function Footer() {
@@ -25,33 +24,14 @@ export default function Footer() {
                 <MaskLines
                   as="h2"
                   className="f-display text-[clamp(2rem,3.6vw,3.25rem)] [--wght:450]"
-                  lines={["Un projet pour", "votre commerce ?"]}
+                  lines={["Un projet", "en tête ?"]}
                 />
                 <FadeIn delay={0.15}>
-                  <p className="mt-5 max-w-[46ch] text-muted">
-                    Décrivez-moi votre besoin en quelques lignes : je vous réponds avec mes questions ou une première
-                    estimation.
-                  </p>
+                  <p className="mt-5 max-w-[40ch] text-muted">Écrivez-moi en quelques lignes, je vous réponds rapidement.</p>
                 </FadeIn>
               </div>
-              <FadeIn delay={0.2} className="flex flex-col items-start gap-4 md:items-end">
-                <Link href="/contact" className={ctaClass}>
-                  Demander un devis
-                  <ArrowRightIcon size={16} weight="bold" className="transition-transform duration-500 ease-[var(--ease-expo)] group-hover:translate-x-1" />
-                </Link>
-                <div className="flex items-center gap-3 text-[0.9375rem]">
-                  <a href={`mailto:${site.email}`} className="u-link">
-                    {site.email}
-                  </a>
-                  <button
-                    type="button"
-                    onClick={copyEmail}
-                    aria-label="Copier l'adresse email"
-                    className="grid h-11 w-11 place-items-center rounded-full text-muted transition-colors hover:bg-card hover:text-ink"
-                  >
-                    <CopyIcon size={16} />
-                  </button>
-                </div>
+              <FadeIn delay={0.2}>
+                <EmailActions align="end" />
               </FadeIn>
             </div>
           </div>
@@ -63,7 +43,7 @@ export default function Footer() {
           <div className="col-span-2 md:col-span-1">
             <p className="f-display text-[1.375rem] leading-none [--wght:520]">Noam Guez</p>
             <p className="mt-3 max-w-[34ch] text-[0.9375rem] text-muted">
-              Sites internet et applications web pour les commerçants et indépendants, à Lyon.
+              Creative developer : sites et applications web sur mesure, partout en France.
             </p>
           </div>
           <nav aria-label="Pages">
@@ -94,7 +74,7 @@ export default function Footer() {
         <div className="shell">
         <div className="flex flex-wrap items-center justify-between gap-4 border-t border-line py-5 text-sm text-muted">
           <span>
-            © {new Date().getFullYear()} Noam Guez, développeur web freelance à Lyon
+            © {new Date().getFullYear()} Noam Guez, creative developer
           </span>
           <button type="button" onClick={toTop} className="group inline-flex min-h-11 items-center gap-2 hover:text-ink">
             Haut de page

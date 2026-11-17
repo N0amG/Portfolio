@@ -30,8 +30,8 @@ const sans = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Noam Guez — Développeur web freelance",
-  description: "Noam Guez, développeur web freelance à Lyon : sites, applications web et API.",
+  title: "Noam Guez — Creative developer",
+  description: "Noam Guez, creative developer en France : sites et applications web sur mesure.",
   icons: {
     icon: "/img/avatar.webp",
     apple: "/img/avatar.webp",

@@ -1,62 +1,59 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowDownIcon, ArrowRightIcon, ArrowUpRightIcon, PlusIcon } from "@phosphor-icons/react/dist/ssr";
+import { ArrowRightIcon, ArrowUpRightIcon, PlusIcon } from "@phosphor-icons/react/dist/ssr";
 import HeroTitle from "@/components/home/HeroTitle";
-import VelocityMarquee from "@/components/home/VelocityMarquee";
 import ScrollStatement from "@/components/home/ScrollStatement";
+import ProcessTimeline, { type Step } from "@/components/home/ProcessTimeline";
 import Assemble from "@/components/scroll/Assemble";
 import RevealBand from "@/components/scroll/RevealBand";
 import CollageAssemble from "@/components/scroll/CollageAssemble";
 import SectionIntro from "@/components/SectionIntro";
 import { FadeIn } from "@/components/Reveal";
-import { ctaClass } from "@/components/Navbar";
+import { ctaLargeClass } from "@/lib/ui";
 import { getProjectBySlug, type Project } from "@/data/portfolio/projects";
-
-const trades = ["Restaurants", "Boutiques", "Artisans", "Salons", "Cafés", "Épiceries fines", "Fleuristes", "Boulangeries"];
+import { site } from "@/lib/site";
 
 const offers = [
   {
     title: "Site vitrine",
-    text: "Votre commerce présenté comme il le mérite : horaires, carte ou catalogue, photos, plan d'accès, et un bouton pour vous appeler.",
-    for: "Restaurants, boutiques, artisans",
+    text: "Votre activité présentée clairement : infos utiles, photos, et un moyen simple de vous joindre.",
+    for: "Commerces, artisans, indépendants",
   },
   {
     title: "Réservation en ligne",
-    text: "Vos clients réservent ou prennent rendez-vous à toute heure, reçoivent une confirmation, et vous suivez tout simplement.",
+    text: "Vos clients réservent à toute heure, vous gardez la main sur votre agenda.",
     for: "Salons, restaurants, location",
   },
   {
-    title: "Coup de neuf",
-    text: "Votre site actuel, repris : plus rapide sur mobile, plus clair à lire, et mieux placé sur Google.",
-    for: "Tous ceux qui ont déjà un site",
+    title: "Refonte",
+    text: "Votre site actuel, plus rapide sur mobile, plus clair, mieux placé sur Google.",
+    for: "Ceux qui ont déjà un site",
   },
 ];
 
-const steps = [
-  { title: "On en parle", text: "On définit ensemble votre besoin, ce qui est inclus et le délai. Vous recevez un devis clair." },
-  {
-    title: "Je le construis",
-    text: "Vous suivez l'avancement sur une version en ligne, mise à jour au fil du projet, et vous donnez votre avis.",
-  },
-  { title: "Mise en ligne", text: "Votre site est publié, je vous transmets tous les accès, et je reste joignable après." },
+const steps: Step[] = [
+  { title: "J'écoute", text: "On échange sur votre activité, vos clients et vos objectifs." },
+  { title: "J'analyse", text: "Je traduis votre besoin en solution concrète, avec un devis clair." },
+  { title: "Je construis", text: "Vous suivez l'avancement en ligne et validez chaque étape." },
+  { title: "Je livre", text: "Mise en ligne, accès transmis, et je reste disponible après." },
 ];
 
 const faq = [
   {
     q: "Combien coûte un site ?",
-    a: "Je propose des prix compétitifs, adaptés au volume du projet : un site vitrine de quelques pages ne coûte pas le prix d'une application complète. Après un premier échange, je vous envoie un devis détaillé et sans engagement.",
+    a: "Le prix dépend du projet : un site vitrine ne coûte pas le prix d'une application complète. Vous recevez un devis détaillé et sans engagement.",
   },
   {
     q: "En combien de temps est-il prêt ?",
-    a: "Comptez environ 10 jours pour un site vitrine, et 1 mois pour une application web complète, une fois vos textes et photos réunis. Le délai exact est écrit dans le devis, avant de commencer.",
+    a: "Environ 10 jours pour un site vitrine, 1 mois pour une application web. Le délai exact figure dans le devis.",
   },
   {
     q: "Pourrai-je modifier mon site moi-même ?",
-    a: "Oui, si vous le souhaitez : je peux prévoir un espace simple pour changer vos horaires, textes ou photos, et je vous montre comment faire.",
+    a: "Oui : je peux prévoir un espace simple pour changer vos textes, horaires ou photos.",
   },
   {
     q: "Et l'hébergement, le nom de domaine ?",
-    a: "Je m'occupe de la mise en ligne et je vous transmets tous les accès. Je vous explique les options d'hébergement et de nom de domaine.",
+    a: "Je m'occupe de la mise en ligne et je vous transmets tous les accès.",
   },
 ];
 
@@ -100,49 +97,34 @@ function Tile({ project, big }: { project: Project; big?: boolean }) {
 export default function Home() {
   return (
     <>
-      {/* ───────── Hero ───────── */}
-      <section className="shell pb-12 pt-28 md:pb-16 md:pt-36">
+      {/* ───────── Hero : une promesse, un seul appel à l'action ───────── */}
+      <section className="shell pb-14 pt-28 md:pb-20 md:pt-36">
         <p className="hero-up f-label text-muted" style={{ animationDelay: "0.05s" }}>
-          Noam Guez, développeur web freelance à Lyon
+          {site.name} · {site.role} · {site.city}
         </p>
         <div className="mt-8">
           <HeroTitle />
         </div>
 
         <div className="mt-10 border-t border-line pt-8 md:mt-12">
-          <div className="hero-up" style={{ animationDelay: "0.35s" }}>
-            <p className="max-w-[44ch] text-lg leading-relaxed md:text-[1.25rem]">
-              Je construis le site de votre commerce, de la première maquette à la mise en ligne. Vous n&apos;avez qu&apos;un
-              seul interlocuteur : moi.
+          <div className="hero-up flex flex-col gap-8 md:flex-row md:items-end md:justify-between" style={{ animationDelay: "0.35s" }}>
+            <p className="max-w-[40ch] text-lg leading-relaxed md:text-[1.25rem]">
+              Je conçois et développe votre site, de la maquette à la mise en ligne. Un seul interlocuteur : moi.
             </p>
-            <div className="mt-8 flex flex-wrap items-center gap-4">
-              <Link href="/contact" className={ctaClass}>
-                Demander un devis
-                <ArrowRightIcon size={16} weight="bold" className="transition-transform duration-500 ease-[var(--ease-expo)] group-hover:translate-x-1" />
-              </Link>
-              <Link
-                href="#realisations"
-                className="group inline-flex min-h-11 items-center gap-2 font-semibold text-accent-ink"
-              >
-                Voir des réalisations
-                <ArrowDownIcon size={16} weight="bold" className="transition-transform duration-500 group-hover:translate-y-0.5" />
-              </Link>
-            </div>
+            <Link href="/contact" className={`${ctaLargeClass} w-full justify-center sm:w-auto`}>
+              Demander un devis
+              <ArrowRightIcon size={20} weight="bold" className="transition-transform duration-500 ease-[var(--ease-expo)] group-hover:translate-x-1" />
+            </Link>
           </div>
         </div>
       </section>
 
-      {/* ───────── Métiers (banderole) ───────── */}
-      <section className="border-y border-line py-5 md:py-7" aria-label="Pour qui">
-        <VelocityMarquee
-          items={trades}
-          className="f-display text-[clamp(2.4rem,6vw,5.5rem)] italic leading-[1.15] [--wght:340]"
-        />
-      </section>
-
-      {/* ───────── Offres : lignes qui s'assemblent ───────── */}
+      {/* ───────── Ce que je peux faire pour vous ───────── */}
       <section className="shell py-16 md:py-24">
-        <SectionIntro title="Ce que je peux faire pour vous" />
+        <SectionIntro
+          title="Ce que je peux faire pour vous"
+          intro="J'analyse votre besoin, je comprends votre activité, et je crée la solution adaptée."
+        />
         <ol className="mt-8 border-b border-line">
           {offers.map((o, i) => (
             <li key={o.title}>
@@ -152,12 +134,12 @@ export default function Home() {
                     aria-hidden
                     className="absolute inset-0 origin-bottom scale-y-0 bg-accent-ink transition-transform duration-700 ease-[var(--ease-expo)] group-hover:scale-y-100"
                   />
-                  <div className="relative grid gap-4 px-1 py-7 transition-colors duration-500 group-hover:text-on-accent md:grid-cols-[1fr_1.15fr] md:items-baseline md:gap-10 md:px-6 md:py-8">
-                    <h3 className="f-display text-[clamp(2.1rem,3.8vw,3.4rem)] leading-[1.02] [--wght:420]">{o.title}</h3>
+                  <div className="relative grid gap-3 px-1 py-7 transition-colors duration-500 group-hover:text-on-accent md:grid-cols-[1fr_1.15fr] md:items-baseline md:gap-10 md:px-6 md:py-8">
+                    <h3 className="f-display text-[clamp(2rem,3.8vw,3.4rem)] leading-[1.02] [--wght:420]">{o.title}</h3>
                     <div>
                       <p className="text-lg leading-relaxed">{o.text}</p>
-                      <p className="mt-3 text-[0.9375rem] text-muted transition-colors duration-500 group-hover:text-on-accent">
-                        Idéal pour : {o.for}
+                      <p className="mt-2 text-[0.9375rem] text-muted transition-colors duration-500 group-hover:text-on-accent">
+                        Pour : {o.for}
                       </p>
                     </div>
                   </div>
@@ -168,21 +150,24 @@ export default function Home() {
         </ol>
       </section>
 
-      {/* ───────── Phrase choc : bande terracotta qui s'ouvre ───────── */}
+      {/* ───────── Phrase choc : bande qui s'ouvre ───────── */}
       <RevealBand className="bg-band py-20 text-on-band md:py-28">
         <div className="shell">
           <ScrollStatement
-            className="f-display text-[clamp(2.1rem,4.6vw,4.4rem)] leading-[1.08] [--wght:380]"
-            text="Avant de pousser votre porte, vos clients vous cherchent sur leur téléphone. Autant qu'ils y trouvent *ce* *qu'ils* *cherchent.*"
+            className="f-display text-[clamp(2rem,4.6vw,4.4rem)] leading-[1.08] [--wght:380]"
+            text="Vos clients vous cherchent d'abord sur leur téléphone. Faites qu'ils *vous* *y* *trouvent.*"
           />
         </div>
       </RevealBand>
 
-      {/* ───────── Morceaux de sites qui s'assemblent (section épinglée) ───────── */}
-      <CollageAssemble
-        title="Des sites que j'ai construits."
-        caption="Captures de projets réalisés en agence, en formation et pour moi."
-      />
+      {/* ───────── Comment on travaille ensemble (avant les réalisations) ───────── */}
+      <section className="shell py-16 md:py-24">
+        <SectionIntro title="Comment on travaille ensemble" />
+        <ProcessTimeline steps={steps} />
+      </section>
+
+      {/* ───────── Morceaux de sites qui s'assemblent (section épinglée, captures cliquables) ───────── */}
+      <CollageAssemble title="Des sites que j'ai construits." caption="Touchez une capture pour voir le projet." />
 
       {/* ───────── Réalisations : tuiles qui s'emboîtent ───────── */}
       <section id="realisations" className="shell scroll-mt-24 py-16 md:py-24">
@@ -210,44 +195,25 @@ export default function Home() {
         )}
       </section>
 
-      {/* ───────── Étapes + FAQ, côte à côte sur desktop ───────── */}
+      {/* ───────── Questions fréquentes ───────── */}
       <section className="mb-16 bg-alt py-16 md:mb-24 md:py-24">
-        <div className="shell grid gap-14 md:grid-cols-2 md:gap-16">
-          <div>
-            <SectionIntro title="Comment on travaille ensemble" />
-            <ol className="mt-8 border-t border-line">
-              {steps.map((s, i) => (
-                <li key={s.title} className="border-b border-line">
-                  <Assemble from={{ y: 60, opacity: 0 }} end="start 0.7" className="grid grid-cols-[3.25rem_1fr] gap-4 py-6">
-                    <span className="f-display text-[3rem] italic leading-[0.85] text-accent [--wght:300]">{i + 1}</span>
-                    <div>
-                      <h3 className="f-display text-[1.5rem] [--wght:480]">{s.title}</h3>
-                      <p className="mt-2 leading-relaxed text-muted">{s.text}</p>
-                    </div>
-                  </Assemble>
-                </li>
+        <div className="shell grid gap-10 md:grid-cols-[1fr_1.6fr] md:gap-16">
+          <SectionIntro title="Questions fréquentes" />
+          <FadeIn>
+            <div className="border-t border-line">
+              {faq.map((f) => (
+                <details key={f.q} className="group border-b border-line [&_summary::-webkit-details-marker]:hidden">
+                  <summary className="f-display flex min-h-11 cursor-pointer list-none items-center justify-between gap-6 py-5 text-[1.3rem] [--wght:450]">
+                    {f.q}
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-line transition-[transform,background-color,color] duration-500 ease-[var(--ease-expo)] group-open:rotate-45 group-open:bg-accent-ink group-open:text-on-accent">
+                      <PlusIcon size={16} weight="bold" />
+                    </span>
+                  </summary>
+                  <p className="max-w-[60ch] pb-6 leading-relaxed text-muted">{f.a}</p>
+                </details>
               ))}
-            </ol>
-          </div>
-
-          <div>
-            <SectionIntro title="Questions fréquentes" />
-            <FadeIn className="mt-8">
-              <div className="border-t border-line">
-                {faq.map((f) => (
-                  <details key={f.q} className="group border-b border-line [&_summary::-webkit-details-marker]:hidden">
-                    <summary className="f-display flex min-h-11 cursor-pointer list-none items-center justify-between gap-6 py-5 text-[1.3rem] [--wght:450]">
-                      {f.q}
-                      <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-line transition-[transform,background-color,color] duration-500 ease-[var(--ease-expo)] group-open:rotate-45 group-open:bg-accent-ink group-open:text-on-accent">
-                        <PlusIcon size={16} weight="bold" />
-                      </span>
-                    </summary>
-                    <p className="max-w-[60ch] pb-6 leading-relaxed text-muted">{f.a}</p>
-                  </details>
-                ))}
-              </div>
-            </FadeIn>
-          </div>
+            </div>
+          </FadeIn>
         </div>
       </section>
     </>

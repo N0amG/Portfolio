@@ -5,14 +5,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import * as Dialog from "@radix-ui/react-dialog";
 import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "framer-motion";
-import { ArrowRightIcon, ArrowUpRightIcon } from "@phosphor-icons/react";
+import { ArrowUpRightIcon } from "@phosphor-icons/react";
 import ThemeToggle from "./ThemeToggle";
 import { useLenisLock } from "./SmoothScroll";
 import { site, ease, easeInOut } from "@/lib/site";
-
-/** Bouton pilule principal (terracotta), réutilisé dans le header, le menu et le footer. */
-export const ctaClass =
-  "group inline-flex h-12 items-center gap-2 rounded-full bg-accent-ink px-6 font-semibold text-on-accent transition-colors hover:bg-accent";
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -99,10 +95,6 @@ export default function Navbar() {
 
           <div className="flex items-center gap-2">
             <ThemeToggle className="h-11 w-11" />
-            <Link href="/contact" className={`${ctaClass.replace("inline-flex", "hidden sm:inline-flex")} h-11 px-5 text-[0.9375rem]`}>
-              Demander un devis
-              <ArrowRightIcon size={16} weight="bold" className="transition-transform duration-500 ease-[var(--ease-expo)] group-hover:translate-x-1" />
-            </Link>
             <button
               type="button"
               onClick={() => setMenuOpen(true)}
@@ -175,10 +167,6 @@ export default function Navbar() {
                     exit={{ opacity: 0 }}
                     transition={{ delay: 0.5 }}
                   >
-                    <Link href="/contact" onClick={() => setMenuOpen(false)} className={`${ctaClass} justify-center`}>
-                      Demander un devis
-                      <ArrowRightIcon size={16} weight="bold" />
-                    </Link>
                     <div className="flex flex-wrap items-center justify-between gap-4 text-[0.9375rem] text-muted">
                       <a href={`mailto:${site.email}`} className="hover:text-ink">
                         {site.email}

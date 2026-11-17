@@ -1,7 +1,7 @@
 export const site = {
   name: "Noam Guez",
-  role: "Développeur web freelance",
-  city: "Lyon, France",
+  role: "Creative developer",
+  city: "France",
   email: "noamguez0@gmail.com",
   /** Téléphone / WhatsApp affiché sur la page Contact (laisser vide pour le masquer), ex. "+33 6 12 34 56 78". */
   phone: "" as string,
@@ -15,6 +15,11 @@ export const site = {
     { href: "/contact", label: "Contact" },
   ],
 } as const;
+
+/** Ouvre une nouvelle conversation Gmail adressée à moi, avec un objet prérempli. */
+export const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(site.email)}&su=${encodeURIComponent(
+  "Demande de devis",
+)}`;
 
 export const ease = [0.16, 1, 0.3, 1] as const;
 export const easeInOut = [0.76, 0, 0.24, 1] as const;

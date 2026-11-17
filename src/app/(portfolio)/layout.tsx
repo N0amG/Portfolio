@@ -5,9 +5,9 @@ import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
-  title: "Noam Guez — Développeur web freelance à Lyon",
+  title: "Noam Guez — Creative developer",
   description:
-    "Développeur web freelance à Lyon. Je conçois et développe sites, applications web et API en React, Next.js, Node.js et Django.",
+    "Noam Guez, creative developer en France. J'analyse votre besoin et je conçois le site ou l'application web qui vous correspond.",
 };
 
 export default function PortfolioLayout({ children }: { children: React.ReactNode }) {

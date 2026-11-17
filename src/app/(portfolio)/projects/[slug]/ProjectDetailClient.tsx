@@ -13,7 +13,7 @@ const Lightbox = dynamic(() => import("@/components/Lightbox"), { ssr: false });
 import { FadeIn } from "@/components/Reveal";
 import Assemble from "@/components/scroll/Assemble";
 import SectionIntro from "@/components/SectionIntro";
-import { ctaClass } from "@/components/Navbar";
+import { ctaClass } from "@/lib/ui";
 import { Project } from "@/data/portfolio/projects";
 
 interface Props {

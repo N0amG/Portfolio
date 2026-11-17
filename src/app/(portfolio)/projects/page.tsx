@@ -10,7 +10,7 @@ import { featuredProjects, otherProjects } from "@/data/portfolio/projects";
 export const metadata: Metadata = {
   title: "Réalisations | Noam Guez",
   description:
-    "Sites vitrines, réservation en ligne, optimisation : une sélection de réalisations de Noam Guez, développeur web freelance à Lyon.",
+    "Sites vitrines, réservation en ligne, applications web : une sélection de réalisations de Noam Guez, creative developer.",
 };
 
 export default function ProjectsPage() {
