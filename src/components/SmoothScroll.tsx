@@ -2,13 +2,32 @@
 
 import { ReactLenis, useLenis } from "lenis/react";
 import { usePathname } from "next/navigation";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useMediaQuery } from "@/lib/useMediaQuery";
 
+/**
+ * Nouvelle page → haut de page. Sauf pour un retour / une avance du navigateur
+ * (popstate) : on laisse la position précédente être restaurée.
+ */
 function RouteReset() {
   const pathname = usePathname();
   const lenis = useLenis();
+  const fromHistory = useRef(false);
+
   useEffect(() => {
+    const onPop = () => {
+      fromHistory.current = true;
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  useEffect(() => {
+    if (fromHistory.current) {
+      fromHistory.current = false;
+      lenis?.resize();
+      return;
+    }
     lenis?.scrollTo(0, { immediate: true, force: true });
   }, [pathname, lenis]);
   return null;

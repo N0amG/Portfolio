@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { getPreviousPath } from "@/lib/navHistory";
 import dynamic from "next/dynamic";
 import { motion, useScroll, useTransform } from "framer-motion";
 import useEmblaCarousel from "embla-carousel-react";
@@ -20,6 +22,48 @@ interface Props {
   project: Project;
   prev: Project;
   next: Project;
+}
+
+/** Libellé du retour selon la page d'où l'on vient. */
+function backLabel(path: string): string {
+  if (path === "/") return "Retour à l'accueil";
+  if (path === "/projects") return "Retour aux réalisations";
+  if (path === "/about") return "Retour à « À propos »";
+  if (path.startsWith("/projects/")) return "Retour au projet précédent";
+  return "Retour";
+}
+
+/**
+ * Bouton retour : ramène à la page d'où l'on vient (retour navigateur, qui
+ * restaure aussi la position de scroll). Sans page précédente sur le site
+ * (lien partagé, rechargement), il mène à toutes les réalisations.
+ */
+function BackLink() {
+  const router = useRouter();
+  const [prev, setPrev] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Lu après le montage (le rendu serveur et le premier rendu client restent identiques),
+    // et après l'effet de RouteTracker qui enregistre la navigation en cours.
+    const id = window.setTimeout(() => setPrev(getPreviousPath()), 0);
+    return () => window.clearTimeout(id);
+  }, []);
+
+  return (
+    <Link
+      href={prev ?? "/projects"}
+      onClick={(e) => {
+        if (!prev) return;
+        e.preventDefault();
+        router.back();
+      }}
+      className="hero-up group inline-flex min-h-11 items-center gap-2 text-[0.9375rem] font-medium text-muted hover:text-ink"
+      style={{ animationDelay: "0.02s" }}
+    >
+      <ArrowLeftIcon size={14} className="transition-transform group-hover:-translate-x-1" />{" "}
+      {prev ? backLabel(prev) : "Toutes les réalisations"}
+    </Link>
+  );
 }
 
 /** Couverture arrondie, dévoilée par le haut, avec un parallaxe interne au scroll. */
@@ -147,13 +191,7 @@ export default function ProjectDetailClient({ project, prev, next }: Props) {
     <article className="pb-16 pt-28 md:pb-24 md:pt-36">
       {/* En-tête */}
       <header className="shell">
-        <Link
-          href="/projects"
-          className="hero-up group inline-flex min-h-11 items-center gap-2 text-[0.9375rem] font-medium text-muted hover:text-ink"
-          style={{ animationDelay: "0.02s" }}
-        >
-          <ArrowLeftIcon size={14} className="transition-transform group-hover:-translate-x-1" /> Toutes les réalisations
-        </Link>
+        <BackLink />
 
         <div className="mt-8 grid items-end gap-10 md:grid-cols-12">
           <h1 className="f-display text-[clamp(3rem,8vw,7.5rem)] leading-[0.98] tracking-[-0.03em] [--wght:390] md:col-span-8">
