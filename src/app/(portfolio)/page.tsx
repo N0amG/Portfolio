@@ -15,25 +15,22 @@ import { site } from "@/lib/site";
 
 const offers = [
   {
-    title: "Site vitrine",
-    text: "Votre activité présentée clairement : infos utiles, photos, et un moyen simple de vous joindre.",
-    for: "Commerces, artisans, indépendants",
+    title: "J'analyse",
+    text: "Votre activité, vos clients, vos contraintes : je pars de votre besoin réel, pas d'un modèle tout fait.",
   },
   {
-    title: "Réservation en ligne",
-    text: "Vos clients réservent à toute heure, vous gardez la main sur votre agenda.",
-    for: "Salons, restaurants, location",
+    title: "Je comprends",
+    text: "Je traduis ce besoin en solution concrète : site, application web, outil sur mesure.",
   },
   {
-    title: "Refonte",
-    text: "Votre site actuel, plus rapide sur mobile, plus clair, mieux placé sur Google.",
-    for: "Ceux qui ont déjà un site",
+    title: "Je crée",
+    text: "Je conçois et développe une solution adaptée, rapide, claire et prête à évoluer avec vous.",
   },
 ];
 
 const steps: Step[] = [
-  { title: "J'écoute", text: "On échange sur votre activité, vos clients et vos objectifs." },
-  { title: "J'analyse", text: "Je traduis votre besoin en solution concrète, avec un devis clair." },
+  { title: "On échange", text: "Votre activité, vos clients et vos objectifs." },
+  { title: "Je propose", text: "Une solution concrète et un devis clair." },
   { title: "Je construis", text: "Vous suivez l'avancement en ligne et validez chaque étape." },
   { title: "Je livre", text: "Mise en ligne, accès transmis, et je reste disponible après." },
 ];
@@ -121,10 +118,7 @@ export default function Home() {
 
       {/* ───────── Ce que je peux faire pour vous ───────── */}
       <section className="shell py-16 md:py-24">
-        <SectionIntro
-          title="Ce que je peux faire pour vous"
-          intro="J'analyse votre besoin, je comprends votre activité, et je crée la solution adaptée."
-        />
+        <SectionIntro title="Ce que je peux faire pour vous" />
         <ol className="mt-8 border-b border-line">
           {offers.map((o, i) => (
             <li key={o.title}>
@@ -136,12 +130,7 @@ export default function Home() {
                   />
                   <div className="relative grid gap-3 px-1 py-7 transition-colors duration-500 group-hover:text-on-accent md:grid-cols-[1fr_1.15fr] md:items-baseline md:gap-10 md:px-6 md:py-8">
                     <h3 className="f-display text-[clamp(2rem,3.8vw,3.4rem)] leading-[1.02] [--wght:420]">{o.title}</h3>
-                    <div>
-                      <p className="text-lg leading-relaxed">{o.text}</p>
-                      <p className="mt-2 text-[0.9375rem] text-muted transition-colors duration-500 group-hover:text-on-accent">
-                        Pour : {o.for}
-                      </p>
-                    </div>
+                    <p className="text-lg leading-relaxed">{o.text}</p>
                   </div>
                 </div>
               </Assemble>
