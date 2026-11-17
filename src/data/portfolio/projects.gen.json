@@ -249,7 +249,7 @@
         "description": "Les messages partent par email depuis le serveur, avec une limite d'envoi par visiteur pour éviter les abus."
       }
     ],
-    "liveUrl": "https://www.noam-guez.com/",
+    "liveUrl": "https://noamguez.fr/",
     "codeUrl": "https://github.com/N0amG/Portfolio",
     "imgCount": 5
   },
