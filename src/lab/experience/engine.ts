@@ -9,7 +9,7 @@ import { createLetters } from "./text/letters";
 import { createQuality, type TierName } from "./quality";
 import { createRegistry } from "./scenes/registry";
 import { createSceneElements } from "./scenes";
-import { SKY_H, SKY_W, type CompositeParams, type FrameParams, type Layer } from "./scenes/types";
+import { SKY_H, SKY_W, type BlackholeParams, type CompositeParams, type FrameParams, type Layer } from "./scenes/types";
 
 /* ───────────────────────────────────────────────────────────
    Moteur : renderer, passes, boucle unique, qualité automatique.
@@ -134,6 +134,7 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
       uStepK: { value: 0.07 }, uOct: { value: 4 },
       uSkyRot: { value: new THREE.Matrix3() }, uClock: { value: 0 },
       uSkyTex: { value: null as THREE.Texture | null }, uSkyOn: { value: 0 },
+      uErupt: { value: new THREE.Vector4() },
     },
     vertexShader: FS_VERT,
     fragmentShader: BLACKHOLE_FRAG,
@@ -256,16 +257,17 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
   // -------------------------------------------------------------------------
   // Registre de scènes (éléments visuels du catalogue, section 5 bis)
   // -------------------------------------------------------------------------
-  const scenes = createRegistry(createSceneElements(), { renderer, camera: textCam, ortho: orthoCam });
+  const scenes = createRegistry(createSceneElements(), { root: els.canvas.parentElement ?? document.body, renderer, camera: textCam, ortho: orthoCam });
   const composite: CompositeParams = {
     waves: finalMat.uniforms.uWaves.value as THREE.Vector4[],
     motion: finalMat.uniforms.uMotion.value as THREE.Vector2,
     chroma: 0,
     flare: 0,
   };
+  const bhParams: BlackholeParams = { erupt: bhMat.uniforms.uErupt.value as THREE.Vector4 };
   const frameParams: FrameParams = {
     s: 0, slide: 0, weight: 0, dt: 0, time: 0, camPos, camF, camR, camU, viewProj, bhScreen, bhNdc, rhNdc,
-    mouse: new THREE.Vector2(), width: 1, height: 1, dpr: DPR, reduced: false, composite,
+    mouse: new THREE.Vector2(), width: 1, height: 1, dpr: DPR, reduced: false, composite, bh: bhParams,
   };
   function updateScenes(dt: number) {
     const f = frameParams;
@@ -273,6 +275,7 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     f.mouse.set(parX, parY); f.width = window.innerWidth; f.height = window.innerHeight;
     for (const w of composite.waves) w.set(0, 0, 0, 0);
     composite.motion.set(0, 0); composite.chroma = 0; composite.flare = 0;
+    bhParams.erupt.set(0, 0, 0, 0);
     scenes.update(f, P.tier);
   }
   /** Rend une couche du registre dans la cible donnée, par-dessus son contenu. */
@@ -441,6 +444,8 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     bhMat,
     nav,
     scenes,
+    composite,
+    bhParams,
     listeners,
     quality,
     resizeTargets,

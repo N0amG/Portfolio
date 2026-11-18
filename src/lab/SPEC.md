@@ -341,7 +341,17 @@ Web Audio **procédural**, sans fichier au départ : aucune licence et un son en
 
 Une **session neuve par phase**, qui commence par lire ce fichier.
 
-**État au 18/11/2026 : lot V0 (socle) fait, en attente de validation par Noam. Prochaine étape : lot V1.**
+**État au 18/11/2026 : lots V0 et V1 faits (V1 en attente de validation par Noam). Prochaine étape : lot V2.**
+
+**Lot V1 (effets légers), tous dans `experience/scenes/`, chacun avec son dossier lil-gui et son interrupteur :**
+- `composite.ts` : **12 ondes** (anneau au départ et, plus discret, à l'arrivée de chaque transition, jusqu'à 4 ; déplacement radial dans `FINAL_FRAG`), **13 mouvement** (vitesse apparente de la caméra : flou directionnel en 8 prises **sur les étoiles seulement**, car flouter le trou noir dupliquait ses contours ; aberration chromatique radiale sur le fond et les étoiles), **14 reflets** (traînée horizontale tirée du bloom, masquée par l'ombre et le disque ; portée réduite à 0,16 et intensité à 0,12 car une longue traînée à gauche du disque ressemblait à une duplication des contours).
+- `dust.ts` **15** : 1 800 points en 3 couches (couche `front`), fixes dans le monde, recyclés par modulo autour de la caméra ; parallaxe caméra et souris.
+- `comets.ts` **9** : 3 emplacements, spirale en écran calculée dans le vertex shader (couche `back`, cachées par l'ombre) ; une toutes les ~5,5 s sur S3, ~26 s ailleurs.
+- `galaxy.ts` **10** : spirale dessinée dans la couche `sky` (S1), donc lentillée (image primaire + image secondaire de l'autre côté). `SKY_W×SKY_H` passé de 1024×512 à **2048×1024** (trop flou sinon).
+- `eruption.ts` **16** : clic = azimut du disque sous le curseur ; uniform `uErupt` dans `blackhole.ts` (front net, queue qui s'étire, tour du disque en ~3,4 s).
+- `hud.ts` **19** : DOM (`.lab-sci`, coin haut droit), valeurs par slide interpolées, distance et décalage gravitationnel en direct, chiffres qui défilent pendant les transitions ; pas d'écriture DOM hors changement de texte (12 Hz max).
+- Ajouts d'infrastructure : `FrameParams.bh` (paramètres du shader du trou noir), `SceneContext.root`, `SceneElement.setActive` (éléments DOM), `__composite` et `__bhParams` en console.
+- **Mesures** (`__bench(1000)`, médiane de 5, RTX 5070 Ti, 1680×1148, résolution 1, haute, S1) : base 0,70 ms ; ondes +0,01 ; mouvement +0,01 (version initiale à 8 prises sur la scène) ; reflets +0,00 ; poussière +0,01 ; éruption +0,01 ; comètes +0,01 ; galaxie +0,03 ; tous ensemble 0,73 au repos et 0,74 en pleine transition. 180 fps tenus sur S1→S9 et retour, aucune erreur console. Mesures à refaire sur la simulation ×9 / ×90 avant ouverture.
 - **Registre de scènes** (`experience/scenes/`) :
   - `types.ts` : interface `SceneElement` (`id`, `label`, `slides` en index 0-based via `S(n)` ou `"all"`, `cost` léger/moyen/lourd, `minTier`, `layers`, `enabledByDefault`, `init(ctx)`, `update(f)`, `render(layer, ctx)`, `dispose()`, `gui(folder)` optionnel), `FrameParams` (caméra, matrice, centre et ombre du trou noir, souris, `weight` 0→1 dans la fenêtre, `reduced`, `composite`) et `CompositeParams`.
   - Couches : `back` (après les étoiles, dans leur cible pleine résolution, caché par l'ombre), `sky` (cible équirectangulaire 1024×512 échantillonnée par le shader du trou noir à travers les rayons courbés : 10, 18), `front` (à l'écran après la composition). Effets de composition (12, 13, 14) : `f.composite` (`waves[4]`, `motion`, `chroma`, `flare`), branchés sur des uniforms déclarés dans `FINAL_FRAG`, utilisés à partir de V1.

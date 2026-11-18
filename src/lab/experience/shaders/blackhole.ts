@@ -6,6 +6,7 @@ export const BLACKHOLE_FRAG = /* glsl */ `
   varying vec2 vUv;
   uniform vec2 uRes; uniform float uTime, uTanHalf, uIntensity, uDoppler, uStepK, uOct, uClock;
   uniform mat3 uSkyRot;
+  uniform vec4 uErupt;   // 16 · éruption du disque : (azimut de départ, âge, vitesse angulaire, amplitude)
   uniform sampler2D uSkyTex; uniform float uSkyOn;   // couche "sky" du registre (équirectangulaire, repère monde)
   uniform vec3 uCamPos, uCamR, uCamU, uCamF, uC0, uC1, uC2, uC3;
   ${COMMON}
@@ -49,6 +50,17 @@ export const BLACKHOLE_FRAG = /* glsl */ `
     float temp = pow(R_IN / r, 0.85) * shift;
     vec3 c = ramp(temp * 0.95 + n * 0.18);
     float bright = prof * (0.25 + 1.5 * n) * pow(shift, 3.0) * (0.6 + 1.6 * pow(R_IN / r, 1.5)) * uIntensity * 2.2;
+    if (uErupt.w > 0.0){
+      // 16 · éruption : une langue de plasma part de l'azimut du clic, fait le tour du disque (front net, queue qui s'étire)
+      float head = uErupt.x + uErupt.z * uErupt.y;
+      float dl = mod(head - phi + 3.14159265, 6.2831853) - 3.14159265;  // ≥ 0 : derrière le front
+      dl *= sign(uErupt.z);
+      float tail = dl >= 0.0 ? exp(-dl * 1.1) : exp(dl * 9.0);
+      float rad = exp(-pow((r - 5.2) / 4.2, 2.0));
+      float e = tail * rad * uErupt.w * (0.65 + 0.7 * n);
+      bright = bright * (1.0 + 3.5 * e) + prof * e * 7.0 * uIntensity;
+      c = mix(c, ramp(0.9), clamp(e, 0.0, 1.0) * 0.7);
+    }
     float alpha = clamp(prof * (0.8 + 0.5 * n), 0.0, 0.97);
     return vec4(c * bright, alpha);
   }

@@ -14,6 +14,7 @@ export interface Entry {
   el: SceneElement;
   enabled: boolean;
   active: boolean;
+  wasActive: boolean;
   /** Dans la fenêtre et autorisé (interrupteur + qualité), avant le budget et la coupe de décor. */
   candidate: boolean;
   d: number;
@@ -22,7 +23,7 @@ export interface Entry {
 
 export function createRegistry(elements: SceneElement[], ctx: SceneContext) {
   const entries: Entry[] = elements.map((el) => ({
-    el, enabled: el.enabledByDefault ?? true, active: false, candidate: false, d: 1, slide: 0,
+    el, enabled: el.enabledByDefault ?? true, active: false, wasActive: false, candidate: false, d: 1, slide: 0,
   }));
   const sorted = entries.slice();
   let decor = 0;
@@ -64,6 +65,10 @@ export function createRegistry(elements: SceneElement[], ctx: SceneContext) {
       f.weight = 1 - e.d;
       f.reduced = c === "leger" && decor >= 2;
       e.el.update(f);
+    }
+    // éléments DOM : prévenus quand ils entrent ou sortent de la fenêtre active
+    for (const e of entries) {
+      if (e.active !== e.wasActive) { e.wasActive = e.active; e.el.setActive?.(e.active); }
     }
   }
 

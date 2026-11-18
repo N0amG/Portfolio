@@ -92,6 +92,15 @@ body {
 .lab-hint { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 3; transition: opacity 0.4s; }
 .lab-count { position: fixed; right: 24px; bottom: 22px; z-index: 3; }
 
+/* 19 · HUD scientifique (lot V1) : coin haut droit, discret, ne gêne pas le texte */
+.lab-sci {
+  position: fixed; right: 24px; top: 18px; z-index: 3; pointer-events: none;
+  display: grid; grid-template-columns: auto auto; column-gap: 14px; row-gap: 3px;
+  font-size: 10px; line-height: 1.5; letter-spacing: 0.06em; color: rgba(242, 239, 232, 0.5);
+  font-variant-numeric: tabular-nums;
+}
+.lab-sci .v { color: rgba(242, 239, 232, 0.9); text-align: right; white-space: pre; }
+
 /* HUD de dev (absent en production) */
 .lab-hud { position: fixed; left: 24px; top: 18px; z-index: 3; line-height: 1.7; color: rgba(242, 239, 232, 0.75); }
 .lab-hud b { color: var(--lab-amber); font-weight: 400; }

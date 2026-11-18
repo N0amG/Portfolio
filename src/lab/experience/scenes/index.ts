@@ -1,4 +1,10 @@
+import { createComets } from "./comets";
+import { createFlare, createMotion, createWaves } from "./composite";
 import { createDebugElement } from "./debug";
+import { createDust } from "./dust";
+import { createEruption } from "./eruption";
+import { createGalaxy } from "./galaxy";
+import { createHud } from "./hud";
 import type { SceneElement } from "./types";
 
 /**
@@ -7,6 +13,8 @@ import type { SceneElement } from "./types";
  */
 export function createSceneElements(): SceneElement[] {
   const list: SceneElement[] = [];
+  // Lot V1 : effets légers
+  list.push(createWaves(), createMotion(), createFlare(), createDust(), createEruption(), createHud(), createComets(), createGalaxy());
   // Élément factice de test : dev uniquement (retiré du build de production), éteint par défaut.
   if (process.env.NODE_ENV !== "production") list.push(createDebugElement());
   return list;

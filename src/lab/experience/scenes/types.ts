@@ -19,14 +19,15 @@ import type { TierName } from "../quality";
 export type Cost = "leger" | "moyen" | "lourd";
 export type Layer = "sky" | "back" | "front";
 
-export const SKY_W = 1024;
-export const SKY_H = 512;
+// 2048×1024 depuis le lot V1 (la galaxie, 10, y est trop floue à 1024×512 : ~3 px par degré contre ~22 à l'écran).
+export const SKY_W = 2048;
+export const SKY_H = 1024;
 
 /** Paramètres des passes de composition, remis à zéro à chaque image avant les update(). */
 export interface CompositeParams {
   /** 12 · ondes gravitationnelles : jusqu'à 4 anneaux (x, y = centre NDC, z = rayon NDC, w = amplitude ; w = 0 : inactif). */
   waves: THREE.Vector4[];
-  /** 13 · flou de mouvement : vitesse apparente à l'écran (NDC/s). */
+  /** 13 · flou de mouvement : déplacement apparent pendant l'obturation, en NDC (x et y). */
   motion: THREE.Vector2;
   /** 13 · aberration chromatique (0 = aucune). */
   chroma: number;
@@ -34,8 +35,16 @@ export interface CompositeParams {
   flare: number;
 }
 
+/** Paramètres transmis au shader du trou noir (remis à zéro à chaque image comme `composite`). */
+export interface BlackholeParams {
+  /** 16 · éruption du disque : x = azimut de départ (rad), y = âge (s), z = vitesse angulaire signée (rad/s), w = amplitude (0 = inactif). */
+  erupt: THREE.Vector4;
+}
+
 /** Ressources partagées, fournies une fois à init(). */
 export interface SceneContext {
+  /** Conteneur DOM du lab (pour les éléments DOM, ex. le HUD scientifique). */
+  root: HTMLElement;
   renderer: THREE.WebGLRenderer;
   /** Caméra perspective de la scène (même pose et même projection que le texte et le trou noir). */
   camera: THREE.PerspectiveCamera;
@@ -69,6 +78,7 @@ export interface FrameParams {
   /** Qualité automatique : true = décor léger à réduire (moins de particules, etc.). */
   reduced: boolean;
   composite: CompositeParams;
+  bh: BlackholeParams;
 }
 
 export interface SceneElement {
@@ -87,6 +97,8 @@ export interface SceneElement {
   init(ctx: SceneContext): void;
   /** Uniquement quand l'élément est actif (dans sa fenêtre, retenu par le budget). */
   update(f: FrameParams): void;
+  /** Optionnel : appelé quand l'élément devient actif ou inactif (interrupteur, fenêtre, budget), pour les éléments DOM. */
+  setActive?(active: boolean): void;
   /** Une fois par couche déclarée ; la cible et autoClear = false sont déjà réglés par le moteur. */
   render(layer: Layer, ctx: SceneContext): void;
   dispose(): void;
