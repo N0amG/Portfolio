@@ -1,0 +1,1254 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lab — prototype trou noir (phase 0)</title>
+<!-- Prototype autonome, hors build. Syne via Google Fonts pour le prototype uniquement (auto-hébergée en phase 1). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400..800&display=swap" rel="stylesheet">
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+  "lil-gui": "https://cdn.jsdelivr.net/npm/lil-gui@0.20.0/dist/lil-gui.esm.min.js"
+} }
+</script>
+<style>
+  :root { --text: #f2efe8; }
+  html, body { margin: 0; background: #000; color: var(--text); }
+  body { font-family: Syne, sans-serif; overflow: hidden; }
+  #gl { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; z-index: 0; }
+  #page { position: relative; height: 100vh; z-index: 1; pointer-events: none; }
+  .glyph { font-family: Syne, sans-serif; font-weight: 700; font-size: clamp(30px, 4.4vw, 74px);
+           line-height: 1.06; letter-spacing: -0.02em; }
+  /* Bloc de mesure (invisible) : sert uniquement à calculer la position de repos de chaque lettre */
+  .measure { position: absolute; top: 60vh; left: 8vw; width: min(80vw, 1150px); visibility: hidden; }
+  .measure .w { display: inline-block; white-space: nowrap; }
+  .measure .l { display: inline-block; }
+  /* Couche visible : un span par lettre, transform + opacity uniquement */
+  #letters { position: fixed; inset: 0; z-index: 2; pointer-events: none; overflow: hidden; }
+  #letters span { position: absolute; left: 0; top: 0; display: block; will-change: transform, opacity;
+                  transform-origin: 50% 55%; white-space: pre; }
+  .mono { font-family: ui-monospace, "JetBrains Mono", Consolas, monospace; font-size: 11px; letter-spacing: .12em;
+          text-transform: uppercase; color: rgba(242,239,232,.6); }
+  #brand { position: fixed; left: 24px; bottom: 22px; z-index: 3; }
+  #hint { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 3; transition: opacity .4s; }
+  #count { position: fixed; right: 24px; bottom: 22px; z-index: 3; }
+  #hud { position: fixed; left: 24px; top: 18px; z-index: 3; line-height: 1.7; color: rgba(242,239,232,.75); }
+  #hud b { color: #ffb347; font-weight: 400; }
+  .lil-gui.root { --background-color: rgba(10,8,6,.82); --widget-color: #2a221c; --focus-color: #3a2e25;
+                  --hover-color: #352a22; --number-color: #ffb347; --string-color: #ffb347; z-index: 10; }
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+
+<div id="page"></div>
+<div id="letters" class="glyph" role="region" aria-live="polite"></div>
+
+<div id="hud" class="mono">fps <b id="fps">—</b><br><span id="res">—</span><br><span id="gpu">—</span><br><span id="qual">—</span></div>
+<div id="brand" class="mono">Noam Guez — lab · prototype phase 0</div>
+<div id="hint" class="mono">Scroll ↓</div>
+<div id="count" class="mono">01 / 05</div>
+
+<script type="module">
+import * as THREE from 'three';
+import GUI from 'lil-gui';
+
+// Textes provisoires (les vrais textes viendront de content.ts en phase 2)
+const TEXTS = [
+  'Noam, creative developer à Lyon. Je conçois et développe des sites et des applications web de A à Z.',
+  'Des interfaces rapides, nettes, pensées pour durer. Ici, elles finissent dans un trou noir.',
+  'Texte de remplissage numéro trois. Il sert juste à tester la transition suivante.',
+  "Dernier bloc avant l'horizon. Encore un geste et il ne restera que le vide.",
+];
+
+// ---------------------------------------------------------------------------
+// Réglages
+// ---------------------------------------------------------------------------
+const P = {
+  diskSpeed: 4.0,
+  plasmaIntensity: 1.0,
+  skyDrift: 0.02,     // rotation lente du ciel (rad/s) : les étoiles défilent à travers la lentille
+  plasmaColor: '#ff5a1f',
+  suction: 0.46,
+  starTrail: 1.0,     // longueur de la traînée laissée par les étoiles pendant leur aspiration
+  explosion: 0,       // explosion des lettres avant l'aspiration (désactivée pour l'instant ; 1.93 = ancien réglage)
+  absorbDur: 3.2,     // durée (s) de l'explosion + aspiration d'un bloc
+  resolution: 1.0,
+  simGpu: 1,          // multiplicateur de charge GPU (simulation d'une carte plus faible)
+  auto: true,         // qualité et résolution réglées automatiquement selon le matériel
+  tier: 'haute',
+  bloom: 0.6,
+  grain: 0.11,
+  doppler: 0.95,
+};
+
+// ---------------------------------------------------------------------------
+// Scène / caméra (unités : rayon de Schwarzschild = 1)
+// ---------------------------------------------------------------------------
+const CAM_DIST = 22.0;
+const TAN_HALF = 0.42;               // demi-champ vertical
+const SHADOW_B = 2.598;              // paramètre d'impact critique (3√3/2)
+// rayon apparent de l'ombre, en unités NDC verticales
+const shadowNdc = (d) => Math.tan(Math.asin(SHADOW_B * Math.sqrt(1 - 1 / d) / d)) / TAN_HALF;
+const RH_NDC = shadowNdc(CAM_DIST);
+// Caméra pilotée par les slides : cam.s = position (0 = slide 1, 1 = slide 2…), animée dans le temps
+const cam = { s: 0 };
+let camDist = CAM_DIST, rhNdc = RH_NDC;
+
+const canvas = document.getElementById('gl');
+// powerPreference 'high-performance' : demande le GPU dédié sur les machines à double GPU.
+// Le navigateur et l'OS ont le dernier mot (sous Windows : Paramètres > Affichage > Graphiques).
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: false, alpha: false, powerPreference: 'high-performance' });
+renderer.setClearColor(0x000000, 1);
+renderer.autoClear = true;
+const DPR = Math.min(window.devicePixelRatio || 1, 2);
+renderer.setPixelRatio(DPR);
+
+const orthoCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+
+// Triangle plein écran
+const fsGeo = new THREE.BufferGeometry();
+fsGeo.setAttribute('position', new THREE.Float32BufferAttribute([-1, -1, 0, 3, -1, 0, -1, 3, 0], 3));
+fsGeo.setAttribute('uv', new THREE.Float32BufferAttribute([0, 0, 2, 0, 0, 2], 2));
+const fsMesh = new THREE.Mesh(fsGeo);
+fsMesh.frustumCulled = false;
+const fsScene = new THREE.Scene();
+fsScene.add(fsMesh);
+
+const FS_VERT = /* glsl */`
+  varying vec2 vUv;
+  void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }
+`;
+
+const COMMON = /* glsl */`
+  float hash13(vec3 p){ p = fract(p * 0.1031); p += dot(p, p.zyx + 31.32); return fract((p.x + p.y) * p.z); }
+  vec3 hash33(vec3 p){ p = fract(p * vec3(.1031, .1030, .0973)); p += dot(p, p.yxz + 33.33);
+                       return fract((p.xxy + p.yxx) * p.zyx); }
+  float vnoise(vec3 p){
+    vec3 i = floor(p), f = fract(p); f = f * f * (3.0 - 2.0 * f);
+    float a = hash13(i),               b = hash13(i + vec3(1,0,0));
+    float c = hash13(i + vec3(0,1,0)), d = hash13(i + vec3(1,1,0));
+    float e = hash13(i + vec3(0,0,1)), g = hash13(i + vec3(1,0,1));
+    float h = hash13(i + vec3(0,1,1)), k = hash13(i + vec3(1,1,1));
+    return mix(mix(mix(a,b,f.x), mix(c,d,f.x), f.y), mix(mix(e,g,f.x), mix(h,k,f.x), f.y), f.z);
+  }
+  float fbm(vec3 p){
+    float s = 0.0, a = 0.5;
+    for (int i = 0; i < 4; i++){ if (float(i) >= uOct) break; s += a * vnoise(p); p = p * 2.07 + vec3(1.7, 9.2, 3.1); a *= 0.5; }
+    return s;
+  }
+  float fbm2(vec3 p){ return 0.5 * vnoise(p) + 0.25 * vnoise(p * 2.07 + vec3(1.7, 9.2, 3.1)); }
+`;
+
+// ---------------------------------------------------------------------------
+// 1) Étoiles aspirées : quads instanciés, trajectoire entièrement calculée dans le vertex shader
+// ---------------------------------------------------------------------------
+const STAR_COUNT = 1100;
+// Chaque étoile est un ruban : une pointe arrondie devant la tête, puis TRAIL_SEG segments qui suivent
+// exactement la spirale sur les dernières secondes de trajet (traînée rémanente courbe).
+const TRAIL_SEG = 16;
+const starGeo = new THREE.InstancedBufferGeometry();
+(() => {
+  const pos = [], idx = [];
+  const rows = [-1];                                   // -1 : pointe avant ; 0..1 : de la tête vers la queue
+  for (let k = 0; k <= TRAIL_SEG; k++) rows.push(k / TRAIL_SEG);
+  rows.forEach((x) => { pos.push(x, -1, 0, x, 1, 0); });
+  for (let k = 0; k < rows.length - 1; k++) {
+    const a = k * 2, b = a + 1, c = a + 2, d = a + 3;
+    idx.push(a, c, b, b, c, d);
+  }
+  starGeo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+  starGeo.setIndex(idx);
+})();
+const seeds = new Float32Array(STAR_COUNT * 4);
+for (let i = 0; i < STAR_COUNT; i++) {
+  seeds[i * 4 + 0] = Math.random() * Math.PI * 2;  // angle de départ
+  seeds[i * 4 + 1] = 0.55 + Math.random() * 0.9;   // vitesse
+  seeds[i * 4 + 2] = Math.random();                // phase de vie
+  seeds[i * 4 + 3] = Math.random();                // taille / éclat
+}
+starGeo.setAttribute('aSeed', new THREE.InstancedBufferAttribute(seeds, 4));
+starGeo.instanceCount = STAR_COUNT;
+
+const starMat = new THREE.ShaderMaterial({
+  uniforms: {
+    uT: { value: 0 }, uAspect: { value: 1 }, uRh: { value: RH_NDC }, uPx: { value: 0.002 }, uTrail: { value: 1 },
+    uC: { value: new THREE.Vector2() },
+  },
+  vertexShader: /* glsl */`
+    attribute vec4 aSeed;
+    uniform float uT, uAspect, uRh, uPx, uTrail;
+    uniform vec2 uC;   // centre du trou noir à l'écran (NDC)
+    varying float vAcross, vAlong, vB, vAbs; varying vec3 vCol;
+
+    // position sur la spirale (espace "unités verticales" : x dans [-aspect, aspect])
+    vec2 pathPos(float f, float a0, float r0){
+      float r = uRh + (r0 - uRh) * (1.0 - pow(f, 3.4));
+      float a = a0 + 2.4 * pow(f, 3.6);            // sens anti-horaire, accélère près de l'horizon
+      return vec2(cos(a), sin(a)) * r;
+    }
+    void main(){
+      float a0 = aSeed.x;
+      vec2 cs = vec2(cos(a0), sin(a0));
+      float rEdge = min(uAspect / max(abs(cs.x), 1e-3), 1.0 / max(abs(cs.y), 1e-3));
+      // les étoiles naissent un peu partout autour du trou noir (jusqu'au bord de l'écran), puis tombent ; en boucle
+      float r0 = mix(uRh * 2.4, rEdge * 1.15, sqrt(fract(aSeed.w * 7.13)));
+      float rate = 0.055 * aSeed.y;
+      float f = fract(uT * rate + aSeed.z);   // temps propre : indépendant du scroll et des slides
+      // traînée filante courte (style d'origine) + traînée rémanente courbe qui ne pousse que pendant l'aspiration
+      float streak = 0.0015 + 0.05 * pow(f, 7.0);
+      float absorbTrail = uTrail * 0.28 * smoothstep(0.55, 1.0, f);
+      float df = streak + absorbTrail;
+      vAbs = absorbTrail / df;
+      float x = position.x;
+      float t = max(x, 0.0);
+      float ft = max(f - df * t, 0.0);
+      vec2 p = pathPos(ft, a0, r0);
+      vec2 tg = pathPos(min(ft + 0.003, 0.9999), a0, r0) - pathPos(max(ft - 0.003, 0.0), a0, r0);
+      float tl = length(tg);
+      vec2 dir = tl > 1e-6 ? tg / tl : -normalize(p);
+      vec2 nrm = vec2(-dir.y, dir.x);
+      float wHead = max(uPx * (0.9 + 1.6 * aSeed.w) * mix(1.0, 0.55, f * f), uPx * 0.9);
+      float w = wHead * mix(1.0, 0.4, t);                     // la traînée s'affine vers la queue
+      if (x < 0.0) p += dir * (-x) * wHead * 1.6;             // pointe arrondie devant la tête
+      p += nrm * position.y * 1.6 * w;
+      vAcross = position.y * 1.6;
+      vAlong = x;
+      // chaque point de la traînée s'éteint quand il atteint l'horizon
+      float fadeOut = smoothstep(uRh * 1.0, uRh * 1.35, length(p));
+      float fadeIn = smoothstep(0.0, 0.12, f);    // apparition douce
+      vB = (0.25 + 1.2 * pow(aSeed.w, 3.0)) * (1.0 + 4.0 * pow(f, 5.0)) * fadeIn * fadeOut;
+      vCol = mix(vec3(0.78, 0.86, 1.0), vec3(1.0, 0.72, 0.42), smoothstep(0.55, 1.0, ft));
+      gl_Position = vec4(p.x / uAspect + uC.x, p.y + uC.y, 0.0, 1.0);
+    }
+  `,
+  fragmentShader: /* glsl */`
+    varying float vAcross, vAlong, vB, vAbs; varying vec3 vCol;
+    void main(){
+      float across = exp(-vAcross * vAcross * 2.2);
+      // tête arrondie ; corps : traînée filante d'origine (dégradé linéaire), qui devient une lumière rémanente
+      // à décroissance exponentielle quand l'étoile se fait aspirer
+      float body = mix(0.2 + 0.8 * (1.0 - vAlong), exp(-vAlong * 3.0), vAbs);
+      float along = vAlong < 0.0 ? exp(-vAlong * vAlong * 5.0) : body;
+      gl_FragColor = vec4(vCol * vB * across * along, 1.0);
+    }
+  `,
+  transparent: true, depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending,
+});
+const starMesh = new THREE.Mesh(starGeo, starMat);
+starMesh.frustumCulled = false;
+const starScene = new THREE.Scene();
+starScene.add(starMesh);
+
+// ---------------------------------------------------------------------------
+// 2) Trou noir : raymarching plein écran (géodésiques de Schwarzschild approximées)
+// ---------------------------------------------------------------------------
+const col = (hex) => new THREE.Color(hex); // conversion sRGB -> linéaire (ColorManagement actif)
+const bhMat = new THREE.ShaderMaterial({
+  uniforms: {
+    uRes: { value: new THREE.Vector2(1, 1) },
+    uTime: { value: 0 },
+    uCamPos: { value: new THREE.Vector3() },
+    uCamR: { value: new THREE.Vector3() }, uCamU: { value: new THREE.Vector3() }, uCamF: { value: new THREE.Vector3() },
+    uTanHalf: { value: TAN_HALF },
+    uC0: { value: col('#8a1a05') }, uC1: { value: col(P.plasmaColor) },
+    uC2: { value: col('#ffb347') }, uC3: { value: col('#fff4e0') },
+    uIntensity: { value: 1 }, uDoppler: { value: 0.75 },
+    uStepK: { value: 0.07 }, uOct: { value: 4 },
+    uSkyRot: { value: new THREE.Matrix3() }, uClock: { value: 0 },
+  },
+  vertexShader: FS_VERT,
+  fragmentShader: /* glsl */`
+    precision highp float;
+    varying vec2 vUv;
+    uniform vec2 uRes; uniform float uTime, uTanHalf, uIntensity, uDoppler, uStepK, uOct, uClock;
+    uniform mat3 uSkyRot;
+    uniform vec3 uCamPos, uCamR, uCamU, uCamF, uC0, uC1, uC2, uC3;
+    ${COMMON}
+    const float R_IN = 2.9;
+    const float R_OUT = 12.0;
+    const float PERIOD = 40.0;
+    const float B_FAR = 15.0;    // au-delà : déviation analytique, pas de raymarching
+    const float R_EXIT = 16.0;   // rayon de sortie du raymarching
+
+    vec3 ramp(float x){
+      x = clamp(x, 0.0, 1.0);
+      if (x < 0.33) return mix(uC0, uC1, x / 0.33);
+      if (x < 0.66) return mix(uC1, uC2, (x - 0.33) / 0.33);
+      return mix(uC2, uC3, (x - 0.66) / 0.34);
+    }
+
+    float diskNoise(float r, float phi, float t, float seed){
+      float ph = phi + 1.55 * pow(r, -1.5) * t;     // rotation képlérienne (différentielle)
+      float ar = 1.4 + 0.25 * r;                     // fréquence angulaire basse -> filaments
+      vec3 q = vec3(cos(ph) * ar, sin(ph) * ar, r * 3.2 + seed);
+      return fbm(q) * (uOct >= 4.0 ? 1.0 : (uOct >= 3.0 ? 1.0667 : 1.2));
+    }
+
+    vec4 diskSample(vec3 p, vec3 rd){
+      float r = length(p.xz);
+      if (r < R_IN - 0.4 || r > R_OUT) return vec4(0.0);
+      float phi = atan(p.z, p.x);
+      // deux phases en fondu enchaîné pour éviter un cisaillement infini
+      float t1 = mod(uTime, PERIOD), t2 = mod(uTime + PERIOD * 0.5, PERIOD);
+      float w1 = sin(3.14159265 * t1 / PERIOD); w1 *= w1;
+      float n = w1 * diskNoise(r, phi, t1, 0.0) + (1.0 - w1) * diskNoise(r, phi, t2, 17.3);
+      n = smoothstep(0.22, 0.82, n);
+
+      float prof = smoothstep(R_IN - 0.4, R_IN + 0.9, r) * (1.0 - smoothstep(R_OUT * 0.42, R_OUT, r));
+      // beaming Doppler : le côté gauche s'approche
+      vec3 vdir = normalize(vec3(p.z, 0.0, -p.x));
+      float beta = uDoppler * sqrt(0.5 / max(r - 1.0, 0.4));
+      float gam = inversesqrt(1.0 - beta * beta);
+      float D = 1.0 / (gam * (1.0 - beta * dot(vdir, -rd)));
+      float shift = D * sqrt(1.0 - 1.0 / r);          // + décalage gravitationnel
+      float temp = pow(R_IN / r, 0.85) * shift;
+      vec3 c = ramp(temp * 0.95 + n * 0.18);
+      float bright = prof * (0.25 + 1.5 * n) * pow(shift, 3.0) * (0.6 + 1.6 * pow(R_IN / r, 1.5)) * uIntensity * 2.2;
+      float alpha = clamp(prof * (0.8 + 0.5 * n), 0.0, 0.97);
+      return vec4(c * bright, alpha);
+    }
+
+    vec3 starField(vec3 d){
+      d = uSkyRot * d;                   // le ciel tourne lentement : il défile à travers la lentille
+      vec3 c = vec3(0.0);
+      for (int l = 0; l < 2; l++){
+        float sc = l == 0 ? 70.0 : 160.0;
+        vec3 p = d * sc;
+        vec3 id = floor(p);
+        vec3 h = hash33(id + float(l) * 31.7);
+        if (h.x > 0.8){
+          vec3 sp = id + 0.15 + 0.7 * hash33(id + 4.7);
+          float dist2 = dot(p - sp, p - sp);
+          float b = exp(-dist2 * (l == 0 ? 150.0 : 70.0)) * (0.5 + 3.0 * h.y * h.y * h.y);
+          b *= 0.65 + 0.35 * sin(uClock * (1.2 + 3.5 * h.z) + h.y * 60.0);   // scintillement
+          c += b * mix(vec3(0.75, 0.85, 1.0), vec3(1.0, 0.85, 0.65), h.z);
+        }
+      }
+      float neb = fbm2(d * 2.4 + 3.0);
+      c += vec3(0.012, 0.02, 0.06) * smoothstep(0.35, 0.7, neb) + vec3(0.03, 0.008, 0.004) * smoothstep(0.45, 0.75, fbm2(d * 1.3 - 7.0));
+      return c;
+    }
+
+    void main(){
+      vec2 uv = vUv * 2.0 - 1.0;
+      uv.x *= uRes.x / uRes.y;
+      vec3 rd = normalize(uCamF + uTanHalf * (uv.x * uCamR + uv.y * uCamU));
+      vec3 hv = cross(uCamPos, rd);
+      float h2 = dot(hv, hv);
+      float b = sqrt(h2);                       // paramètre d'impact (rayon droit)
+      vec3 acc_col = vec3(0.0);
+      float alpha = 0.0, rmin = 1e3;
+      bool captured = false;
+      vec3 dir;
+      if (b > B_FAR){
+        // Rayon lointain : il ne croise ni le disque ni la zone de champ fort.
+        // Déviation analytique en champ faible, de la caméra jusqu'à l'infini : (1/b)(1 - s0/sqrt(s0²+b²)).
+        float s0 = dot(uCamPos, rd);
+        float defl = (1.0 - s0 / sqrt(s0 * s0 + h2)) / b;
+        vec3 toC = normalize(-uCamPos + dot(uCamPos, rd) * rd);
+        dir = normalize(rd * cos(defl) + toC * sin(defl));
+      } else {
+        vec3 pos = uCamPos, vel = rd;
+        for (int i = 0; i < 200; i++){
+          float r = length(pos);
+          float dt = clamp(uStepK * r, 0.02, 1.5);
+          vec3 prev = pos;
+          vel += -1.5 * h2 * pos / (r * r * r * r * r) * dt;
+          pos += vel * dt;
+          float r2 = length(pos);
+          rmin = min(rmin, r2);
+          if (prev.y * pos.y < 0.0){
+            vec3 hit = mix(prev, pos, prev.y / (prev.y - pos.y));
+            vec4 ds = diskSample(hit, normalize(vel));
+            acc_col += (1.0 - alpha) * ds.rgb;
+            alpha += (1.0 - alpha) * ds.a;
+            if (alpha > 0.985) break;
+          }
+          if (r2 < 1.0){ captured = true; break; }
+          if (r2 > R_EXIT && dot(pos, vel) > 0.0) break;   // sorti de la zone utile : fin analytique
+        }
+        dir = normalize(vel);
+        // déviation restante jusqu'à l'infini (champ faible)
+        float s1 = dot(pos, dir);
+        vec3 perp = -pos + s1 * dir;
+        float bb = max(length(perp), 1e-3);
+        float defl = (1.0 - s1 / sqrt(s1 * s1 + bb * bb)) / bb;
+        dir = normalize(dir * cos(defl) + perp / bb * sin(defl));
+      }
+      vec3 bg = vec3(0.0);
+      if (!captured){
+        bg = starField(dir);
+        // anneau de photons : rayons qui ont frôlé la sphère de photons (r = 1.5)
+        float ring = exp(-pow((rmin - 1.5) * 6.0, 2.0));
+        acc_col += (1.0 - alpha * 0.7) * ring * mix(uC2, uC3, 0.6) * 0.45 * uIntensity;
+      }
+      acc_col += (1.0 - alpha) * bg;
+      // alpha = transmission vers le fond : sert à composer les étoiles aspirées (pleine résolution) dans la passe finale
+      float trans = captured ? 0.0 : (1.0 - alpha);
+      gl_FragColor = vec4(acc_col, trans);
+    }
+  `,
+});
+
+// ---------------------------------------------------------------------------
+// 3) Post : bloom léger (2 niveaux) + composition finale (tonemap, vignette, grain)
+// ---------------------------------------------------------------------------
+const brightMat = new THREE.ShaderMaterial({
+  uniforms: { uTex: { value: null } },
+  vertexShader: FS_VERT,
+  fragmentShader: /* glsl */`
+    varying vec2 vUv; uniform sampler2D uTex;
+    void main(){
+      vec3 c = texture2D(uTex, vUv).rgb;
+      float l = dot(c, vec3(0.2126, 0.7152, 0.0722));
+      gl_FragColor = vec4(c * smoothstep(0.7, 1.8, l), 1.0);
+    }
+  `,
+});
+const blurMat = new THREE.ShaderMaterial({
+  uniforms: { uTex: { value: null }, uDir: { value: new THREE.Vector2() } },
+  vertexShader: FS_VERT,
+  fragmentShader: /* glsl */`
+    varying vec2 vUv; uniform sampler2D uTex; uniform vec2 uDir;
+    void main(){
+      vec3 c = texture2D(uTex, vUv).rgb * 0.2270270;
+      c += (texture2D(uTex, vUv + uDir * 1.3846154).rgb + texture2D(uTex, vUv - uDir * 1.3846154).rgb) * 0.3162162;
+      c += (texture2D(uTex, vUv + uDir * 3.2307692).rgb + texture2D(uTex, vUv - uDir * 3.2307692).rgb) * 0.0702703;
+      gl_FragColor = vec4(c, 1.0);
+    }
+  `,
+});
+const finalMat = new THREE.ShaderMaterial({
+  uniforms: {
+    uScene: { value: null }, uB1: { value: null }, uB2: { value: null }, uStars: { value: null }, uLetters: { value: null },
+    uTextCol: { value: new THREE.Vector3(0.949, 0.937, 0.910) },
+    uTexel: { value: new THREE.Vector2(1, 1) },
+    uBloom: { value: 0.9 }, uGrain: { value: 0.045 }, uTime: { value: 0 }, uAspect: { value: 1 },
+  },
+  vertexShader: FS_VERT,
+  fragmentShader: /* glsl */`
+    varying vec2 vUv;
+    uniform sampler2D uScene, uB1, uB2, uStars, uLetters; uniform float uBloom, uGrain, uTime, uAspect; uniform vec2 uTexel;
+    uniform vec3 uTextCol;
+    // Upscale bicubique Catmull-Rom en 9 lectures (net même à basse résolution interne)
+    vec4 sampleCR(sampler2D tex, vec2 uv){
+      vec2 sp = uv / uTexel, tc = floor(sp - 0.5) + 0.5, f = sp - tc;
+      vec2 w0 = f * (-0.5 + f * (1.0 - 0.5 * f)), w1 = 1.0 + f * f * (-2.5 + 1.5 * f);
+      vec2 w2 = f * (0.5 + f * (2.0 - 1.5 * f)), w3 = f * f * (-0.5 + 0.5 * f);
+      vec2 w12 = w1 + w2, o12 = w2 / w12;
+      vec2 t0 = (tc - 1.0) * uTexel, t3 = (tc + 2.0) * uTexel, t12 = (tc + o12) * uTexel;
+      vec4 r = texture2D(tex, vec2(t0.x, t0.y)) * w0.x * w0.y + texture2D(tex, vec2(t12.x, t0.y)) * w12.x * w0.y + texture2D(tex, vec2(t3.x, t0.y)) * w3.x * w0.y
+             + texture2D(tex, vec2(t0.x, t12.y)) * w0.x * w12.y + texture2D(tex, vec2(t12.x, t12.y)) * w12.x * w12.y + texture2D(tex, vec2(t3.x, t12.y)) * w3.x * w12.y
+             + texture2D(tex, vec2(t0.x, t3.y)) * w0.x * w3.y + texture2D(tex, vec2(t12.x, t3.y)) * w12.x * w3.y + texture2D(tex, vec2(t3.x, t3.y)) * w3.x * w3.y;
+      return max(r, 0.0);
+    }
+    vec3 aces(vec3 x){ return clamp((x * (2.51 * x + 0.03)) / (x * (2.43 * x + 0.59) + 0.14), 0.0, 1.0); }
+    float hash12(vec2 p){ vec3 p3 = fract(vec3(p.xyx) * .1031); p3 += dot(p3, p3.yzx + 33.33); return fract((p3.x + p3.y) * p3.z); }
+    void main(){
+      vec4 sc = sampleCR(uScene, vUv);
+      vec3 hdr = sc.rgb + texture2D(uStars, vUv).rgb * clamp(sc.a, 0.0, 1.0);
+      hdr += uBloom * (texture2D(uB1, vUv).rgb * 0.55 + texture2D(uB2, vUv).rgb * 0.9);
+      vec3 c = aces(hdr * 0.95);
+      vec2 q = (vUv - 0.5) * vec2(uAspect, 1.0);
+      c *= mix(1.0, smoothstep(1.25, 0.25, length(q)), 0.4);
+      c = pow(c, vec3(1.0 / 2.2));
+      float l = dot(c, vec3(0.333));
+      float n = hash12(gl_FragCoord.xy + fract(uTime * 7.31) * 1000.0) - 0.5;
+      c += n * uGrain * (0.25 + 0.75 * sqrt(l));
+      // lettres détachées : r = couverture, g = couverture × absorption (prémultipliés)
+      vec4 lt = texture2D(uLetters, vUv);
+      float cov = clamp(lt.a, 0.0, 1.0);
+      float absorb = clamp(lt.g / max(lt.a, 1e-4), 0.0, 1.0);
+      // plus une lettre est absorbée, plus elle passe derrière le disque et dans l'ombre
+      float vis = mix(1.0, clamp(sc.a, 0.0, 1.0), absorb);
+      c = mix(c, uTextCol, cov * vis);
+      gl_FragColor = vec4(max(c, 0.0), 1.0);
+    }
+  `,
+});
+
+// ---------------------------------------------------------------------------
+// Render targets
+// ---------------------------------------------------------------------------
+const rtOpts = { type: THREE.HalfFloatType, minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: false };
+const rt = {
+  stars: new THREE.WebGLRenderTarget(1, 1, rtOpts),
+  scene: new THREE.WebGLRenderTarget(1, 1, rtOpts),
+  a1: new THREE.WebGLRenderTarget(1, 1, rtOpts), t1: new THREE.WebGLRenderTarget(1, 1, rtOpts),
+  a2: new THREE.WebGLRenderTarget(1, 1, rtOpts), t2: new THREE.WebGLRenderTarget(1, 1, rtOpts),
+  letters: new THREE.WebGLRenderTarget(1, 1, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: false }),
+};
+let iw = 1, ih = 1;
+const resEl = document.getElementById('res');
+
+function resize() {
+  resizeTargets();
+  layoutLetters();
+}
+
+function resizeTargets() {
+  const w = window.innerWidth, h = window.innerHeight;
+  renderer.setSize(w, h, false);
+  iw = Math.max(64, Math.round(w * DPR * P.resolution));
+  ih = Math.max(64, Math.round(h * DPR * P.resolution));
+  const fw = Math.round(w * DPR), fh = Math.round(h * DPR);
+  rt.stars.setSize(fw, fh); rt.letters.setSize(fw, fh); rt.scene.setSize(iw, ih);
+  finalMat.uniforms.uTexel.value.set(1 / iw, 1 / ih);
+  rt.a1.setSize(iw >> 1, ih >> 1); rt.t1.setSize(iw >> 1, ih >> 1);
+  rt.a2.setSize(iw >> 2, ih >> 2); rt.t2.setSize(iw >> 2, ih >> 2);
+  bhMat.uniforms.uRes.value.set(iw, ih);
+  starMat.uniforms.uAspect.value = w / h;
+  starMat.uniforms.uPx.value = 2 / fh;
+  finalMat.uniforms.uAspect.value = w / h;
+  resEl.textContent = `interne ${iw}×${ih} (${Math.round(P.resolution * 100)} %) · écran ${Math.round(w * DPR)}×${Math.round(h * DPR)}`;
+}
+
+function pass(mat, target) {
+  fsMesh.material = mat;
+  renderer.setRenderTarget(target);
+  renderer.render(fsScene, orthoCam);
+}
+
+// ---------------------------------------------------------------------------
+// Texte : un bloc par slide. Chaque bloc a deux progressions animées dans le temps :
+//   q = entrée (0 caché -> 1 posé, lisible) ; p = explosion + aspiration (0 posé -> 1 avalé)
+// ---------------------------------------------------------------------------
+const pageEl = document.getElementById('page');
+const lettersEl = document.getElementById('letters');
+const letters = [];
+const blocks = TEXTS.map((text, bi) => {
+  const el = document.createElement('div');
+  el.className = 'measure glyph'; el.setAttribute('aria-hidden', 'true');
+  const words = text.split(' ');
+  words.forEach((word, wi) => {
+    const w = document.createElement('span'); w.className = 'w';
+    for (const ch of word) {
+      const m = document.createElement('span'); m.className = 'l'; m.textContent = ch; w.appendChild(m);
+      const v = document.createElement('span'); v.textContent = ch; v.style.opacity = '0'; lettersEl.appendChild(v);
+      const rnd = () => Math.random();
+      letters.push({ m, v, b: bi, r: [rnd(), rnd(), rnd(), rnd(), rnd()], x: 0, y: 0, w: 0, h: 0, domOp: '0', tf: '' });
+    }
+    el.appendChild(w);
+    if (wi < words.length - 1) el.appendChild(document.createTextNode(' '));
+  });
+  pageEl.appendChild(el);
+  return { text, el, cx: 0, cy: 0, halfW: 1 };
+});
+const measureEl = blocks[0].el;   // référence de style (taille de police) pour l'atlas
+
+function layoutLetters() {
+  for (const B of blocks) {
+    const br = B.el.getBoundingClientRect();
+    B.cx = br.left + br.width / 2; B.cy = br.top + br.height / 2; B.halfW = br.width / 2;
+  }
+  for (const L of letters) {
+    const r = L.m.getBoundingClientRect();
+    L.x = r.left; L.y = r.top; L.w = r.width; L.h = r.height;
+  }
+  buildAtlas();
+  anchorLetters();
+}
+
+// --- Lettres détachées rendues en WebGL : atlas de glyphes + petit maillage par lettre (déformable)
+// Le texte fixe reste en DOM (net, accessible). Dès qu'une lettre se détache, elle passe dans le canvas,
+// au pixel près, pour pouvoir être courbée par les forces de marée et la lentille gravitationnelle.
+const GRID = 10;                                     // subdivisions du maillage d'une lettre
+const NL = letters.length;
+const glyphGeo = (() => {
+  const g = new THREE.PlaneGeometry(1, 1, GRID, GRID);
+  const pos = g.attributes.position;
+  for (let i = 0; i < pos.count; i++) pos.setXY(i, pos.getX(i) + 0.5, 0.5 - pos.getY(i));   // [0,1]², y vers le bas
+  const ig = new THREE.InstancedBufferGeometry();
+  ig.index = g.index;
+  ig.setAttribute('position', pos);
+  ig.instanceCount = NL * 2;                          // image primaire + image secondaire (de l'autre côté de l'anneau)
+  return ig;
+})();
+const mkInst = (name) => {
+  const a = new THREE.InstancedBufferAttribute(new Float32Array(NL * 2 * 4), 4);
+  a.setUsage(THREE.DynamicDrawUsage);
+  glyphGeo.setAttribute(name, a);
+  return a;
+};
+const iA = mkInst('iA'), iB = mkInst('iB'), iC = mkInst('iC'), iUV = mkInst('iUV');
+// position 3D de la lettre (origine de sa boîte) et vecteurs monde par pixel du plan du bloc ; iD.x = mélange 3D -> écran
+const iW = mkInst('iW'), iR = mkInst('iR'), iU = mkInst('iU'), iD = mkInst('iD');
+
+const glyphMat = new THREE.ShaderMaterial({
+  uniforms: {
+    uAtlas: { value: null }, uView: { value: new THREE.Vector2(1, 1) }, uCenter: { value: new THREE.Vector2() },
+    uThetaE: { value: 100 }, uPar: { value: new THREE.Vector2() }, uSwirl: { value: 1.1 }, uTide: { value: 1.0 },
+    uViewProj: { value: new THREE.Matrix4() },
+  },
+  vertexShader: /* glsl */`
+    attribute vec4 iA;   // origine écran (px), angle vitesse, rotation propre (rad)
+    attribute vec4 iB;   // échelle x/y, opacité, absorption
+    attribute vec4 iC;   // boîte (px), marge (px), image (0 primaire / 1 secondaire)
+    attribute vec4 iUV;  // rectangle dans l'atlas
+    attribute vec4 iW, iR, iU, iD;   // texte posé en 3D (voir JS)
+    uniform vec2 uView, uCenter, uPar;
+    uniform mat4 uViewProj;
+    uniform float uThetaE, uSwirl, uTide;
+    varying vec2 vUv; varying float vOp, vS;
+    vec2 rot2(vec2 p, float a){ float c = cos(a), s = sin(a); return vec2(c * p.x - s * p.y, s * p.x + c * p.y); }
+    void main(){
+      float op = iB.z, s = iB.w, img = iC.w;
+      vOp = img < 0.5 ? op : op * s * s * 0.75;
+      vS = s;
+      vUv = mix(iUV.xy, iUV.zw, position.xy);
+      if (vOp < 0.002){ gl_Position = vec4(2.0, 2.0, 2.0, 1.0); return; }
+
+      // 1. transform de la lettre (identique au CSS du DOM : rotate(va) scale(sx,sy) rotate(rot - va))
+      vec2 box = iC.xy; float pad = iC.z;
+      vec2 local = position.xy * (box + 2.0 * pad) - pad;
+      vec2 p = local - vec2(0.5, 0.55) * box;
+      // 0. texte posé : vraie position 3D dans la scène, projetée par la même caméra que le trou noir
+      vec3 wp = iW.xyz + iR.xyz * p.x + iU.xyz * p.y;
+      vec4 clipR = uViewProj * vec4(wp, 1.0);
+      vec2 ndcR = clipR.xy / max(clipR.w, 1e-3);
+      p = rot2(p, iA.w); p *= iB.xy; p = rot2(p, iA.z);
+      vec2 rel = iA.xy + p - uCenter;
+
+      // 2. forces de marée : rotation différentielle (le bord intérieur prend de l'avance -> la lettre se courbe
+      //    le long de sa spirale) + étirement radial (spaghettification courbe, pas en ligne droite)
+      float rL = max(length(iA.xy - uCenter), 1.0);
+      float r = max(length(rel), 1.0);
+      rel = rot2(rel, -uSwirl * s * (rL / r - 1.0));
+      r = max(rL + (r - rL) * (1.0 + uTide * s * s), 1.0);
+      vec2 dir = normalize(rel);
+
+      // 3. lentille gravitationnelle (équation de lentille d'un point massif), décalée par la parallaxe souris
+      vec2 beta = dir * r + uPar * s;
+      float b = max(length(beta), 1e-3);
+      vec2 bd = beta / b;
+      float q = sqrt(b * b + 4.0 * uThetaE * uThetaE);
+      vec2 outRel = img < 0.5 ? bd * mix(b, 0.5 * (b + q), s)      // image primaire
+                              : bd * 0.5 * (b - q);                // image secondaire, de l'autre côté de l'anneau
+      if (img > 0.5) vOp *= clamp(1.6 - b / (2.2 * uThetaE), 0.0, 1.0);
+      vec2 sp = uCenter + outRel;
+      vec2 ndcS = vec2(sp.x / uView.x * 2.0 - 1.0, 1.0 - sp.y / uView.y * 2.0);
+      // passage progressif du plan 3D à la physique écran au moment où la lettre se détache
+      gl_Position = vec4(mix(ndcR, ndcS, iD.x), 0.0, 1.0);
+    }
+  `,
+  fragmentShader: /* glsl */`
+    uniform sampler2D uAtlas;
+    varying vec2 vUv; varying float vOp, vS;
+    void main(){
+      float a = texture2D(uAtlas, vUv).a * vOp;
+      gl_FragColor = vec4(a, a * vS, 0.0, a);
+    }
+  `,
+  transparent: true, depthTest: false, depthWrite: false, side: THREE.DoubleSide,
+  blending: THREE.CustomBlending, blendEquation: THREE.AddEquation,
+  blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor,
+  blendSrcAlpha: THREE.OneFactor, blendDstAlpha: THREE.OneMinusSrcAlphaFactor,
+});
+const glyphMesh = new THREE.Mesh(glyphGeo, glyphMat);
+glyphMesh.frustumCulled = false;
+const glyphScene = new THREE.Scene();
+glyphScene.add(glyphMesh);
+
+// Atlas : chaque caractère dessiné dans une cellule qui reproduit sa boîte DOM (même ligne de base)
+let atlasTex = null;
+function buildAtlas() {
+  const cs = getComputedStyle(measureEl);
+  const domFont = parseFloat(cs.fontSize);
+  const AF = 128, k = AF / domFont;                  // échelle atlas / DOM
+  const padDom = Math.ceil(domFont * 0.18), pad = padDom * k;
+  const cv = document.createElement('canvas');
+  const ctx = cv.getContext('2d');
+  const font = `700 ${AF}px Syne`;
+  ctx.font = font;
+  const m = ctx.measureText('Hg');
+  const asc = m.fontBoundingBoxAscent, desc = m.fontBoundingBoxDescent;
+  const cells = new Map();
+  const W = 2048;
+  let x = 0, y = 0, rowH = 0;
+  for (const L of letters) {
+    const ch = L.m.textContent;
+    if (cells.has(ch)) continue;
+    const cw = Math.ceil(L.w * k + 2 * pad), chh = Math.ceil(L.h * k + 2 * pad);
+    if (x + cw > W) { x = 0; y += rowH + 2; rowH = 0; }
+    cells.set(ch, { x, y, cw, chh, lineH: L.h * k });
+    x += cw + 2; rowH = Math.max(rowH, chh);
+  }
+  cv.width = W; cv.height = y + rowH + 2;
+  ctx.font = font; ctx.fillStyle = '#fff'; ctx.textBaseline = 'alphabetic';
+  for (const [ch, c] of cells) {
+    const baseline = c.y + pad + (c.lineH - (asc + desc)) / 2 + asc;
+    ctx.fillText(ch, c.x + pad, baseline);
+  }
+  if (atlasTex) atlasTex.dispose();
+  atlasTex = new THREE.CanvasTexture(cv);
+  atlasTex.minFilter = THREE.LinearMipmapLinearFilter;
+  atlasTex.generateMipmaps = true;
+  atlasTex.anisotropy = 4;
+  glyphMat.uniforms.uAtlas.value = atlasTex;
+  // attributs fixes par lettre : boîte, marge, image, uv (flipY : v = 1 en haut du canvas)
+  const H = cv.height;
+  letters.forEach((L, i) => {
+    const c = cells.get(L.m.textContent);
+    for (const j of [i, i + NL]) {
+      iC.setXYZW(j, L.w, L.h, padDom, j < NL ? 0 : 1);
+      iUV.setXYZW(j, c.x / W, 1 - c.y / H, (c.x + c.cw) / W, 1 - (c.y + c.chh) / H);
+    }
+  });
+  iC.needsUpdate = true; iUV.needsUpdate = true;
+}
+
+const easeOut = (t) => 1 - Math.pow(1 - t, 3);
+const smooth = (a, b, x) => { const t = Math.min(1, Math.max(0, (x - a) / (b - a))); return t * t * (3 - 2 * t); };
+const DEG = Math.PI / 180;
+
+function setDom(L, op, tf) {
+  if (L.domOp !== op) { L.v.style.opacity = op; L.domOp = op; }
+  if (tf !== undefined && L.tf !== tf) { L.v.style.transform = tf; L.tf = tf; }
+}
+function setGlyph(i, ox, oy, va, rot, sx, sy, op, abs, kd = 1) {
+  for (const j of [i, i + NL]) {
+    iA.setXYZW(j, ox, oy, va, rot);
+    iB.setXYZW(j, sx, sy, op, abs);
+    iD.setX(j, kd);
+  }
+}
+
+function updateLetters() {
+  const W = window.innerWidth, H = window.innerHeight;
+  const cx = bhScreen.x, cy = bhScreen.y;   // centre du trou noir à l'écran (il bouge avec la caméra)
+  const rh = rhNdc * H / 2;                  // rayon de l'ombre en px (varie avec le recul de la caméra)
+  const E = P.explosion > 0 ? 0.26 : 0;      // part "explosion" de la séquence d'une lettre (0 = aspiration directe)
+  const DMAX = 0.35;                         // décalage max entre les lettres d'un bloc (fraction de p)
+  const force = P.explosion;
+  letters.forEach((L, i) => {
+    const B = blocks[L.b];
+    const [r1, r2, r3, r4, r5] = L.r;
+    const homeX = L.x + L.w / 2, homeY = L.y + L.h / 2;
+    setDom(L, '0');                          // le DOM ne sert plus qu'à la mise en page et à l'accessibilité
+    // d = position de la caméra par rapport à ce bloc : 0 = face au bloc, +1 = slide suivante, -1 = précédente
+    const d = cam.s - L.b;
+    const e = smooth(-0.45, -0.15, d);       // apparition du bloc qui arrive
+    // position actuelle de la lettre posée en 3D, projetée à l'écran (sert de point de départ à l'explosion)
+    vTmp.copy(L.world).project(textCam);
+    const restX = (vTmp.x + 1) / 2 * W, restY = (1 - vTmp.y) / 2 * H;
+    vTmp2.copy(L.world).addScaledVector(L.wr, L.w).project(textCam);
+    const rs = Math.hypot((vTmp2.x - vTmp.x) / 2 * W, (vTmp2.y - vTmp.y) / 2 * H) / Math.max(L.w, 1);
+    // désintégration : commence quand le bloc est parti sur le côté, les lettres de tête d'abord
+    const pBlock = Math.min(1, Math.max(0, (d - 0.1) / 0.9));
+    const xN = (homeX - B.cx) / B.halfW * 0.5 + 0.5;
+    const delay = (0.55 * r1 + 0.45 * (1 - xN)) * DMAX;   // côté droit d'abord : il reste le plus longtemps dans le cadre
+    const u = Math.min(1, Math.max(0, (pBlock - delay) / (1 - DMAX)));
+    if (u <= 0) {
+      setGlyph(i, restX, restY, 0, 0, rs, rs, e, 0, 0);   // rendu 100 % 3D
+      return;
+    }
+    if (u >= 1) { setGlyph(i, 0, 0, 0, 0, 1, 1, 0, 0); return; }
+
+    let x, y, op = 1, rot = 0, va = 0, sx = 1, sy = 1, sc = 1;
+    const bx = restX, by = restY;
+    // 1. explosion : directions opposées (côté gauche vers la gauche, côté droit vers la droite, haut/bas alterné)
+    const side = Math.sign(homeX - B.cx) || 1;
+    let dx = side * (0.45 + 0.9 * r2) + (homeX - B.cx) / B.halfW * 0.4;
+    let dy = (r3 - 0.5) * 2.2 * (r5 > 0.5 ? 1 : -1);
+    const dl = Math.hypot(dx, dy) || 1; dx /= dl; dy /= dl;
+    const dist = (70 + 190 * r4) * force * (H / 900);
+    const spin = (r5 - 0.5) * 2 * 420 * force;
+    const k = easeOut(Math.min(1, u / E));
+    const ex = bx + dx * dist * k, ey = by + dy * dist * k;
+    rot = spin * k;
+    if (u < E) {
+      x = ex; y = ey;
+    } else {
+      // 2. spirale gravitationnelle vers l'horizon (anti-horaire à l'écran, comme le disque et les étoiles)
+      const s = (u - E) / (1 - E);
+      const ox = ex - cx, oy = ey - cy;
+      const r0 = Math.hypot(ox, oy), a0 = Math.atan2(oy, ox);
+      const path = (t) => {
+        const rr = rh + (r0 - rh) * (1 - Math.pow(t, 1.7));
+        const aa = a0 - 1.9 * Math.PI * Math.pow(t, 1.8);
+        return [cx + Math.cos(aa) * rr, cy + Math.sin(aa) * rr, rr];
+      };
+      const [px, py, rr] = path(s);
+      const [qx, qy] = path(Math.max(0, s - 0.012));
+      x = px; y = py;
+      const vx = px - qx, vy = py - qy, sp = Math.hypot(vx, vy);
+      va = Math.atan2(vy, vx) * 180 / Math.PI;
+      const stretch = Math.min(3, Math.max(0, sp / 5 - 0.4));   // étirement le long de la vitesse (la courbure vient du shader)
+      sx = 1 + stretch; sy = 1 / Math.sqrt(1 + stretch * 0.8);
+      sc = 0.3 + 0.7 * smooth(rh, rh * 2.6, rr);
+      rot += 160 * s;
+      op = smooth(rh * 0.95, rh * 1.7, rr) * (1 - smooth(0.93, 1, s));
+    }
+    // absorption : 0 pendant l'explosion, 1 quand la lettre est prise par le trou noir
+    const absorb = smooth(E * 0.7, E + (1 - E) * 0.35, u);
+    // origine de la transformation = 50 % / 55 % de la boîte (comme le transform-origin CSS)
+    const ks = rs + (1 - rs) * smooth(0, Math.max(E, 0.3), u);   // l'échelle de perspective se relâche en douceur
+    const kd = smooth(0, Math.max(E * 0.5, 0.08), u);   // bascule progressive du plan 3D vers la physique écran
+    setGlyph(i, x, y, va * DEG, (rot - va) * DEG, sx * sc * ks, sy * sc * ks, op, absorb, kd);
+  });
+  iA.needsUpdate = true; iB.needsUpdate = true; iD.needsUpdate = true;
+}
+
+// ---------------------------------------------------------------------------
+// Navigation par slides : un geste (molette, trackpad, clavier) = une slide, quelle que soit son amplitude.
+// Les animations se jouent dans le temps ; les gestes pendant une transition sont perdus (pas de file d'attente).
+// ---------------------------------------------------------------------------
+const linear = (t) => t;
+const easeInOut = (t) => 0.5 - 0.5 * Math.cos(Math.PI * t);
+const tweens = [];
+function tween(obj, key, to, dur, delay = 0, ease = easeInOut) {
+  return new Promise((res) => tweens.push({ obj, key, to, dur, delay, ease, from: null, t: 0, res }));
+}
+function stepTweens(dt) {
+  for (const tw of [...tweens]) {
+    if (tw.delay > 0) { tw.delay -= dt; continue; }
+    if (tw.from === null) tw.from = tw.obj[tw.key];
+    tw.t += dt;
+    const k = Math.min(1, tw.t / tw.dur);
+    tw.obj[tw.key] = tw.from + (tw.to - tw.from) * tw.ease(k);
+    if (k >= 1) { tweens.splice(tweens.indexOf(tw), 1); tw.res(); }
+  }
+}
+
+const NS = blocks.length;            // slides 0..NS-1 : un bloc chacune ; slide NS : le trou noir seul
+let slide = 0, busy = false;
+const hintEl = document.getElementById('hint');
+const countEl = document.getElementById('count');
+function updateNav() {
+  const pad = (n) => String(n).padStart(2, '0');
+  countEl.textContent = `${pad(slide + 1)} / ${pad(NS + 1)}`;
+  hintEl.textContent = slide === NS ? '← revenir' : 'Scroll →';
+  hintEl.style.opacity = busy ? '0' : (slide === 0 || slide === NS ? '1' : '0');
+  lettersEl.setAttribute('aria-label', slide < NS ? blocks[slide].text : '');
+}
+
+async function go(dir) {
+  const next = slide + dir;
+  if (busy || next < 0 || next > NS) return;
+  busy = true; updateNav();
+  // une seule valeur animée : la caméra tourne autour du trou noir ; le texte glisse, se désintègre sur le côté
+  // et s'enroule autour de l'horizon ; le bloc suivant arrive par l'autre côté. Le retour est l'exact inverse.
+  await tween(cam, 's', next, P.absorbDur, 0, easeInOut);
+  slide = next; busy = false; updateNav();
+}
+
+// Détection de geste : un nouveau geste commence après une pause d'au moins GESTURE_GAP ms sans événement molette.
+// Tant que les événements s'enchaînent (scroll long, inertie du trackpad), c'est le même geste : une seule slide.
+const GESTURE_GAP = 220;
+let lastWheel = -1e9, armed = true;
+window.addEventListener('wheel', (e) => {
+  if (e.target.closest && e.target.closest('.lil-gui')) return;
+  e.preventDefault();
+  const now = performance.now();
+  const gap = now - lastWheel;
+  lastWheel = now;
+  const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;   // molette ou glissé horizontal
+  if (Math.abs(delta) < 1) return;
+  if (gap > GESTURE_GAP) armed = true;
+  if (!armed) return;
+  armed = false;                       // ce geste est consommé, même s'il tombe pendant une transition
+  if (!busy) go(delta > 0 ? 1 : -1);
+}, { passive: false });
+window.addEventListener('keydown', (e) => {
+  if (e.repeat || (e.target.closest && e.target.closest('input, select, textarea, .lil-gui'))) return;
+  if (['ArrowDown', 'ArrowRight', 'PageDown', ' ', 'Spacebar'].includes(e.key)) { e.preventDefault(); go(1); }
+  else if (['ArrowUp', 'ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); go(-1); }
+});
+window.__go = go;
+window.__nav = () => ({ slide, busy });
+window.__cam = cam;                         // test : position de la caméra (en slides)
+window.__step = (dt) => stepTweens(dt);   // test : avance les animations sans dépendre du rAF
+
+// ---------------------------------------------------------------------------
+// Boucle unique
+// ---------------------------------------------------------------------------
+const fpsEl = document.getElementById('fps');
+const gpuEl = document.getElementById('gpu');
+const gpuName = (() => {
+  const g = renderer.getContext();
+  const ext = g.getExtension('WEBGL_debug_renderer_info');
+  const raw = ext ? g.getParameter(ext.UNMASKED_RENDERER_WEBGL) : g.getParameter(g.RENDERER);
+  const m = /ANGLE \([^,]+,\s*([^(]+?)\s*(\(|Direct3D|,)/.exec(raw);
+  return (m ? m[1] : raw).trim();
+})();
+function updateGpuLabel() {
+  gpuEl.textContent = `gpu ${gpuName}` + (P.simGpu > 1 ? ` · simulation ×${P.simGpu}` : '');
+}
+updateGpuLabel();
+let mouseX = 0, mouseY = 0, parX = 0, parY = 0;
+// ---------------------------------------------------------------------------
+// Caméra et texte en 3D
+// ---------------------------------------------------------------------------
+const camPos = new THREE.Vector3(), camF = new THREE.Vector3(), camR = new THREE.Vector3(), camU = new THREE.Vector3();
+const camTarget = new THREE.Vector3();
+const UP = new THREE.Vector3(0, 1, 0);
+// Trajectoire de la caméra (schéma de Noam) : un arrêt par slide, positions sur une sphère autour du trou noir.
+//   az = tour horizontal (négatif = à gauche), el = hauteur par rapport au plan du disque (négatif = en dessous),
+//   dist = distance au trou noir, look = décalage de la visée vers la droite/gauche (unités de scène).
+const KEYS = [
+  { az:  0.00, el:  0.13, dist: 22, look: 0 },      // 1 : vue de base, au-dessus du disque
+  { az: -0.60, el: -0.32, dist: 22, look: -2 },     // 2 : dessous, à gauche (le trou noir est à droite du cadre)
+  { az:  0.45, el:  0.30, dist: 21, look: 1.5 },    // 3 : dessus, à droite (le trou noir est à gauche du cadre)
+  { az:  0.10, el: -0.38, dist: 22, look: 0 },      // 4 : dessous, regard vers le haut
+  { az:  0.00, el:  0.13, dist: 22, look: 0 },      // 5 : slide vide, retour à la vue de base
+];
+const BULGE = 0.9;                    // ampleur des boucles vers l'extérieur entre deux arrêts
+const DEZOOM = 0.32;                  // recul de la caméra au milieu d'une boucle
+const ROLL = 0.14;                    // inclinaison de la caméra dans les virages (rad)
+const TEXT_DEPTH = 7;                 // profondeur des plans de texte devant la caméra (le trou noir est à 22) : forte parallaxe
+const textCam = new THREE.PerspectiveCamera(2 * Math.atan(TAN_HALF) * 180 / Math.PI, 1, 0.1, 200);
+const viewProj = new THREE.Matrix4();
+
+// Pose de la caméra pour une position s (en slides) : interpolation entre deux arrêts, avec une boucle
+// qui s'écarte du trou noir (perpendiculaire au trajet, côté extérieur) et un recul au milieu.
+function cameraPose(s, parAz, parEl, out) {
+  const n = KEYS.length - 1;
+  const sc = Math.min(Math.max(s, 0), n);
+  const i = Math.min(Math.floor(sc), n - 1), t = sc - i;
+  const A = KEYS[i], B = KEYS[i + 1];
+  const bump = Math.sin(Math.PI * t);                            // 0 aux arrêts, 1 au milieu de la boucle
+  const ca = B.az - A.az, ce = B.el - A.el, len = Math.hypot(ca, ce) || 1;
+  let na = -ce / len, ne = ca / len;
+  if (na * (A.az + B.az) + ne * (A.el + B.el) < 0) { na = -na; ne = -ne; }   // toujours vers l'extérieur
+  const az = A.az + ca * t + na * BULGE * len * bump + parAz;
+  const el = Math.max(-1.2, Math.min(1.2, A.el + ce * t + ne * BULGE * len * bump + parEl));
+  const dist = (A.dist + (B.dist - A.dist) * t) * (1 + DEZOOM * bump);
+  const look = A.look + (B.look - A.look) * t;
+  // la caméra s'incline dans le sens du virage, comme un travelling en courbe
+  out.roll = ROLL * bump * Math.sign(ca || 1);
+  out.pos.set(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el)).multiplyScalar(dist);
+  out.f.copy(out.pos).negate().normalize();
+  out.r.crossVectors(out.f, UP).normalize();
+  out.u.crossVectors(out.r, out.f);
+  out.target.copy(out.r).multiplyScalar(look);                   // visée décalée (le trou noir n'est pas forcément centré)
+  out.f.copy(out.target).sub(out.pos).normalize();
+  out.r.crossVectors(out.f, UP).normalize();
+  out.u.crossVectors(out.r, out.f);
+  return out;
+}
+const pose = { pos: camPos, f: camF, r: camR, u: camU, target: camTarget };
+const tmpPose = { pos: new THREE.Vector3(), f: new THREE.Vector3(), r: new THREE.Vector3(), u: new THREE.Vector3(), target: new THREE.Vector3() };
+const bhScreen = new THREE.Vector2();       // centre du trou noir à l'écran (px)
+const bhNdc = new THREE.Vector2();
+const vTmp = new THREE.Vector3(), vTmp2 = new THREE.Vector3();
+
+function updateCamera(dt) {
+  parX += (mouseX - parX) * (1 - Math.exp(-dt * 2));
+  parY += (mouseY - parY) * (1 - Math.exp(-dt * 2));
+  cameraPose(cam.s, parX * 0.05, parY * 0.025, pose);
+  camF.copy(camTarget).sub(camPos).normalize();
+  camR.crossVectors(camF, UP).normalize();
+  camU.crossVectors(camR, camF);
+  const cr = Math.cos(pose.roll || 0), sr = Math.sin(pose.roll || 0);
+  vTmp.copy(camR).multiplyScalar(cr).addScaledVector(camU, sr);
+  camU.multiplyScalar(cr).addScaledVector(camR, -sr);
+  camR.copy(vTmp);
+  camDist = camPos.length();
+  rhNdc = shadowNdc(camDist);
+  const W = window.innerWidth, H = window.innerHeight;
+  textCam.aspect = W / H; textCam.updateProjectionMatrix();
+  textCam.position.copy(camPos); textCam.up.copy(camU); textCam.lookAt(camTarget);
+  textCam.updateMatrixWorld();
+  viewProj.multiplyMatrices(textCam.projectionMatrix, textCam.matrixWorldInverse);
+  vTmp.set(0, 0, 0).project(textCam);
+  bhNdc.set(vTmp.x, vTmp.y);
+  bhScreen.set((vTmp.x + 1) / 2 * W, (1 - vTmp.y) / 2 * H);
+}
+
+// Chaque bloc est un plan posé dans la scène, face à la caméra de SA slide, à TEXT_DEPTH devant elle :
+// vu depuis sa slide il occupe exactement sa place de mise en page ; depuis ailleurs, on le voit sous un autre angle.
+function anchorLetters() {
+  const W = window.innerWidth, H = window.innerHeight, asp = W / H;
+  const wpp = 2 * TEXT_DEPTH * TAN_HALF / H;           // unités de scène par pixel à cette profondeur
+  letters.forEach((L, i) => {
+    const B = blocks[L.b];
+    cameraPose(L.b, 0, 0, tmpPose);
+    const ox = L.x + L.w / 2, oy = L.y + L.h * 0.55;      // origine de la boîte (comme le transform-origin)
+    const nx = ox / W * 2 - 1, ny = 1 - oy / H * 2;
+    vTmp.copy(tmpPose.pos)
+      .addScaledVector(tmpPose.f, TEXT_DEPTH)
+      .addScaledVector(tmpPose.r, nx * TAN_HALF * asp * TEXT_DEPTH)
+      .addScaledVector(tmpPose.u, ny * TAN_HALF * TEXT_DEPTH);
+    L.world = L.world || new THREE.Vector3();
+    L.world.copy(vTmp);
+    L.wr = L.wr || new THREE.Vector3(); L.wr.copy(tmpPose.r).multiplyScalar(wpp);
+    L.wu = L.wu || new THREE.Vector3(); L.wu.copy(tmpPose.u).multiplyScalar(-wpp);
+    for (const j of [i, i + NL]) {
+      iW.setXYZ(j, L.world.x, L.world.y, L.world.z);
+      iR.setXYZ(j, L.wr.x, L.wr.y, L.wr.z);
+      iU.setXYZ(j, L.wu.x, L.wu.y, L.wu.z);
+    }
+  });
+  iW.needsUpdate = true; iR.needsUpdate = true; iU.needsUpdate = true;
+}
+
+window.addEventListener('pointermove', (e) => { mouseX = e.clientX / innerWidth * 2 - 1; mouseY = e.clientY / innerHeight * 2 - 1; });
+
+let last = performance.now(), diskTime = 0, suctionTime = 0, elapsed = 0, skyAngle = 0;
+const SKY_AXIS = new THREE.Vector3(0.35, 1, 0.2).normalize();
+const skyM4 = new THREE.Matrix4();
+let fpsFrames = 0, fpsAcc = 0, fpsMin = Infinity;
+window.__stats = { fps: 0, ms: 0, samples: [] };
+window.__P = P; // accès console aux réglages
+window.__calibrate = () => (window.__calib = calibrate());
+window.__setRes = (r) => { P.auto = false; P.resolution = r; resizeTargets(); refreshGui(); updateQualityLabel(); };
+
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000);
+  const rawMs = now - last;
+  last = now; elapsed += dt;
+
+  // FPS
+  fpsFrames++; fpsAcc += rawMs;
+  if (fpsAcc >= 500) {
+    const fps = fpsFrames * 1000 / fpsAcc;
+    fpsEl.textContent = `${fps.toFixed(0)} · ${(fpsAcc / fpsFrames).toFixed(1)} ms`;
+    window.__stats.fps = fps; window.__stats.ms = fpsAcc / fpsFrames; window.__stats.samples.push(+fps.toFixed(1));
+    if (window.__stats.samples.length > 120) window.__stats.samples.shift();
+    fpsFrames = 0; fpsAcc = 0;
+  }
+
+  // Temps propres : la rotation du disque et l'aspiration s'accumulent (pas de saut quand on change un réglage)
+  diskTime += dt * 1.6 * P.diskSpeed;
+  suctionTime += dt * P.suction;
+  skyAngle += dt * P.skyDrift;
+
+  // Scroll lissé
+  stepTweens(dt);
+
+  updateCamera(dt);
+  updateLetters();
+  render();
+  // Simulation d'un GPU plus faible : le rendu complet est refait N-1 fois de plus (charge GPU × N)
+  for (let k = 1; k < P.simGpu; k++) render();
+  adaptQuality(rawMs);
+  requestAnimationFrame(frame);
+}
+
+function render() {
+  // 1. étoiles aspirées
+  starMat.uniforms.uT.value = suctionTime;
+  starMat.uniforms.uRh.value = rhNdc;
+  starMat.uniforms.uC.value.copy(bhNdc);
+  starMat.uniforms.uTrail.value = P.starTrail;
+  renderer.setRenderTarget(rt.stars);
+  renderer.render(starScene, orthoCam);
+
+  // 1b. lettres détachées (maillages déformés : marée + lentille + parallaxe souris)
+  const W = window.innerWidth, H = window.innerHeight;
+  const gu = glyphMat.uniforms;
+  gu.uView.value.set(W, H);
+  gu.uCenter.value.copy(bhScreen);
+  gu.uViewProj.value.copy(viewProj);
+  gu.uThetaE.value = rhNdc * H / 2 * 1.15;
+  gu.uPar.value.set(parX * 0.06 * H, -parY * 0.03 * H);
+  renderer.setRenderTarget(rt.letters);
+  renderer.setClearColor(0x000000, 0);
+  renderer.clear();
+  renderer.render(glyphScene, orthoCam);
+  renderer.setClearColor(0x000000, 1);
+
+  // 2. trou noir
+  const u = bhMat.uniforms;
+  u.uTime.value = diskTime;
+  u.uCamPos.value.copy(camPos); u.uCamF.value.copy(camF); u.uCamR.value.copy(camR); u.uCamU.value.copy(camU);
+  u.uIntensity.value = P.plasmaIntensity;
+  u.uDoppler.value = P.doppler;
+  u.uSkyRot.value.setFromMatrix4(skyM4.makeRotationAxis(SKY_AXIS, skyAngle));
+  u.uClock.value = elapsed;
+  pass(bhMat, rt.scene);
+
+  // 3. bloom
+  brightMat.uniforms.uTex.value = rt.scene.texture; pass(brightMat, rt.a1);
+  blurMat.uniforms.uTex.value = rt.a1.texture; blurMat.uniforms.uDir.value.set(1 / rt.a1.width, 0); pass(blurMat, rt.t1);
+  blurMat.uniforms.uTex.value = rt.t1.texture; blurMat.uniforms.uDir.value.set(0, 1 / rt.a1.height); pass(blurMat, rt.a1);
+  blurMat.uniforms.uTex.value = rt.a1.texture; blurMat.uniforms.uDir.value.set(2 / rt.a1.width, 0); pass(blurMat, rt.t2);
+  blurMat.uniforms.uTex.value = rt.t2.texture; blurMat.uniforms.uDir.value.set(0, 1 / rt.t2.height); pass(blurMat, rt.a2);
+
+  // 4. composition finale à l'écran
+  const f = finalMat.uniforms;
+  f.uScene.value = rt.scene.texture; f.uStars.value = rt.stars.texture; f.uLetters.value = rt.letters.texture; f.uB1.value = rt.a1.texture; f.uB2.value = rt.a2.texture;
+  f.uBloom.value = P.bloom; f.uGrain.value = P.grain; f.uTime.value = elapsed;
+  pass(finalMat, null);
+}
+
+// ---------------------------------------------------------------------------
+// Qualité automatique : indices matériels + mini-test au chargement, puis ajustement continu
+// ---------------------------------------------------------------------------
+const gl = renderer.getContext();
+const TIERS = {
+  haute:   { stepK: 0.07,  oct: 4, stars: 1100 },
+  moyenne: { stepK: 0.095, oct: 3, stars: 800 },
+  basse:   { stepK: 0.13,  oct: 2, stars: 500 },
+};
+const TIER_ORDER = ['haute', 'moyenne', 'basse'];
+const BUDGET_MS = 15;        // coût visé par image, mesuré en synchrone (pessimiste) : marge sous 16,7 ms
+const RES_MIN = 0.3;
+let autoCeil = 1;            // plafond de résolution trouvé par la calibration (abaissé si la machine décroche)
+let autoInfo = '';
+
+function applyTier(name) {
+  const t = TIERS[name];
+  P.tier = name;
+  bhMat.uniforms.uStepK.value = t.stepK;
+  bhMat.uniforms.uOct.value = t.oct;
+  starGeo.instanceCount = t.stars;
+}
+
+function hardwareHints() {
+  const g = gpuName.toLowerCase();
+  const software = /swiftshader|llvmpipe|basic render|software/.test(g);
+  const integrated = /intel|uhd|iris|hd graphics|mali|adreno|powervr|radeon\(tm\) graphics|vega \d+ graphics/.test(g);
+  const cores = navigator.hardwareConcurrency || 4;
+  const mem = navigator.deviceMemory || 8;     // Chrome uniquement, plafonné à 8
+  return { software, integrated, cores, mem };
+}
+
+// Temps moyen d'une image complète (simulation de GPU comprise) à une résolution donnée, synchronisé sur le GPU
+const syncPx = new Uint8Array(4);
+function timeFrames(res) {
+  P.resolution = res; resizeTargets();
+  const sync = () => gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, syncPx);
+  for (let k = 0; k < P.simGpu; k++) render(0);
+  sync();                                     // échauffement (compilation, allocation)
+  let n = 0;
+  const t0 = performance.now();
+  do {
+    for (let k = 0; k < P.simGpu; k++) render(0);
+    sync(); n++;
+  } while (n < 3 || (performance.now() - t0 < 120 && n < 20));
+  return (performance.now() - t0) / n;
+}
+
+function calibrate() {
+  const t0 = performance.now();
+  const h = hardwareHints();
+  const start = h.software ? 2 : (h.integrated || h.cores <= 4 || h.mem <= 4 ? 1 : 0);
+  let chosen = null;
+  for (let i = start; i < TIER_ORDER.length; i++) {
+    applyTier(TIER_ORDER[i]);
+    // modèle : coût = fixe + k × résolution²  (deux mesures suffisent)
+    const ra = 0.6, rb = 0.35;
+    const a = timeFrames(ra), b = timeFrames(rb);
+    const k = Math.max(1e-3, (a - b) / (ra * ra - rb * rb));
+    const fixed = Math.max(0, a - k * ra * ra);
+    let r = Math.sqrt(Math.max(0, (BUDGET_MS - fixed) / k));
+    r = Math.min(1, Math.floor(r * 20) / 20);
+    if (r >= 0.45 || i === TIER_ORDER.length - 1) {
+      chosen = { tier: TIER_ORDER[i], res: Math.max(RES_MIN, r), msAt060: +a.toFixed(2), msAt035: +b.toFixed(2) };
+      break;
+    }
+  }
+  applyTier(chosen.tier);
+  autoCeil = chosen.res;
+  P.resolution = chosen.res;
+  resizeTargets();
+  const ms = Math.round(performance.now() - t0);
+  autoInfo = `calibré en ${ms} ms` + (start > 0 ? ` · indice ${h.software ? 'rendu logiciel' : 'gpu modeste'}` : '');
+  adapt.cool = 1500; adapt.acc = 0; adapt.n = 0; adapt.good = 0; adapt.fast = 0; adapt.locked = false;
+  refreshGui();
+  updateQualityLabel();
+  return { ...chosen, hints: h, ms };
+}
+
+// Ajustement continu : on baisse si les images dépassent ~18 ms en moyenne sur 1 s, on remonte prudemment.
+const adapt = { acc: 0, n: 0, good: 0, fast: 0, cool: 0, locked: false };
+function adaptQuality(rawMs) {
+  if (!P.auto || rawMs > 250) return;        // onglet revenu au premier plan, etc.
+  if (adapt.cool > 0) { adapt.cool -= rawMs; return; }
+  adapt.acc += rawMs; adapt.n++;
+  if (adapt.acc < 1000) return;
+  const avg = adapt.acc / adapt.n;
+  adapt.acc = 0; adapt.n = 0;
+  if (avg > 18) {
+    adapt.good = 0; adapt.fast = 0; adapt.locked = true;   // plafond verrouillé après un décrochage
+    if (P.resolution > RES_MIN + 0.001) {
+      autoCeil = Math.max(RES_MIN, P.resolution - 0.05);        // ne pas remonter au niveau qui a décroché
+      P.resolution = Math.max(RES_MIN, Math.round((P.resolution - 0.1) * 20) / 20);
+    } else {
+      const i = TIER_ORDER.indexOf(P.tier);
+      if (i < TIER_ORDER.length - 1) applyTier(TIER_ORDER[i + 1]);
+    }
+    resizeTargets(); adapt.cool = 800;
+  } else if (avg < 17.5 && P.resolution < autoCeil - 0.001) {
+    if (++adapt.good >= 4) {
+      P.resolution = Math.min(autoCeil, Math.round((P.resolution + 0.05) * 20) / 20);
+      resizeTargets(); adapt.good = 0; adapt.cool = 800;
+    }
+  } else if (avg < 14 && !adapt.locked && (P.resolution < 0.999 || P.tier !== 'haute')) {
+    // Marge nette (écran > 60 Hz et images rapides) : on remonte d'un cran, qualité d'abord puis résolution
+    adapt.good = 0;
+    if (++adapt.fast >= 3) {
+      const i = TIER_ORDER.indexOf(P.tier);
+      if (i > 0 && P.resolution >= 0.5) applyTier(TIER_ORDER[i - 1]);
+      else { P.resolution = Math.min(1, Math.round((P.resolution + 0.05) * 20) / 20); autoCeil = P.resolution; }
+      resizeTargets(); adapt.fast = 0; adapt.cool = 800;
+    }
+  } else { adapt.good = 0; adapt.fast = 0; }
+  refreshGui();
+  updateQualityLabel();
+}
+
+const qualEl = document.getElementById('qual');
+function updateQualityLabel() {
+  qualEl.textContent = `qualité ${P.tier} · ${P.auto ? 'auto' : 'manuelle'}` + (P.auto && autoInfo ? ` · ${autoInfo}` : '');
+}
+function refreshGui() { if (typeof gui !== 'undefined') gui.controllersRecursive().forEach((c) => c.updateDisplay()); }
+
+// Banc d'essai GPU (indépendant du rAF, utile si l'onglet est en arrière-plan) : __bench(120) -> ms/frame
+window.__bench = (n = 120) => {
+  const px = new Uint8Array(4);
+  render(1 / 60); gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+  const t0 = performance.now();
+  for (let i = 0; i < n; i++) { diskTime += 1.6 / 60; suctionTime += 1 / 60; render(1 / 60); }
+  gl.readPixels(0, 0, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, px);
+  const ms = (performance.now() - t0) / n;
+  return { msPerFrame: +ms.toFixed(2), fpsMax: +(1000 / ms).toFixed(0), internal: `${iw}x${ih}` };
+};
+
+// ---------------------------------------------------------------------------
+// GUI
+// ---------------------------------------------------------------------------
+const gui = new GUI({ title: 'Réglages — trou noir' });
+gui.add(P, 'diskSpeed', 0, 4, 0.01).name('Vitesse du disque');
+gui.add(P, 'plasmaIntensity', 0.2, 3, 0.01).name('Intensité plasma');
+gui.addColor(P, 'plasmaColor').name('Couleur plasma').onChange((v) => bhMat.uniforms.uC1.value.set(v));
+gui.add(P, 'suction', 0, 4, 0.01).name('Aspiration étoiles');
+gui.add(P, 'skyDrift', 0, 0.2, 0.005).name('Dérive du ciel');
+gui.add(P, 'starTrail', 0, 3, 0.05).name("Traînée d'aspiration");
+gui.add(P, 'explosion', 0, 3, 0.01).name('Explosion lettres (0 = off)');
+gui.add(P, 'absorbDur', 1, 8, 0.1).name('Durée transition (s)');
+gui.add(P, 'auto').name('Auto (selon le matériel)').onChange((v) => { if (v) window.__calib = calibrate(); updateQualityLabel(); });
+gui.add(P, 'tier', TIER_ORDER).name('Qualité').onChange((v) => { P.auto = false; applyTier(v); refreshGui(); updateQualityLabel(); });
+gui.add(P, 'resolution', 0.25, 1, 0.05).name('Résolution interne').onChange(() => { P.auto = false; refreshGui(); updateQualityLabel(); }).onFinishChange(resizeTargets);
+gui.add({ recal: () => { P.auto = true; window.__calib = calibrate(); } }, 'recal').name('Recalibrer');
+// Ratios de puissance de calcul (FP32) par rapport à une RTX 5070 Ti (~44 TFLOPS) :
+// GTX 1660 ~5 TFLOPS -> ×9 ; Intel UHD 630 (i3 10e gen) ~0,45 TFLOPS -> ×90.
+gui.add(P, 'simGpu', {
+  'Aucune (ce GPU)': 1,
+  'GTX 1660 (×9)': 9,
+  'Intel UHD 630 · i3 10e gen (×90)': 90,
+}).name('Simuler un GPU').onChange(() => { updateGpuLabel(); if (P.auto) window.__calib = calibrate(); });
+const more = gui.addFolder('Divers');
+more.add(P, 'doppler', 0, 0.95, 0.01).name('Doppler');
+more.add(P, 'bloom', 0, 2, 0.01).name('Bloom');
+more.add(P, 'grain', 0, 0.15, 0.005).name('Grain');
+more.close();
+gui.close();   // panneau fermé par défaut
+
+window.addEventListener('resize', resize);
+await document.fonts.load('700 64px Syne').catch(() => {});
+await document.fonts.ready;
+resize();
+updateCamera(0);
+updateNav();
+applyTier(P.tier);
+if (P.auto) window.__calib = calibrate(); else updateQualityLabel();
+requestAnimationFrame((t) => { last = t; frame(t); });
+</script>
+</body>
+</html>
