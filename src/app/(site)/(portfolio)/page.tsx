@@ -23,28 +23,28 @@ export const metadata: Metadata = {
 };
 
 const offers = [
-  { title: "J'analyse", text: "Votre activité, vos clients, vos contraintes." },
-  { title: "Je comprends", text: "Site vitrine, réservation en ligne ou outil sur mesure : la bonne solution." },
-  { title: "Je crée", text: "Un site rapide, clair, bien référencé, prêt à évoluer." },
+  { title: "Analyse du besoin", text: "Votre activité, vos clients, vos contraintes." },
+  { title: "Compréhension du projet", text: "Site vitrine, réservation en ligne ou outil sur mesure : la bonne solution." },
+  { title: "Conception créative", text: "Un site rapide, clair, bien référencé, prêt à évoluer." },
 ];
 
 const steps: Step[] = [
-  { title: "On échange", text: "Votre projet, vos objectifs." },
-  { title: "Je propose", text: "Une solution et un devis clair." },
-  { title: "Je construis", text: "Vous suivez et validez chaque étape." },
-  { title: "Je livre", text: "Mise en ligne, accès transmis, suivi après." },
+  { title: "Brief", text: "Votre projet, vos objectifs." },
+  { title: "Proposition", text: "Une solution et un devis clair." },
+  { title: "Accompagnement personnalisé", text: "Vous suivez et validez chaque étape." },
+  { title: "Livrable", text: "Mise en ligne, accès transmis, suivi sur le long terme." },
 ];
 
 const faq = [
   { q: "Combien coûte un site ?", a: "Selon le projet : un site vitrine coûte moins qu'une application. Devis détaillé, sans engagement." },
-  { q: "En combien de temps ?", a: "Environ 10 jours pour un site vitrine, 1 mois pour une application web." },
+  { q: "En combien de temps ?", a: "Environ 14 jours pour un site vitrine, 1 mois pour une application web." },
   { q: "Pourrai-je le modifier ?", a: "Oui, avec un espace simple pour vos textes, horaires et photos." },
-  { q: "Hébergement et nom de domaine ?", a: "Je m'occupe de la mise en ligne et vous transmets tous les accès." },
+  { q: "Hébergement et nom de domaine ?", a: "La mise en ligne est prise en charge et tous les accès vous sont transmis." },
 ];
 
 const facts = [
   { title: "Bachelor et master", text: "En développement web, de l'interface à l'hébergement." },
-  { title: "Plusieurs années en entreprise", text: "Applications web et mobiles livrées à de vrais clients." },
+  { title: "Expérience en entreprise", text: "Applications web et mobiles conçues et mises en production pour des clients." },
   { title: "Un seul interlocuteur", text: "Maquette, développement, mise en ligne." },
 ];
 
@@ -106,7 +106,7 @@ export default function Home() {
 
       {/* ───────── Services ───────── */}
       <section id="services" className="shell scroll-mt-20 py-16 md:py-24">
-        <SectionIntro title="Ce que je fais" />
+        <SectionIntro title="Mon expertise" />
         <ol className="mt-8 border-b border-line">
           {offers.map((o, i) => (
             <li key={o.title}>
@@ -129,13 +129,13 @@ export default function Home() {
 
       {/* ───────── Méthode ───────── */}
       <section id="methode" className="shell scroll-mt-20 pb-16 md:pb-24">
-        <SectionIntro title="Comment on travaille" />
+        <SectionIntro title="Notre collaboration" />
         <ProcessTimeline steps={steps} />
       </section>
 
       {/* ───────── Réalisations : captures qui s'assemblent, puis la grille ───────── */}
       <div id="realisations" className="scroll-mt-20">
-        <CollageAssemble title="Des sites que j'ai construits." caption="Touchez une capture pour voir le projet." />
+        <CollageAssemble title="Des projets menés de A à Z." caption="Touchez une capture pour voir le projet." />
       </div>
       <section className="shell pb-16 md:pb-24" aria-labelledby="realisations-titre">
         <h2 id="realisations-titre" className="sr-only">
@@ -168,10 +168,10 @@ export default function Home() {
       <section id="a-propos" className="scroll-mt-20 bg-alt py-16 md:py-24">
         <div className="shell grid items-center gap-12 md:grid-cols-[1.3fr_1fr] md:gap-16">
           <div>
-            <SectionIntro title="Qui suis-je ?" />
+            <SectionIntro title="À propos" />
             <FadeIn delay={0.1}>
               <p className="mt-5 max-w-[42ch] text-[clamp(1.15rem,1.6vw,1.35rem)] leading-relaxed">
-                Noam, creative developer à Lyon. Je conçois et développe des sites et des applications web de A à Z.
+                Noam, creative developer à Lyon. Conception et développement de sites et d'applications web, de A à Z.
               </p>
             </FadeIn>
             <ul className="mt-8 border-t border-line">
