@@ -279,7 +279,17 @@ Web Audio **procédural**, sans fichier au départ : aucune licence et un son en
 
 Une **session neuve par phase**, qui commence par lire ce fichier.
 
-**État au 18/11/2026 : phase 0 terminée, validée par Noam.**
+**État au 18/11/2026 : phase 1 livrée, à valider par Noam sur `lab.localhost:3000`.**
+- Le prototype est porté dans `src/lab/experience/` sans changement de rendu :
+  - `engine.ts` : renderer, passes dans l'ordre étoiles → lettres → trou noir → bloom → composition, boucle unique (ticker GSAP) ;
+  - `timeline.ts` : `KEYS`, `cameraPose`, navigation (GSAP `Observer` pour la molette, clavier, tween `cam.s` en `sine.inOut`) ;
+  - `text/letters.ts` : atlas, lettres WebGL, physique ; `quality.ts` : qualité automatique ; `shaders/*.ts` : GLSL repris tel quel ;
+  - `devtools.ts` : lil-gui, « Simuler un GPU », `__bench()` et accès console, chargés par `import()` en dev uniquement (HUD fps aussi).
+- `three` 0.170.0, `gsap` 3.15.1, `lil-gui` 0.20.0 (versions figées). Polices Syne + JetBrains Mono dans `src/lab/fonts` (sous-ensemble latin).
+- DA verte supprimée ; `themeColor` noir. Écran « Expérience conçue pour ordinateur » sur les écrans tactiles sans survol.
+- Textes : les 4 blocs provisoires, dans `src/lab/content.ts`.
+
+**Phase 0 (18/11/2026) : terminée, validée par Noam.**
 - Le prototype `prototypes/black-hole.html` va bien au-delà du livrable prévu. Il couvre déjà une bonne part des phases 1 et 2 :
   - la navigation par slides et la caméra sur trajectoire ;
   - le texte en 3D aspiré lettre par lettre ;

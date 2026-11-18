@@ -1,0 +1,11 @@
+/**
+ * Textes de l'expérience.
+ * Phase 1 : les 4 blocs provisoires du prototype. Les vrais textes (6 à 8 blocs copiés du portfolio
+ * classique, pas importés) arrivent en phase 2.
+ */
+export const TEXTS: readonly string[] = [
+  "Noam, creative developer à Lyon. Je conçois et développe des sites et des applications web de A à Z.",
+  "Des interfaces rapides, nettes, pensées pour durer. Ici, elles finissent dans un trou noir.",
+  "Texte de remplissage numéro trois. Il sert juste à tester la transition suivante.",
+  "Dernier bloc avant l'horizon. Encore un geste et il ne restera que le vide.",
+];

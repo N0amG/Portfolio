@@ -1,50 +1,147 @@
-@import "tailwindcss";
-
-/* Lab : ses propres jetons, sans lien avec le thème du site freelance. */
+/* Lab : DA « trou noir » (src/lab/SPEC.md, section 4), sans lien avec le thème du site freelance. */
 :root {
-  --lab-bg: #07090c;
-  --lab-fg: #e6edf3;
-  --lab-muted: #8b97a3;   /* 6.4:1 sur le fond */
-  --lab-line: #1d242c;
-  --lab-signal: #b6f36a;  /* 13:1 sur le fond */
+  --lab-void: #000000;
+  --lab-text: #f2efe8;          /* blanc cassé */
+  --lab-muted: rgba(242, 239, 232, 0.6);
+  --lab-amber: #ffb347;
+  --lab-plasma: #ff5a1f;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--lab-void);
+  color: var(--lab-text);
 }
 
 .lab-body {
-  min-height: 100svh;
-  background: var(--lab-bg);
-  color: var(--lab-fg);
-  font-family: ui-monospace, "SFMono-Regular", "Cascadia Code", Menlo, Consolas, monospace;
+  font-family: var(--ff-display), sans-serif;
+  overflow: hidden;              /* navigation par keyframes : la page ne défile jamais */
   -webkit-font-smoothing: antialiased;
 }
 
-/* Grille de fond très discrète */
-.lab-grid {
-  background-image:
-    linear-gradient(var(--lab-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--lab-line) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(ellipse at 50% 40%, #000 30%, transparent 75%);
+.lab-void {
+  position: fixed;
+  inset: 0;
+  background: var(--lab-void);
 }
 
-/* Curseur qui clignote */
-.lab-caret {
-  display: inline-block;
-  width: 0.6ch;
-  height: 1em;
-  margin-left: 0.15ch;
-  transform: translateY(0.12em);
-  background: var(--lab-signal);
-  animation: lab-blink 1.1s steps(1) infinite;
+/* ── Expérience ─────────────────────────────────────────── */
+.lab-gl {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: block;
+  z-index: 0;
 }
-@keyframes lab-blink {
-  50% { opacity: 0; }
+
+.lab-page {
+  position: relative;
+  height: 100vh;
+  z-index: 1;
+  pointer-events: none;
 }
+
+.glyph {
+  font-family: var(--ff-display), sans-serif;
+  font-weight: 700;
+  font-size: clamp(30px, 4.4vw, 74px);
+  line-height: 1.06;
+  letter-spacing: -0.02em;
+}
+
+/* Bloc de mesure (invisible) : sert uniquement à calculer la position de repos de chaque lettre */
+.measure {
+  position: absolute;
+  top: 60vh;
+  left: 8vw;
+  width: min(80vw, 1150px);
+  visibility: hidden;
+}
+.measure .w { display: inline-block; white-space: nowrap; }
+.measure .l { display: inline-block; }
+
+/* Couche accessible : un span par lettre (opacité 0, le rendu visible est en WebGL) */
+.lab-letters {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  overflow: hidden;
+}
+.lab-letters span {
+  position: absolute;
+  left: 0;
+  top: 0;
+  display: block;
+  will-change: transform, opacity;
+  transform-origin: 50% 55%;
+  white-space: pre;
+}
+
+.mono {
+  font-family: var(--ff-mono), ui-monospace, monospace;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--lab-muted);
+}
+
+.lab-brand { position: fixed; left: 24px; bottom: 22px; z-index: 3; }
+.lab-hint { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%); z-index: 3; transition: opacity 0.4s; }
+.lab-count { position: fixed; right: 24px; bottom: 22px; z-index: 3; }
+
+/* HUD de dev (absent en production) */
+.lab-hud { position: fixed; left: 24px; top: 18px; z-index: 3; line-height: 1.7; color: rgba(242, 239, 232, 0.75); }
+.lab-hud b { color: var(--lab-amber); font-weight: 400; }
+
+.lil-gui.root {
+  --background-color: rgba(10, 8, 6, 0.82);
+  --widget-color: #2a221c;
+  --focus-color: #3a2e25;
+  --hover-color: #352a22;
+  --number-color: #ffb347;
+  --string-color: #ffb347;
+  z-index: 10;
+}
+
+/* ── Mobile / tablette ──────────────────────────────────── */
+.lab-desktop-only {
+  min-height: 100svh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 20px;
+  padding: 48px 24px;
+  max-width: 560px;
+  margin: 0 auto;
+  background: radial-gradient(circle at 50% 30%, rgba(255, 90, 31, 0.12), transparent 60%);
+}
+.lab-desktop-only h1 {
+  margin: 0;
+  font-weight: 700;
+  font-size: clamp(32px, 9vw, 52px);
+  line-height: 1.04;
+  letter-spacing: -0.02em;
+}
+.lab-desktop-only p {
+  margin: 0;
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--lab-muted);
+}
+.lab-desktop-only a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--lab-amber);
+  text-decoration: none;
+}
+.lab-desktop-only a:hover { text-decoration: underline; text-underline-offset: 4px; }
 
 :focus-visible {
-  outline: 2px solid var(--lab-signal);
+  outline: 2px solid var(--lab-amber);
   outline-offset: 3px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .lab-caret { animation: none; }
 }
