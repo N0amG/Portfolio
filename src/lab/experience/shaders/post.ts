@@ -23,6 +23,9 @@ export const FINAL_FRAG = /* glsl */ `
   varying vec2 vUv;
   uniform sampler2D uScene, uB1, uB2, uStars, uLetters; uniform float uBloom, uGrain, uTime, uAspect; uniform vec2 uTexel;
   uniform vec3 uTextCol;
+  // Entrées des effets de composition (registre, CompositeParams) : déclarées au lot V0, utilisées à partir de V1
+  // (12 ondes gravitationnelles, 13 flou de mouvement + aberration chromatique, 14 reflets anamorphiques).
+  uniform vec4 uWaves[4]; uniform vec2 uMotion; uniform float uChroma, uFlare;
   // Upscale bicubique Catmull-Rom en 9 lectures (net même à basse résolution interne)
   vec4 sampleCR(sampler2D tex, vec2 uv){
     vec2 sp = uv / uTexel, tc = floor(sp - 0.5) + 0.5, f = sp - tc;

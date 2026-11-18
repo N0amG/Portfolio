@@ -61,6 +61,23 @@ export function mountDevtools(engine: Engine) {
   more.add(P, "bloom", 0, 2, 0.01).name("Bloom");
   more.add(P, "grain", 0, 0.15, 0.005).name("Grain");
   more.close();
+
+  // Registre de scènes : un dossier par élément, avec son interrupteur (pour mesurer son coût seul au __bench)
+  const sc = gui.addFolder("Scènes (registre)");
+  const decorNames = { "0 · tout": 0, "1 · moyens coupés": 1, "2 · légers réduits": 2 };
+  const decorProxy = {
+    get decor() { return engine.scenes.decor.level(); },
+    set decor(v: number) { engine.scenes.decor.set(v); },
+  };
+  sc.add(decorProxy, "decor", decorNames).name("Décor (qualité auto)").listen();
+  for (const e of engine.scenes.entries) {
+    const f = sc.addFolder(e.el.label);
+    f.add(e, "enabled").name(`Actif · ${e.el.cost} · dès « ${e.el.minTier} »`);
+    f.add(e, "active").name("En cours (fenêtre + budget)").disable().listen();
+    e.el.gui?.(f);
+    f.close();
+  }
+  sc.close();
   gui.close(); // panneau fermé par défaut
   refreshGui();
 
@@ -72,6 +89,7 @@ export function mountDevtools(engine: Engine) {
   w.__nav = engine.nav.state;
   w.__bench = engine.bench;
   w.__calibrate = calibrate;
+  w.__scenes = engine.scenes;
   w.__setRes = (r: number) => {
     P.auto = false;
     P.resolution = r;
@@ -82,6 +100,6 @@ export function mountDevtools(engine: Engine) {
 
   return () => {
     gui.destroy();
-    for (const k of ["__P", "__stats", "__cam", "__go", "__nav", "__bench", "__calibrate", "__setRes", "__calib"]) delete w[k];
+    for (const k of ["__P", "__stats", "__cam", "__go", "__nav", "__bench", "__calibrate", "__setRes", "__calib", "__scenes"]) delete w[k];
   };
 }

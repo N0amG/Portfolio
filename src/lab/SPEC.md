@@ -140,6 +140,68 @@ Sur le trou blanc : `contact@noamguez.fr` (copie au clic), liens, retour vers no
 
 Un indice discret en mono (« continuer ? »). Un geste de scroll de plus (keyframe supplémentaire) **débloque un mini-jeu** : on est un trou noir qui suit la souris, on avale des étoiles, on grossit, et il faut éviter certains obstacles (à définir). Ce mécanisme est original : pas de recréation d'un jeu existant. Le code est chargé à la demande (`import()` dynamique).
 
+## 5 bis. Plan visuel v2 (décision du 18/11/2026)
+
+Noam veut **un maximum d'effets visuels avant les textes**. Les 20 idées ci-dessous sont **toutes retenues**. Les vrais textes, le son, le contact et l'ouverture viennent après.
+
+### Catalogue (numéros de référence)
+
+Légende : coût GPU 🟢 léger · 🟠 moyen · 🔴 lourd.
+
+| # | Élément | GPU | Description |
+|---|---|---|---|
+| 1 | Supernova | 🔴 | Préchargement : l'étoile pulse, le cœur implose, flash et onde de choc, éjection en nébuleuse, puis le reste s'effondre en trou noir et allume le disque. |
+| 2 | Plongée + trou de ver | 🔴 | On traverse l'anneau de photons : traînées de lumière, tunnel déformé, aberration chromatique croissante, puis noir total. |
+| 3 | Point blanc → trou blanc | 🔴 | Un point blanc grandit jusqu'à l'écran blanc, puis dézoom sur un trou blanc à horizon bleu : matière éjectée et jets façon quasar. |
+| 4 | Nébuleuses | 🟠 | Volumes de gaz colorés (fBm raymarché à basse résolution, ou couches de billboards bruités), avec une teinte propre à chaque slide. |
+| 5 | Étoile compagne dévorée | 🟠 | Étoile voisine dont la matière est arrachée en filament (débordement du lobe de Roche) et spirale jusque dans le disque. |
+| 6 | Pulsar | 🟠 | Étoile à neutrons avec deux faisceaux coniques tournants, comme un phare, et un halo. |
+| 7 | Planète à anneaux | 🟠 | Au premier plan, elle défile pendant un mouvement de caméra (effet de profondeur), éclairée par le disque. |
+| 8 | Astéroïdes / débris | 🟢 | Rochers instanciés en orbite, avec rotation propre. |
+| 9 | Comètes | 🟢 | Elles traversent l'écran avec leur queue et finissent aspirées. |
+| 10 | Galaxie spirale de fond | 🟢 | Placée dans le fond échantillonné par le shader : elle est courbée par la lentille gravitationnelle. |
+| 11 | Jets relativistes | 🟠 | Deux jets polaires du trou noir, visibles surtout en vue de dessous. |
+| 12 | Ondes gravitationnelles | 🟢 | À chaque changement de slide, des anneaux de distorsion partent du trou noir et traversent l'écran (passe de composition). |
+| 13 | Flou de mouvement + aberration chromatique | 🟢 | Pendant les mouvements de caméra, proportionnels à la vitesse. |
+| 14 | Reflets anamorphiques | 🟢 | Longues traînées horizontales sur les sources très brillantes (côté Doppler du disque, pulsar, supernova). |
+| 15 | Poussière au premier plan | 🟢 | Particules sur 2 ou 3 couches de profondeur, en parallaxe avec la caméra et la souris. |
+| 16 | Éruption du disque au clic | 🟢 | Sursaut local de plasma qui fait le tour du disque, puis s'éteint. |
+| 17 | Curseur gravitationnel | 🟠 | La souris est une petite masse qui courbe légèrement la lumière du fond autour d'elle. |
+| 18 | Texte géant de fond | 🟠 | Grand texte en contour placé **derrière** le trou noir, dans le fond échantillonné, et tordu par la lentille. C'est la signature du site. |
+| 19 | HUD scientifique | 🟢 | Coordonnées, masse, distance, décalage vers le rouge et vitesse de rotation défilent en mono, avec des valeurs propres à chaque slide. |
+| 20 | Texte en anneau | 🟢 | Une phrase disposée en anneau qui orbite autour du trou noir, cachée en partie par l'ombre. |
+
+### Parcours v2 (keyframes)
+
+Ce parcours remplace les pourcentages de la section 5. Chaque slide garde son bloc de texte provisoire. Les arrêts de caméra continuent d'alterner au-dessus et au-dessous du disque.
+
+| Étape | Scène | Éléments propres |
+|---|---|---|
+| P | Préchargement | 1 |
+| S1 | Accueil, vue de base | 10, 18 |
+| S2 | Dessous, à gauche | 5 |
+| S3 | Dessus, à droite | 4, 9 |
+| S4 | Dessous | 6, 8 |
+| S5 | Dessus, la planète traverse le premier plan pendant l'arrivée | 7, 11 |
+| S6 | Approche : le trou noir seul et grand, sans texte | 20 |
+| S7 | Plongée | 2 |
+| S8 | Point blanc | 3 (début) |
+| S9 | Trou blanc | 3 |
+| S10 | Contact | (phase ultérieure) |
+| + | Easter egg | (phase ultérieure) |
+
+**Effets présents partout :** 12, 13, 14, 15, 16, 17, 19.
+
+### Règles de performance
+
+- **Un registre de scènes.** Chaque élément est un module avec la même interface : `init`, `update(params)`, `render`, `dispose`. Il déclare :
+  - **ses slides actives**, et n'est ni mis à jour ni rendu hors de sa fenêtre (sa slide ± la transition) ;
+  - **son coût** et **le niveau de qualité minimal** à partir duquel il est activé.
+- **Jamais plus d'un élément 🔴 actif à la fois.** Les éléments 🟠 sont limités à 2 simultanés en plus du trou noir.
+- **Ordre de dégradation de la qualité automatique :** on coupe d'abord les décors 🟠, ensuite on réduit les décors 🟢, et seulement ensuite on baisse la résolution du trou noir.
+- **Lentille gratuite :** tout ce qui doit être courbé (10, 18, nébuleuses lointaines) va dans le fond échantillonné par le shader du trou noir, pas en géométrie à part.
+- **Chaque élément a son dossier dans le panneau de réglages** (en dev), avec un interrupteur pour mesurer son coût seul.
+
 ## 6. Rendu 3D (choix techniques)
 
 **Trou noir et trou blanc**
@@ -279,7 +341,17 @@ Web Audio **procédural**, sans fichier au départ : aucune licence et un son en
 
 Une **session neuve par phase**, qui commence par lire ce fichier.
 
-**État au 18/11/2026 : phase 1 livrée, à valider par Noam sur `lab.localhost:3000`.**
+**État au 18/11/2026 : lot V0 (socle) fait, en attente de validation par Noam. Prochaine étape : lot V1.**
+- **Registre de scènes** (`experience/scenes/`) :
+  - `types.ts` : interface `SceneElement` (`id`, `label`, `slides` en index 0-based via `S(n)` ou `"all"`, `cost` léger/moyen/lourd, `minTier`, `layers`, `enabledByDefault`, `init(ctx)`, `update(f)`, `render(layer, ctx)`, `dispose()`, `gui(folder)` optionnel), `FrameParams` (caméra, matrice, centre et ombre du trou noir, souris, `weight` 0→1 dans la fenêtre, `reduced`, `composite`) et `CompositeParams`.
+  - Couches : `back` (après les étoiles, dans leur cible pleine résolution, caché par l'ombre), `sky` (cible équirectangulaire 1024×512 échantillonnée par le shader du trou noir à travers les rayons courbés : 10, 18), `front` (à l'écran après la composition). Effets de composition (12, 13, 14) : `f.composite` (`waves[4]`, `motion`, `chroma`, `flare`), branchés sur des uniforms déclarés dans `FINAL_FRAG`, utilisés à partir de V1.
+  - `registry.ts` : fenêtre = slide ± 1 ; budget 1 lourd + 2 moyens (les plus proches de leur slide d'abord) ; niveau de décor 0/1/2. `index.ts` : liste des éléments, chaque lot y ajoute les siens.
+  - `debug.ts` : élément factice (cube en couche `back`, grille en couche `sky`, S6–S9), en dev uniquement et éteint par défaut ; absent du build de production.
+- **Parcours S1–S9** : `KEYS` étendu (S6 approche dessous à 15, S7 dessus à 12, S8 dessous à 12, S9 dessus à 22), S1–S5 inchangés ; `S(n)` et `LAST_SLIDE` dans `timeline.ts`. Compteur « 01 / 09 », indice « ← revenir » sur S9.
+- **Qualité** : `quality.ts` dégrade d'abord le décor (moyens coupés, puis légers réduits) s'il y a des éléments concernés, puis la résolution, puis le niveau ; la remontée suit l'ordre inverse. Le décor revient à 0 à chaque slide posée et à la calibration.
+- **Réglages dev** : dossier « Scènes (registre) » avec le niveau de décor et un dossier par élément (interrupteur, état actif, réglages propres) ; `__scenes` en console.
+
+**Phase 1 (18/11/2026) : livrée et poussée (`f497d8b`).**
 - Le prototype est porté dans `src/lab/experience/` sans changement de rendu :
   - `engine.ts` : renderer, passes dans l'ordre étoiles → lettres → trou noir → bloom → composition, boucle unique (ticker GSAP) ;
   - `timeline.ts` : `KEYS`, `cameraPose`, navigation (GSAP `Observer` pour la molette, clavier, tween `cam.s` en `sine.inOut`) ;
@@ -299,16 +371,27 @@ Une **session neuve par phase**, qui commence par lire ce fichier.
 - Vu ce qu'il y a désormais à porter (shaders, lettres en WebGL, caméra), prévoir **Opus** plutôt que Sonnet pour la phase 1.
 - Textes : provisoires (4 blocs de remplissage). Les vrais textes viendront en phase 2 (`content.ts`).
 
-| # | Phase | Modèle / effort | Livrable validé par Noam |
+**Plan à partir du 18/11/2026 : lots visuels V0 à V7 d'abord** (voir la section 5 bis), puis les phases de fin. Les phases 0 et 1 sont faites.
+
+| Lot | Contenu (n° de la section 5 bis) | Modèle / effort | Livrable validé par Noam |
 |---|---|---|---|
-| 0 | **Prototype DA** : `prototypes/black-hole.html` autonome (three.js en CDN) avec trou noir + étoiles spaghettifiées + 1 bloc de texte aspiré + 3 curseurs de réglage | Opus, élevé | Le rendu et les perfs |
-| 1 | Intégration Next : moteur, canvas, timeline, accueil, écran mobile, polices | Sonnet, moyen | L'accueil sur `lab.localhost` |
-| 2 | Textes aspirés (`content.ts` + physique) | Sonnet, moyen | La séquence 5–55 % |
-| 3 | Plongée, trou de ver, point blanc, trou blanc | Opus, élevé pour le shader ; Sonnet pour le branchement | La séquence 55–90 % |
-| 4 | Préchargement supernova | Opus, élevé | L'intro |
-| 5 | Son | Sonnet, moyen | L'ambiance complète |
-| 6 | Contact + easter egg | Sonnet, moyen | Fin du site |
-| 7 | Passe perfs + accessibilité minimale + ouverture (`indexable: true`) | Sonnet, moyen | Mise en ligne |
+| V0 | **Socle** : registre de scènes, parcours étendu à S1–S9 (`KEYS`, une slide vide par scène à venir), règles de performance, dossier de réglages par élément | Opus, moyen | Navigation S1→S9 et retour, perfs identiques |
+| V1 | **Effets légers partout** : 12, 13, 14, 15, 16, 19, + 9 et 10 | Sonnet, moyen | Le rendu de toutes les slides |
+| V2 | **Lentille et texte** : 18, 17, 20 | Opus, moyen | S1 et S6 |
+| V3 | **Étoile compagne dévorée + jets** : 5, 11 | Opus, élevé | S2 et S5 |
+| V4 | **Nébuleuses + pulsar** : 4, 6 | Opus, élevé | S3 et S4 |
+| V5 | **Astéroïdes + planète** : 8, 7 | Sonnet, moyen | S4 et S5 |
+| V6 | **Supernova** : 1 | Opus, élevé | Le préchargement |
+| V7 | **Plongée → trou blanc** : 2, 3 | Opus, élevé | S7 à S9 |
+| F1 | Son | Sonnet, moyen | L'ambiance complète |
+| F2 | Vrais textes (`content.ts`, polices en latin-ext pour « œ ») | Sonnet, moyen | Les textes |
+| F3 | Contact + easter egg | Sonnet, moyen | Fin du site |
+| F4 | Passe perfs + accessibilité minimale + ouverture (`indexable: true`) | Sonnet, moyen | Mise en ligne |
+
+- **V0 passe obligatoirement en premier**, car tous les autres lots s'y branchent.
+- **Après V0, les lots qui ne touchent pas aux mêmes fichiers peuvent tourner en parallèle.** Le plus sûr reste de les faire **un par un, avec un commit à chaque fois**, parce que presque tous modifient la composition dans `engine.ts`.
+
+**Historique des anciennes phases :** 0 = prototype ; 1 = intégration Next ; 2 = textes (devenue F2) ; 3 = plongée (devenue V7) ; 4 = supernova (devenue V6) ; 5 = son (devenu F1) ; 6 = contact (devenu F3) ; 7 = ouverture (devenue F4).
 
 **Règles d'économie :**
 - Retours groupés en un message par phase.

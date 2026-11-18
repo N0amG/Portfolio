@@ -6,6 +6,7 @@ export const BLACKHOLE_FRAG = /* glsl */ `
   varying vec2 vUv;
   uniform vec2 uRes; uniform float uTime, uTanHalf, uIntensity, uDoppler, uStepK, uOct, uClock;
   uniform mat3 uSkyRot;
+  uniform sampler2D uSkyTex; uniform float uSkyOn;   // couche "sky" du registre (équirectangulaire, repère monde)
   uniform vec3 uCamPos, uCamR, uCamU, uCamF, uC0, uC1, uC2, uC3;
   ${COMMON}
   const float R_IN = 2.9;
@@ -122,6 +123,7 @@ export const BLACKHOLE_FRAG = /* glsl */ `
     vec3 bg = vec3(0.0);
     if (!captured){
       bg = starField(dir);
+      if (uSkyOn > 0.5) bg += textureLod(uSkyTex, vec2(atan(dir.z, dir.x) * 0.15915494 + 0.5, asin(clamp(dir.y, -1.0, 1.0)) * 0.31830989 + 0.5), 0.0).rgb;
       // anneau de photons : rayons qui ont frôlé la sphère de photons (r = 1.5)
       float ring = exp(-pow((rmin - 1.5) * 6.0, 2.0));
       acc_col += (1.0 - alpha * 0.7) * ring * mix(uC2, uC3, 0.6) * 0.45 * uIntensity;

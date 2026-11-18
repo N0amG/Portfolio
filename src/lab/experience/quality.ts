@@ -1,6 +1,8 @@
 /* ───────────────────────────────────────────────────────────
    Qualité automatique : indices matériels + mini-test au chargement, puis ajustement continu.
-   (Le mini-test sera caché dans le préchargement supernova en phase 4.)
+   (Le mini-test sera caché dans le préchargement supernova, lot V6.)
+   Ordre de dégradation (SPEC 5 bis) : décors moyens coupés → décors légers réduits → résolution → niveau.
+   La remontée suit l'ordre inverse.
    ─────────────────────────────────────────────────────────── */
 
 export const TIERS = {
@@ -29,11 +31,13 @@ interface QualityDeps {
   render: () => void;
   resizeTargets: () => void;
   setTier: (t: Tier) => void;
+  /** Niveau de décor du registre de scènes : 0 = tout, 1 = moyens coupés, 2 = légers réduits. */
+  decor?: { level: () => number; set: (n: number) => void; useful: (n: number) => boolean };
   /** Appelé quand la qualité ou la résolution change (libellés, panneau de dev). */
   changed: () => void;
 }
 
-export function createQuality({ P, gl, gpuName, render, resizeTargets, setTier, changed }: QualityDeps) {
+export function createQuality({ P, gl, gpuName, render, resizeTargets, setTier, decor, changed }: QualityDeps) {
   let autoCeil = 1; // plafond de résolution trouvé par la calibration (abaissé si la machine décroche)
   let autoInfo = "";
   const adapt = { acc: 0, n: 0, good: 0, fast: 0, cool: 0, locked: false };
@@ -95,6 +99,7 @@ export function createQuality({ P, gl, gpuName, render, resizeTargets, setTier, 
     resizeTargets();
     const ms = Math.round(performance.now() - t0);
     autoInfo = `calibré en ${ms} ms` + (start > 0 ? ` · indice ${h.software ? "rendu logiciel" : "gpu modeste"}` : "");
+    decor?.set(0);
     adapt.cool = 1500; adapt.acc = 0; adapt.n = 0; adapt.good = 0; adapt.fast = 0; adapt.locked = false;
     changed();
     return { ...chosen, hints: h, ms };
@@ -112,7 +117,10 @@ export function createQuality({ P, gl, gpuName, render, resizeTargets, setTier, 
     adapt.n = 0;
     if (avg > 18) {
       adapt.good = 0; adapt.fast = 0; adapt.locked = true; // plafond verrouillé après un décrochage
-      if (P.resolution > RES_MIN + 0.001) {
+      const dl = decor ? decor.level() : 2;
+      if (dl < 2 && decor!.useful(dl + 1)) {
+        decor!.set(dl + 1); // d'abord les décors (moyens coupés, puis légers réduits)
+      } else if (P.resolution > RES_MIN + 0.001) {
         autoCeil = Math.max(RES_MIN, P.resolution - 0.05); // ne pas remonter au niveau qui a décroché
         P.resolution = Math.max(RES_MIN, Math.round((P.resolution - 0.1) * 20) / 20);
       } else {
@@ -128,12 +136,13 @@ export function createQuality({ P, gl, gpuName, render, resizeTargets, setTier, 
         adapt.good = 0;
         adapt.cool = 800;
       }
-    } else if (avg < 14 && !adapt.locked && (P.resolution < 0.999 || P.tier !== "haute")) {
-      // Marge nette (écran > 60 Hz et images rapides) : on remonte d'un cran, qualité d'abord puis résolution
+    } else if (avg < 14 && !adapt.locked && (P.resolution < 0.999 || P.tier !== "haute" || (decor?.level() ?? 0) > 0)) {
+      // Marge nette (écran > 60 Hz et images rapides) : on remonte d'un cran, qualité d'abord, puis résolution, puis décors
       adapt.good = 0;
       if (++adapt.fast >= 3) {
         const i = TIER_ORDER.indexOf(P.tier);
         if (i > 0 && P.resolution >= 0.5) applyTier(TIER_ORDER[i - 1]);
+        else if (P.resolution >= 0.999 && decor && decor.level() > 0) decor.set(decor.level() - 1);
         else {
           P.resolution = Math.min(1, Math.round((P.resolution + 0.05) * 20) / 20);
           autoCeil = P.resolution;

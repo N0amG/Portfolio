@@ -28,8 +28,17 @@ export const KEYS = [
   { az: -0.6, el: -0.32, dist: 22, look: -2 }, // 2 : dessous, à gauche (le trou noir est à droite du cadre)
   { az: 0.45, el: 0.3, dist: 21, look: 1.5 }, // 3 : dessus, à droite (le trou noir est à gauche du cadre)
   { az: 0.1, el: -0.38, dist: 22, look: 0 }, // 4 : dessous, regard vers le haut
-  { az: 0.0, el: 0.13, dist: 22, look: 0 }, // 5 : slide vide, retour à la vue de base
+  { az: 0.0, el: 0.13, dist: 22, look: 0 }, // 5 : retour à la vue de base (la planète traversera ici, lot V5)
+  // Parcours v2 (SPEC 5 bis) : slides vides pour l'instant, mises en scène par les lots suivants.
+  { az: -0.3, el: -0.2, dist: 15, look: 0 }, // 6 : approche, dessous ; le trou noir seul et grand
+  { az: 0.25, el: 0.22, dist: 12, look: 0 }, // 7 : plongée, dessus (lot V7)
+  { az: -0.15, el: -0.16, dist: 12, look: 0 }, // 8 : point blanc, dessous (lot V7)
+  { az: 0.0, el: 0.13, dist: 22, look: 0 }, // 9 : trou blanc, dessus, dézoom (lot V7)
 ] as const;
+/** Index 0-based d'une slide du parcours : S(1) = 0 … S(9) = 8. */
+export const S = (n: number) => n - 1;
+/** Index de la dernière slide. */
+export const LAST_SLIDE = KEYS.length - 1;
 const BULGE = 0.9; // ampleur des boucles vers l'extérieur entre deux arrêts
 const DEZOOM = 0.32; // recul de la caméra au milieu d'une boucle
 const ROLL = 0.14; // inclinaison de la caméra dans les virages (rad)

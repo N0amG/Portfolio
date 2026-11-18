@@ -100,7 +100,7 @@ function Scene() {
         Scroll →
       </div>
       <div ref={count} className="lab-count mono">
-        01 / 05
+        01 / 09
       </div>
     </>
   );

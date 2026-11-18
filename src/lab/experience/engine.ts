@@ -4,13 +4,18 @@ import { FS_VERT } from "./shaders/common";
 import { STARS_FRAG, STARS_VERT } from "./shaders/stars";
 import { BLACKHOLE_FRAG } from "./shaders/blackhole";
 import { BLUR_FRAG, BRIGHT_FRAG, FINAL_FRAG } from "./shaders/post";
-import { CAM_DIST, TAN_HALF, cameraPose, createNavigation, makePose, shadowNdc } from "./timeline";
+import { CAM_DIST, LAST_SLIDE, TAN_HALF, cameraPose, createNavigation, makePose, shadowNdc } from "./timeline";
 import { createLetters } from "./text/letters";
 import { createQuality, type TierName } from "./quality";
+import { createRegistry } from "./scenes/registry";
+import { createSceneElements } from "./scenes";
+import { SKY_H, SKY_W, type CompositeParams, type FrameParams, type Layer } from "./scenes/types";
 
 /* ───────────────────────────────────────────────────────────
    Moteur : renderer, passes, boucle unique, qualité automatique.
    Ordre des passes : étoiles → lettres → trou noir → bloom → composition finale.
+   Registre de scènes (scenes/) : couches "back" (après les étoiles), "sky" (fond du trou noir),
+   "front" (après la composition) et paramètres de composition, voir scenes/types.ts.
    Port à l'identique du prototype phase 0 (prototypes/black-hole.html).
    ─────────────────────────────────────────────────────────── */
 
@@ -128,6 +133,7 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
       uIntensity: { value: 1 }, uDoppler: { value: 0.75 },
       uStepK: { value: 0.07 }, uOct: { value: 4 },
       uSkyRot: { value: new THREE.Matrix3() }, uClock: { value: 0 },
+      uSkyTex: { value: null as THREE.Texture | null }, uSkyOn: { value: 0 },
     },
     vertexShader: FS_VERT,
     fragmentShader: BLACKHOLE_FRAG,
@@ -148,6 +154,8 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
       uTextCol: { value: new THREE.Vector3(0.949, 0.937, 0.91) }, // #f2efe8 exact (composé après le tonemapping)
       uTexel: { value: new THREE.Vector2(1, 1) },
       uBloom: { value: 0.9 }, uGrain: { value: 0.045 }, uTime: { value: 0 }, uAspect: { value: 1 },
+      uWaves: { value: [0, 1, 2, 3].map(() => new THREE.Vector4()) }, uMotion: { value: new THREE.Vector2() },
+      uChroma: { value: 0 }, uFlare: { value: 0 },
     },
     vertexShader: FS_VERT,
     fragmentShader: FINAL_FRAG,
@@ -163,7 +171,9 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     a1: new THREE.WebGLRenderTarget(1, 1, rtOpts), t1: new THREE.WebGLRenderTarget(1, 1, rtOpts),
     a2: new THREE.WebGLRenderTarget(1, 1, rtOpts), t2: new THREE.WebGLRenderTarget(1, 1, rtOpts),
     letters: new THREE.WebGLRenderTarget(1, 1, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: false }),
+    sky: new THREE.WebGLRenderTarget(SKY_W, SKY_H, rtOpts), // couche "sky" du registre (taille fixe)
   };
+  bhMat.uniforms.uSkyTex.value = rt.sky.texture;
   let iw = 1, ih = 1;
 
   function resizeTargets() {
@@ -193,16 +203,17 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
   // Texte
   // -------------------------------------------------------------------------
   const letters = createLetters(texts, els.page, els.letters);
-  const NS = letters.blocks.length; // slides 0..NS-1 : un bloc chacune ; slide NS : le trou noir seul
+  const NS = letters.blocks.length; // slides 0..NS-1 : un bloc chacune ; les suivantes, jusqu'à LAST_SLIDE, sont sans texte
 
   function updateNav(slide: number, busy: boolean) {
     const pad = (n: number) => String(n).padStart(2, "0");
-    els.count.textContent = `${pad(slide + 1)} / ${pad(NS + 1)}`;
-    els.hint.textContent = slide === NS ? "← revenir" : "Scroll →";
-    els.hint.style.opacity = busy ? "0" : slide === 0 || slide === NS ? "1" : "0";
+    els.count.textContent = `${pad(slide + 1)} / ${pad(LAST_SLIDE + 1)}`;
+    els.hint.textContent = slide === LAST_SLIDE ? "← revenir" : "Scroll →";
+    els.hint.style.opacity = busy ? "0" : slide === 0 || slide === LAST_SLIDE ? "1" : "0";
     els.letters.setAttribute("aria-label", slide < NS ? letters.blocks[slide].text : "");
+    if (!busy) scenes.decor.set(0); // nouvelle slide posée : les décors coupés ont de nouveau leur chance
   }
-  const nav = createNavigation({ cam, last: NS, duration: () => P.absorbDur, onChange: updateNav });
+  const nav = createNavigation({ cam, last: LAST_SLIDE, duration: () => P.absorbDur, onChange: updateNav });
 
   // -------------------------------------------------------------------------
   // Caméra
@@ -242,6 +253,36 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     bhNdc.set(vTmp.x, vTmp.y);
     bhScreen.set(((vTmp.x + 1) / 2) * W, ((1 - vTmp.y) / 2) * H);
   }
+  // -------------------------------------------------------------------------
+  // Registre de scènes (éléments visuels du catalogue, section 5 bis)
+  // -------------------------------------------------------------------------
+  const scenes = createRegistry(createSceneElements(), { renderer, camera: textCam, ortho: orthoCam });
+  const composite: CompositeParams = {
+    waves: finalMat.uniforms.uWaves.value as THREE.Vector4[],
+    motion: finalMat.uniforms.uMotion.value as THREE.Vector2,
+    chroma: 0,
+    flare: 0,
+  };
+  const frameParams: FrameParams = {
+    s: 0, slide: 0, weight: 0, dt: 0, time: 0, camPos, camF, camR, camU, viewProj, bhScreen, bhNdc, rhNdc,
+    mouse: new THREE.Vector2(), width: 1, height: 1, dpr: DPR, reduced: false, composite,
+  };
+  function updateScenes(dt: number) {
+    const f = frameParams;
+    f.s = cam.s; f.dt = dt; f.time = clock.elapsed; f.rhNdc = rhNdc;
+    f.mouse.set(parX, parY); f.width = window.innerWidth; f.height = window.innerHeight;
+    for (const w of composite.waves) w.set(0, 0, 0, 0);
+    composite.motion.set(0, 0); composite.chroma = 0; composite.flare = 0;
+    scenes.update(f, P.tier);
+  }
+  /** Rend une couche du registre dans la cible donnée, par-dessus son contenu. */
+  function renderLayer(layer: Layer, target: THREE.WebGLRenderTarget | null) {
+    renderer.setRenderTarget(target);
+    renderer.autoClear = false;
+    scenes.render(layer);
+    renderer.autoClear = true;
+  }
+
   const onPointer = (e: PointerEvent) => {
     mouseX = (e.clientX / window.innerWidth) * 2 - 1;
     mouseY = (e.clientY / window.innerHeight) * 2 - 1;
@@ -262,6 +303,7 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     starMat.uniforms.uTrail.value = P.starTrail;
     renderer.setRenderTarget(rt.stars);
     renderer.render(starScene, orthoCam);
+    if (scenes.has("back")) renderLayer("back", rt.stars);
 
     // 2. lettres (maillages déformés : marée + lentille + parallaxe souris)
     const W = window.innerWidth, H = window.innerHeight;
@@ -277,8 +319,14 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     renderer.render(letters.scene, orthoCam);
     renderer.setClearColor(0x000000, 1);
 
-    // 3. trou noir
+    // 3. trou noir (+ couche "sky" du registre, échantillonnée à travers les rayons courbés)
     const u = bhMat.uniforms;
+    u.uSkyOn.value = scenes.has("sky") ? 1 : 0;
+    if (u.uSkyOn.value) {
+      renderer.setRenderTarget(rt.sky);
+      renderer.clear();
+      renderLayer("sky", rt.sky);
+    }
     u.uTime.value = clock.disk;
     u.uCamPos.value.copy(camPos); u.uCamF.value.copy(camF); u.uCamR.value.copy(camR); u.uCamU.value.copy(camU);
     u.uIntensity.value = P.plasmaIntensity;
@@ -299,7 +347,11 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     f.uScene.value = rt.scene.texture; f.uStars.value = rt.stars.texture; f.uLetters.value = rt.letters.texture;
     f.uB1.value = rt.a1.texture; f.uB2.value = rt.a2.texture;
     f.uBloom.value = P.bloom; f.uGrain.value = P.grain; f.uTime.value = clock.elapsed;
+    f.uChroma.value = composite.chroma; f.uFlare.value = composite.flare; // uWaves et uMotion partagent leurs vecteurs avec `composite`
     pass(finalMat, null);
+
+    // 6. couche "front" du registre, directement à l'écran
+    if (scenes.has("front")) renderLayer("front", null);
   }
 
   // -------------------------------------------------------------------------
@@ -314,6 +366,7 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
   const listeners = { paramsChanged: () => {} };
   const quality = createQuality({
     P, gl, gpuName, render, resizeTargets,
+    decor: scenes.decor,
     setTier: (t) => {
       bhMat.uniforms.uStepK.value = t.stepK;
       bhMat.uniforms.uOct.value = t.oct;
@@ -366,6 +419,7 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
 
     updateCamera(dt);
     letters.update({ camS: cam.s, explosion: P.explosion, bhScreen, rhNdc, textCam });
+    updateScenes(dt);
     render();
     // Simulation d'un GPU plus faible (dev) : le rendu complet est refait N-1 fois de plus (charge GPU × N)
     for (let k = 1; k < P.simGpu; k++) render();
@@ -386,6 +440,7 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     stats,
     bhMat,
     nav,
+    scenes,
     listeners,
     quality,
     resizeTargets,
@@ -413,8 +468,10 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
       if (disposed) return;
       window.addEventListener("resize", onResize);
       window.addEventListener("pointermove", onPointer);
+      scenes.init();
       onResize();
       updateCamera(0);
+      updateScenes(0);
       updateNav(0, false);
       updateGpuLabel();
       quality.applyTier(P.tier);
@@ -430,6 +487,7 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
       window.removeEventListener("pointermove", onPointer);
       nav.destroy();
       letters.dispose();
+      scenes.dispose();
       Object.values(rt).forEach((t) => t.dispose());
       [starMat, bhMat, brightMat, blurMat, finalMat].forEach((m) => m.dispose());
       fsGeo.dispose();
