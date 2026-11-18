@@ -2,7 +2,7 @@ export const site = {
   name: "Noam Guez",
   role: "Creative developer",
   city: "France",
-  email: "noamguez0@gmail.com",
+  email: "contact@noamguez.fr",
   /** Téléphone / WhatsApp affiché sur la page Contact (laisser vide pour le masquer), ex. "+33 6 12 34 56 78". */
   phone: "" as string,
   socials: [
