@@ -458,3 +458,4 @@ Une **session neuve par phase**, qui commence par lire ce fichier.
 - Écran de choix ou bouton de passage depuis noamguez.fr.
 - Projets cliquables (modale ou lien vers la fiche du site classique).
 - Détail des textes (pour l'instant : phrases piochées dans le portfolio classique).
+- **Fin du plan (avec F4) : revoir le détail des interactions au clic** (éruption du disque, curseur, éléments cliquables), pour qu'elles soient cohérentes et lisibles sur toutes les slides.
