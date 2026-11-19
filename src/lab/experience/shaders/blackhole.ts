@@ -7,7 +7,9 @@ export const BLACKHOLE_FRAG = /* glsl */ `
   uniform vec2 uRes; uniform float uTime, uTanHalf, uIntensity, uDoppler, uStepK, uOct, uClock;
   uniform mat3 uSkyRot;
   uniform vec4 uErupt;   // 16 · éruption du disque : (azimut de départ, âge, vitesse angulaire, amplitude)
-  uniform sampler2D uSkyTex; uniform float uSkyOn;   // couche "sky" du registre (équirectangulaire, repère monde)
+  uniform sampler2D uSkyTex; uniform float uSkyOn;
+  uniform vec4 uLensM;   // 17 · curseur gravitationnel : (position uv, θE², rayon du cœur)
+  uniform sampler2D uTitleTex; uniform vec3 uTitleO, uTitleN, uTitleCol; uniform vec4 uTitleA1, uTitleA2;   // 18 · texte géant   // couche "sky" du registre (équirectangulaire, repère monde)
   uniform vec3 uCamPos, uCamR, uCamU, uCamF, uC0, uC1, uC2, uC3;
   ${COMMON}
   const float R_IN = 2.9;
@@ -136,9 +138,26 @@ export const BLACKHOLE_FRAG = /* glsl */ `
       float defl = tailDefl(s1, bb);
       dir = normalize(dir * cos(defl) + perp / bb * sin(defl));
     }
+    if (uLensM.z > 0.0){
+      // 17 · curseur gravitationnel : lentille ponctuelle douce autour de la souris, sur le fond seulement (β = θ − θE² θ/|θ|²)
+      vec2 dm = uv - uLensM.xy;
+      float r2 = dot(dm, dm);
+      vec2 dd = dm * (uLensM.z / (r2 + uLensM.w * uLensM.w)) * exp(-r2 * 7.0);
+      dir = normalize(dir - uTanHalf * (dd.x * uCamR + dd.y * uCamU));
+    }
+    vec3 title = vec3(0.0);
+    if (uTitleA2.w > 0.0){
+      // 18 · texte géant : plan derrière le trou noir, atteint par le rayon courbé (lentille et anneau d'Einstein gratuits)
+      float dn = dot(dir, uTitleN);
+      float t = dot(uTitleO, uTitleN) / (abs(dn) < 1e-4 ? 1e-4 : dn);
+      vec3 hp = t * dir - uTitleO;
+      vec2 tuv = vec2(dot(hp, uTitleA1.xyz), dot(hp, uTitleA2.xyz)) * 0.5 + 0.5;
+      float inside = step(0.0, t) * step(abs(tuv.x - 0.5), 0.5) * step(abs(tuv.y - 0.5), 0.5);
+      title = uTitleCol * (texture2D(uTitleTex, tuv).a * inside * uTitleA2.w);
+    }
     vec3 bg = vec3(0.0);
     if (!captured){
-      bg = starField(dir);
+      bg = starField(dir) + title;
       if (uSkyOn > 0.5) bg += textureLod(uSkyTex, vec2(atan(dir.z, dir.x) * 0.15915494 + 0.5, asin(clamp(dir.y, -1.0, 1.0)) * 0.31830989 + 0.5), 0.0).rgb;
       // anneau de photons : rayons qui ont frôlé la sphère de photons (r = 1.5)
       float ring = exp(-pow((rmin - 1.5) * 6.0, 2.0));

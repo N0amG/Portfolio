@@ -39,6 +39,19 @@ export interface CompositeParams {
 export interface BlackholeParams {
   /** 16 · éruption du disque : x = azimut de départ (rad), y = âge (s), z = vitesse angulaire signée (rad/s), w = amplitude (0 = inactif). */
   erupt: THREE.Vector4;
+  /** 17 · curseur gravitationnel : xy = position (repère uv du shader : y vers le haut, x × aspect), z = θE², w = rayon du cœur (z = 0 : inactif). */
+  lensM: THREE.Vector4;
+  /** 18 · texte géant de fond : plan échantillonné à travers les rayons courbés (voir title.ts). a2.w = intensité (0 : inactif). */
+  title: {
+    tex: { value: THREE.Texture | null };
+    /** Centre du plan moins la position de la caméra (monde). */
+    o: THREE.Vector3;
+    /** Normale du plan (unitaire). */
+    n: THREE.Vector3;
+    /** Axes du plan divisés par la demi-largeur / demi-hauteur (uv = dot(p, a) × 0,5 + 0,5). */
+    a1: THREE.Vector4;
+    a2: THREE.Vector4;
+  };
 }
 
 /** Ressources partagées, fournies une fois à init(). */
@@ -50,6 +63,8 @@ export interface SceneContext {
   camera: THREE.PerspectiveCamera;
   /** Caméra orthographique (-1..1) pour les passes plein écran (géométrie : triangle avec FS_VERT). */
   ortho: THREE.OrthographicCamera;
+  /** Image du trou noir (résolution interne) : alpha = transmission vers le fond (0 dans l'ombre et derrière le disque). */
+  bhTex: THREE.Texture;
 }
 
 /** État de l'image, recalculé à chaque frame (lecture seule pour les éléments, sauf `composite`). */

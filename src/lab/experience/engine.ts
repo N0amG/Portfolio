@@ -135,6 +135,9 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
       uSkyRot: { value: new THREE.Matrix3() }, uClock: { value: 0 },
       uSkyTex: { value: null as THREE.Texture | null }, uSkyOn: { value: 0 },
       uErupt: { value: new THREE.Vector4() },
+      uLensM: { value: new THREE.Vector4() },
+      uTitleTex: { value: null as THREE.Texture | null }, uTitleO: { value: new THREE.Vector3() }, uTitleN: { value: new THREE.Vector3() },
+      uTitleA1: { value: new THREE.Vector4() }, uTitleA2: { value: new THREE.Vector4() }, uTitleCol: { value: col("#f2efe8") },
     },
     vertexShader: FS_VERT,
     fragmentShader: BLACKHOLE_FRAG,
@@ -257,14 +260,19 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
   // -------------------------------------------------------------------------
   // Registre de scènes (éléments visuels du catalogue, section 5 bis)
   // -------------------------------------------------------------------------
-  const scenes = createRegistry(createSceneElements(), { root: els.canvas.parentElement ?? document.body, renderer, camera: textCam, ortho: orthoCam });
+  const scenes = createRegistry(createSceneElements(), { root: els.canvas.parentElement ?? document.body, renderer, camera: textCam, ortho: orthoCam, bhTex: rt.scene.texture });
   const composite: CompositeParams = {
     waves: finalMat.uniforms.uWaves.value as THREE.Vector4[],
     motion: finalMat.uniforms.uMotion.value as THREE.Vector2,
     chroma: 0,
     flare: 0,
   };
-  const bhParams: BlackholeParams = { erupt: bhMat.uniforms.uErupt.value as THREE.Vector4 };
+  const bu = bhMat.uniforms;
+  const bhParams: BlackholeParams = {
+    erupt: bu.uErupt.value as THREE.Vector4,
+    lensM: bu.uLensM.value as THREE.Vector4,
+    title: { tex: bu.uTitleTex, o: bu.uTitleO.value, n: bu.uTitleN.value, a1: bu.uTitleA1.value, a2: bu.uTitleA2.value },
+  };
   const frameParams: FrameParams = {
     s: 0, slide: 0, weight: 0, dt: 0, time: 0, camPos, camF, camR, camU, viewProj, bhScreen, bhNdc, rhNdc,
     mouse: new THREE.Vector2(), width: 1, height: 1, dpr: DPR, reduced: false, composite, bh: bhParams,
@@ -276,6 +284,8 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     for (const w of composite.waves) w.set(0, 0, 0, 0);
     composite.motion.set(0, 0); composite.chroma = 0; composite.flare = 0;
     bhParams.erupt.set(0, 0, 0, 0);
+    bhParams.lensM.z = 0;
+    bhParams.title.a2.w = 0;
     scenes.update(f, P.tier);
   }
   /** Rend une couche du registre dans la cible donnée, par-dessus son contenu. */

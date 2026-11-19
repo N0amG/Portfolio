@@ -5,6 +5,9 @@ import { createDust } from "./dust";
 import { createEruption } from "./eruption";
 import { createDeepSky } from "./deepsky";
 import { createHud } from "./hud";
+import { createCursor } from "./cursor";
+import { createRing } from "./ring";
+import { createTitle } from "./title";
 import type { SceneElement } from "./types";
 
 /**
@@ -15,6 +18,8 @@ export function createSceneElements(): SceneElement[] {
   const list: SceneElement[] = [];
   // Lot V1 : effets légers
   list.push(createWaves(), createMotion(), createFlare(), createDust(), createEruption(), createHud(), createComets(), createDeepSky());
+  // Lot V2 : lentille et texte
+  list.push(createTitle(), createCursor(), createRing());
   // Élément factice de test : dev uniquement (retiré du build de production), éteint par défaut.
   if (process.env.NODE_ENV !== "production") list.push(createDebugElement());
   return list;

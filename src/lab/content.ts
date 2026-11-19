@@ -9,3 +9,9 @@ export const TEXTS: readonly string[] = [
   "Texte de remplissage numéro trois. Il sert juste à tester la transition suivante.",
   "Dernier bloc avant l'horizon. Encore un geste et il ne restera que le vide.",
 ];
+
+/** 18 · Texte géant de fond (en contour, derrière le trou noir, S1). Provisoire. */
+export const TITLE_TEXT = "NOAM GUEZ";
+
+/** 20 · Phrase en anneau autour du trou noir (S6). Provisoire ; répétée pour faire le tour. */
+export const RING_TEXT = "Tout ce qui passe l'horizon ne revient pas · Creative developer · Lyon · ";
