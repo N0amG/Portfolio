@@ -34,6 +34,8 @@ const LINE_VERT = /* glsl */ `
   attribute vec3 aU;   // x = position le long de la ligne (0..1), y = côté (-1..1), z = graine
   attribute vec2 aL;   // x = L (rayon équatorial de la ligne), y = azimut de départ
   attribute vec3 aD;   // déplacement du point (monde), calculé par la simulation de corde
+  attribute vec3 aT;   // tangente de la forme déformée (monde, non normalisée), quand la simulation est active
+  uniform float uUseT;
   uniform vec3 uP, uM, uB1, uB2;
   uniform float uR, uTwist, uTime, uSwell, uWidth;
   uniform vec4 uLensM;   // 17 · curseur gravitationnel (repère uv du shader du trou noir : x × aspect, y vers le haut)
@@ -52,7 +54,8 @@ const LINE_VERT = /* glsl */ `
   void main(){
     float L = aL.x * uSwell;
     vec3 c = fieldPoint(aU.x, L, aL.y) + aD;
-    vec3 tg = fieldPoint(min(aU.x + 0.004, 1.0), L, aL.y) - fieldPoint(max(aU.x - 0.004, 0.0), L, aL.y);
+    vec3 tg = uUseT > 0.5 && dot(aT, aT) > 1e-12 ? aT
+            : fieldPoint(min(aU.x + 0.004, 1.0), L, aL.y) - fieldPoint(max(aU.x - 0.004, 0.0), L, aL.y);
     vec3 v = normalize(uCamPos - c);
     vec3 sd = cross(tg, v);
     float l = length(sd);
@@ -143,15 +146,17 @@ export function createMagnetar(): SceneElement {
   const P = {
     // réglages de Noam (19/11/2026)
     radius: 0.4, bright: 2.35, width: 0.019, twist: 0, flow: 1.3, incl: 0.57, period: 20.5,
-    burstEvery: 5, burst: 0.95, halo: 1, edge: 1, lens: true,
+    burstEvery: 5, burst: 0.95, halo: 1, edge: 1, lens: false,
     // cordes : doigt et rupture en unités d'écran (demi-hauteur), entre les premiers réglages et le maximum (retour de Noam)
-    finger: 0.07, rupture: 0.25, hold: 0.6, spring: 1.3, damping: 0.11, tension: 1200, push: 30000,
+    finger: 0.07, rupture: 0.6, hold: 1.25, spring: 1.1, damping: 0.11, tension: 2000, push: 32000,
     // forme de la déformation (retour de Noam : une grosse ondulation locale, comme un élastique ou un blob, pas des vaguelettes)
-    blob: 6, blobGain: 2.4, smooth: 40,
+    blob: 15, blobGain: 2.4, smooth: 80,
     // retour de Noam : les petits arcs près de l'étoile doivent beaucoup plus résister (rigidité × (Lmax / L)^stiffPow),
     // et le doigt n'agit qu'une fois la caméra arrivée sur la slide (poids > arrive)
-    stiffPow: 1.4, arrive: 0.998,
-    lensK: 0.07,
+    stiffPow: 3, arrive: 0.998,
+    // seules les lignes du premier plan sous le doigt réagissent (retour de Noam : trop de lignes à la fois)
+    maxLines: 3, layer: 0.1,
+    lensK: 0, // réglages de Noam (19/11/2026) pour toute la partie « cordes »
   };
   let scene: THREE.Scene, lineMat: THREE.ShaderMaterial, starMat: THREE.ShaderMaterial;
   let lineGeo: THREE.BufferGeometry, starGeo: THREE.PlaneGeometry;
@@ -166,10 +171,11 @@ export function createMagnetar(): SceneElement {
   const NP = SEG + 1;
   let nLines = 0;
   let lineL: Float32Array, linePhi: Float32Array, cool: Float32Array;
-  let rest: Float32Array, disp: Float32Array, vel: Float32Array, force: Float32Array, scr: Float32Array;
+  let rest: Float32Array, disp: Float32Array, vel: Float32Array, force: Float32Array;
   let dAttr: THREE.BufferAttribute;
   const tmpF = new Float32Array((SEG + 1) * 3);
-  let planeN = new Float32Array(0);
+  let planeN = new Float32Array(0), hitDepth = new Float32Array(0), sel = new Uint8Array(0);
+  let tAttr: THREE.BufferAttribute;
   let energy = 0;
   const mouse = new THREE.Vector2(), mouseV = new THREE.Vector2(), lastMouse = new THREE.Vector2();
   let mouseIn = false, listening = false;
@@ -202,7 +208,7 @@ export function createMagnetar(): SceneElement {
     // défilent sous une souris immobile : sans ça, elles s'emballaient)
     const touching = mouseIn && fade > 0.5 && f.weight > P.arrive;
     if (!touching && energy < 1e-7) return false;
-    const R = f.camR, U = f.camU;
+    const R = f.camR, U = f.camU, F = f.camF;
     force.fill(0);
     // plan de chaque arc (contient l'axe magnétique m et la direction de son azimut) : normale n = −sin φ·b1 + cos φ·b2.
     // Retour de Noam : les arcs se déforment uniquement dans leur plan (2D), jamais sur le côté (hors du plan).
@@ -212,60 +218,86 @@ export function createMagnetar(): SceneElement {
       planeN[l * 3 + 1] = -sp * b1.y + cp * b2.y;
       planeN[l * 3 + 2] = -sp * b1.z + cp * b2.z;
     }
+    // 1er passage : formes de repos, rupture, et lignes touchées par le doigt (avec la profondeur du contact)
+    let dMin = Infinity;
     for (let l = 0; l < nLines; l++) {
       if (cool[l] > 0) cool[l] -= dt;
       const L = lineL[l] * swell;
-      let snapped = false, hit = false;
-      for (let i = 0; i < NP; i++) {
-        const k = l * NP + i, o = k * 3;
-        restPoint(i / SEG, L, linePhi[l], f.time, rest, o);
-        if (!touching || cool[l] > 0 || i === 0 || i === SEG) continue;
+      hitDepth[l] = Infinity;
+      for (let i = 0; i < NP; i++) restPoint(i / SEG, L, linePhi[l], f.time, rest, (l * NP + i) * 3);
+      if (!touching || cool[l] > 0) continue;
+      let snapped = false;
+      for (let i = 1; i < SEG; i++) {
+        const o = (l * NP + i) * 3;
+        const x = rest[o] + disp[o], y = rest[o + 1] + disp[o + 1], z = rest[o + 2] + disp[o + 2];
+        const cw = e[3] * x + e[7] * y + e[11] * z + e[15];
+        if (cw <= 0.1) continue;
+        const wpu = cw * TAN_HALF; // unités monde par unité d'écran (demi-hauteur) à cette profondeur
+        if (Math.hypot(disp[o], disp[o + 1], disp[o + 2]) / wpu > P.rupture) { snapped = true; break; }
+        const ux = ((e[0] * x + e[4] * y + e[8] * z + e[12]) / cw) * asp, uy = (e[1] * x + e[5] * y + e[9] * z + e[13]) / cw;
+        if (Math.hypot(ux - mouse.x, uy - mouse.y) < P.finger) hitDepth[l] = Math.min(hitDepth[l], cw);
+      }
+      if (snapped) { cool[l] = P.hold; hitDepth[l] = Infinity; }
+      dMin = Math.min(dMin, hitDepth[l]);
+    }
+    // seules les lignes du premier plan sous le doigt réagissent (au plus maxLines, à moins de `layer` de la plus proche)
+    let nSel = 0;
+    if (dMin < Infinity) {
+      for (let l = 0; l < nLines; l++) sel[l] = hitDepth[l] < dMin + P.layer ? 1 : 0;
+      for (let pass = 0; pass < nLines; pass++) {
+        let cnt = 0;
+        for (let l = 0; l < nLines; l++) cnt += sel[l];
+        if (cnt <= P.maxLines) { nSel = cnt; break; }
+        let worst = -1;
+        for (let l = 0; l < nLines; l++) if (sel[l] && (worst < 0 || hitDepth[l] > hitDepth[worst])) worst = l;
+        sel[worst] = 0;
+      }
+    } else sel.fill(0);
+    // 2e passage : poussée sur les lignes retenues, perpendiculaire au fil et dans le plan de l'arc
+    for (let l = 0; nSel > 0 && l < nLines; l++) {
+      if (!sel[l]) continue;
+      const nx = planeN[l * 3], ny = planeN[l * 3 + 1], nz = planeN[l * 3 + 2];
+      for (let i = 1; i < SEG; i++) {
+        const o = (l * NP + i) * 3;
         const x = rest[o] + disp[o], y = rest[o + 1] + disp[o + 1], z = rest[o + 2] + disp[o + 2];
         const cw = e[3] * x + e[7] * y + e[11] * z + e[15];
         if (cw <= 0.1) continue;
         const ux = ((e[0] * x + e[4] * y + e[8] * z + e[12]) / cw) * asp, uy = (e[1] * x + e[5] * y + e[9] * z + e[13]) / cw;
-        const wpu = cw * TAN_HALF; // unités monde par unité d'écran (demi-hauteur) à cette profondeur
-        scr[k] = wpu;
-        // rupture : point trop loin de sa forme de repos → la ligne se décroche
-        const dl = Math.hypot(disp[o], disp[o + 1], disp[o + 2]) / wpu;
-        if (dl > P.rupture) { snapped = true; break; }
         let dx = ux - mouse.x, dy = uy - mouse.y;
         const d = Math.hypot(dx, dy);
         if (d >= P.finger) continue;
         if (d < 1e-5) { dx = mouseV.x || 1; dy = mouseV.y; } // pile sous le doigt : poussé dans le sens du geste
-        hit = true;
-        const n = Math.hypot(dx, dy) || 1, pen = (P.finger - d) * P.push * wpu / n;
-        force[o] += (R.x * dx + U.x * dy) * pen;
-        force[o + 1] += (R.y * dx + U.y * dy) * pen;
-        force[o + 2] += (R.z * dx + U.z * dy) * pen;
+        const dn = Math.hypot(dx, dy) || 1;
+        // direction de poussée à l'écran, en monde
+        const px = (R.x * dx + U.x * dy) / dn, py = (R.y * dx + U.y * dy) / dn, pz = (R.z * dx + U.z * dy) / dn;
+        // normale au fil dans le plan de l'arc : nIn = n × tangente (la poussée le long du fil entassait les points)
+        let tx = rest[o + 3] - rest[o - 3], ty = rest[o + 4] - rest[o - 2], tz = rest[o + 5] - rest[o - 1];
+        const tl = Math.hypot(tx, ty, tz) || 1;
+        tx /= tl; ty /= tl; tz /= tl;
+        let ix = ny * tz - nz * ty, iy = nz * tx - nx * tz, iz = nx * ty - ny * tx;
+        const il = Math.hypot(ix, iy, iz) || 1;
+        ix /= il; iy /= il; iz /= il;
+        // part de nIn visible à l'écran : un arc vu par la tranche ne peut pas être poussé (sinon il part en profondeur)
+        const fwd = ix * F.x + iy * F.y + iz * F.z;
+        const vis = Math.sqrt(Math.max(0, 1 - fwd * fwd));
+        if (vis < 0.35) continue;
+        const amt = (px * ix + py * iy + pz * iz) * (P.finger - d) * P.push * cw * TAN_HALF;
+        force[o] += ix * amt; force[o + 1] += iy * amt; force[o + 2] += iz * amt;
       }
-      // la poussée est ramenée dans le plan de l'arc (sa composante hors du plan est retirée)
-      if (hit && !snapped) {
-        const nx = planeN[l * 3], ny = planeN[l * 3 + 1], nz = planeN[l * 3 + 2];
-        for (let i = 0; i < NP; i++) {
-          const o = (l * NP + i) * 3, d = force[o] * nx + force[o + 1] * ny + force[o + 2] * nz;
-          force[o] -= d * nx; force[o + 1] -= d * ny; force[o + 2] -= d * nz;
+      // la poussée est étalée le long de la corde (gaussienne de σ = blob points) : une bosse lisse, pas des coudes
+      const base = l * NP * 3, sg = Math.max(0.5, P.blob), kr = Math.ceil(sg * 3);
+      tmpF.set(force.subarray(base, base + NP * 3));
+      let ksum = 0;
+      for (let q = -kr; q <= kr; q++) ksum += Math.exp(-(q * q) / (2 * sg * sg));
+      const g = P.blobGain / ksum;
+      for (let i = 1; i < SEG; i++) {
+        let fx = 0, fy = 0, fz = 0;
+        for (let q = Math.max(0, i - kr); q <= Math.min(SEG, i + kr); q++) {
+          const wq = Math.exp(-((q - i) * (q - i)) / (2 * sg * sg)), o = q * 3;
+          fx += tmpF[o] * wq; fy += tmpF[o + 1] * wq; fz += tmpF[o + 2] * wq;
         }
-      }
-      if (snapped) {
-        cool[l] = P.hold;
-        for (let i = 0; i < NP; i++) { const o = (l * NP + i) * 3; force[o] = force[o + 1] = force[o + 2] = 0; }
-      } else if (hit) {
-        // la poussée est étalée le long de la corde (gaussienne de σ = blob points) : une bosse lisse, pas des coudes
-        const base = l * NP * 3, sg = Math.max(0.5, P.blob), kr = Math.ceil(sg * 3);
-        tmpF.set(force.subarray(base, base + NP * 3));
-        let ksum = 0;
-        for (let q = -kr; q <= kr; q++) ksum += Math.exp(-(q * q) / (2 * sg * sg));
-        const g = P.blobGain / ksum;
-        for (let i = 1; i < SEG; i++) {
-          let fx = 0, fy = 0, fz = 0;
-          for (let q = Math.max(0, i - kr); q <= Math.min(SEG, i + kr); q++) {
-            const wq = Math.exp(-((q - i) * (q - i)) / (2 * sg * sg)), o = q * 3;
-            fx += tmpF[o] * wq; fy += tmpF[o + 1] * wq; fz += tmpF[o + 2] * wq;
-          }
-          const o = base + i * 3;
-          force[o] = fx * g; force[o + 1] = fy * g; force[o + 2] = fz * g;
-        }
+        const o = base + i * 3;
+        force[o] = fx * g; force[o + 1] = fy * g; force[o + 2] = fz * g;
       }
     }
     // cordes : rappel vers le repos (k), tension entre voisins (T), amortissement (c) ; 4 sous-pas, pieds fixes
@@ -303,16 +335,26 @@ export function createMagnetar(): SceneElement {
       }
     }
     for (let j = 0; j < disp.length; j++) energy += disp[j] * disp[j] + vel[j] * vel[j] * 0.01;
-    if (energy < 1e-7) resetStrings();
+    if (energy < 1e-7) { resetStrings(); lineMat.uniforms.uUseT.value = 0; }
     // vers le GPU : deux sommets (côtés du ruban) par point
-    const arr = dAttr.array as Float32Array;
-    for (let k2 = 0; k2 < nLines * NP; k2++) {
-      const o = k2 * 3, v = k2 * 6;
-      arr[v] = arr[v + 3] = disp[o];
-      arr[v + 1] = arr[v + 4] = disp[o + 1];
-      arr[v + 2] = arr[v + 5] = disp[o + 2];
+    const arr = dAttr.array as Float32Array, tar = tAttr.array as Float32Array;
+    for (let l = 0; l < nLines; l++) {
+      for (let i = 0; i < NP; i++) {
+        const k2 = l * NP + i, o = k2 * 3, v = k2 * 6;
+        arr[v] = arr[v + 3] = disp[o];
+        arr[v + 1] = arr[v + 4] = disp[o + 1];
+        arr[v + 2] = arr[v + 5] = disp[o + 2];
+        // tangente de la forme DÉFORMÉE : le ruban reste face à la caméra là où la corde est pliée (sinon lames vrillées)
+        const a0 = (l * NP + Math.max(0, i - 1)) * 3, a1 = (l * NP + Math.min(SEG, i + 1)) * 3;
+        const tx = rest[a1] + disp[a1] - rest[a0] - disp[a0];
+        const ty = rest[a1 + 1] + disp[a1 + 1] - rest[a0 + 1] - disp[a0 + 1];
+        const tz = rest[a1 + 2] + disp[a1 + 2] - rest[a0 + 2] - disp[a0 + 2];
+        tar[v] = tar[v + 3] = tx; tar[v + 1] = tar[v + 4] = ty; tar[v + 2] = tar[v + 5] = tz;
+      }
     }
     dAttr.needsUpdate = true;
+    tAttr.needsUpdate = true;
+    lineMat.uniforms.uUseT.value = 1;
     return true;
   }
 
@@ -352,9 +394,10 @@ export function createMagnetar(): SceneElement {
       linePhi = new Float32Array(Ph);
       cool = new Float32Array(nLines);
       planeN = new Float32Array(nLines * 3);
+      hitDepth = new Float32Array(nLines);
+      sel = new Uint8Array(nLines);
       const n3 = nLines * NP * 3;
       rest = new Float32Array(n3); disp = new Float32Array(n3); vel = new Float32Array(n3); force = new Float32Array(n3);
-      scr = new Float32Array(nLines * NP);
       lineGeo = new THREE.BufferGeometry();
       const a = new THREE.Float32BufferAttribute(U, 3);
       lineGeo.setAttribute("aU", a);
@@ -362,6 +405,9 @@ export function createMagnetar(): SceneElement {
       dAttr = new THREE.BufferAttribute(new Float32Array(nLines * NP * 6), 3);
       dAttr.setUsage(THREE.DynamicDrawUsage);
       lineGeo.setAttribute("aD", dAttr);
+      tAttr = new THREE.BufferAttribute(new Float32Array(nLines * NP * 6), 3);
+      tAttr.setUsage(THREE.DynamicDrawUsage);
+      lineGeo.setAttribute("aT", tAttr);
       lineGeo.setAttribute("position", a); // requis par three, non utilisé
       lineGeo.setIndex(idx);
       const common = { transparent: true, side: THREE.DoubleSide, depthTest: false, depthWrite: false, blending: THREE.AdditiveBlending };
@@ -370,7 +416,7 @@ export function createMagnetar(): SceneElement {
           ...lu, uP: { value: pos }, uM: { value: m }, uB1: { value: b1 }, uB2: { value: b2 },
           uR: { value: 0.35 }, uTwist: { value: 0.9 }, uTime: { value: 0 }, uSwell: { value: 1 }, uWidth: { value: 0.02 },
           uFade: { value: 0 }, uBright: { value: 1 }, uBurst: { value: 0 }, uFlow: { value: 0.35 },
-          uLensM: { value: new THREE.Vector4() }, uCursorK: { value: 0.07 }, uGlowK: { value: 0 },
+          uLensM: { value: new THREE.Vector4() }, uCursorK: { value: 0.07 }, uGlowK: { value: 0 }, uUseT: { value: 0 },
         },
         vertexShader: LINE_VERT, fragmentShader: LINE_FRAG, ...common,
       });
@@ -399,7 +445,7 @@ export function createMagnetar(): SceneElement {
       listening = active;
       if (!active) {
         resetStrings();
-        if (dAttr) { (dAttr.array as Float32Array).fill(0); dAttr.needsUpdate = true; }
+        if (dAttr) { (dAttr.array as Float32Array).fill(0); dAttr.needsUpdate = true; lineMat.uniforms.uUseT.value = 0; }
       }
     },
     update(f: FrameParams) {
@@ -470,6 +516,8 @@ export function createMagnetar(): SceneElement {
       folder.add(P, "blobGain", 0.5, 10, 0.1).name("Déformation : force de la bosse");
       folder.add(P, "smooth", 0, 80, 1).name("Déformation : lissage des vaguelettes");
       folder.add(P, "stiffPow", 0, 3, 0.05).name("Petits arcs : rigidité (exposant)");
+      folder.add(P, "maxLines", 1, 10, 1).name("Lignes touchées à la fois (max)");
+      folder.add(P, "layer", 0.1, 4, 0.1).name("Premier plan : profondeur retenue");
       folder.add(P, "lensK", 0, 1, 0.01).name("Lentille du curseur sur les lignes");
       folder.add(P, "lens").name("Lentille (partie derrière)");
       folder.add(P, "edge", 0, 1, 0.05).name("Fondu en bord de fenêtre");
