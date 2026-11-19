@@ -9,7 +9,8 @@ import type { FrameParams, SceneContext, SceneElement } from "./types";
    - Interaction : chaque ligne est une CORDE simulée en 3D (JS, 81 points, sous-pas) : rappel vers sa forme de repos
      (qui tourne avec l'étoile), tension entre voisins (les ondulations se propagent le long du fil), amortissement ; les
      pieds sont fixés à l'étoile. La souris est un « doigt » à l'écran : tout point touché est repoussé hors du doigt,
-     dans le plan perpendiculaire à la visée, quel que soit l'angle de rotation. Si un point dépasse le point de rupture,
+     dans le plan perpendiculaire à la visée, quel que soit l'angle de rotation ; la déformation reste dans le plan de
+     chaque arc (2D : elle peut l'étirer ou l'enfoncer, jamais le déporter sur le côté). Si un point dépasse le point de rupture,
      la ligne se décroche (elle ignore le doigt un instant) et revient avec rebond et ondulations. La lentille du curseur
      (17) ne dévie plus les lignes qu'à 7 %.
    - Lignes de champ dipolaires r = L·sin²θ autour de l'axe magnétique m, sur 5 couches (L) et plusieurs azimuts ;
@@ -168,6 +169,7 @@ export function createMagnetar(): SceneElement {
   let rest: Float32Array, disp: Float32Array, vel: Float32Array, force: Float32Array, scr: Float32Array;
   let dAttr: THREE.BufferAttribute;
   const tmpF = new Float32Array((SEG + 1) * 3);
+  let planeN = new Float32Array(0);
   let energy = 0;
   const mouse = new THREE.Vector2(), mouseV = new THREE.Vector2(), lastMouse = new THREE.Vector2();
   let mouseIn = false, listening = false;
@@ -202,6 +204,14 @@ export function createMagnetar(): SceneElement {
     if (!touching && energy < 1e-7) return false;
     const R = f.camR, U = f.camU;
     force.fill(0);
+    // plan de chaque arc (contient l'axe magnétique m et la direction de son azimut) : normale n = −sin φ·b1 + cos φ·b2.
+    // Retour de Noam : les arcs se déforment uniquement dans leur plan (2D), jamais sur le côté (hors du plan).
+    for (let l = 0; l < nLines; l++) {
+      const sp = Math.sin(linePhi[l]), cp = Math.cos(linePhi[l]);
+      planeN[l * 3] = -sp * b1.x + cp * b2.x;
+      planeN[l * 3 + 1] = -sp * b1.y + cp * b2.y;
+      planeN[l * 3 + 2] = -sp * b1.z + cp * b2.z;
+    }
     for (let l = 0; l < nLines; l++) {
       if (cool[l] > 0) cool[l] -= dt;
       const L = lineL[l] * swell;
@@ -228,6 +238,14 @@ export function createMagnetar(): SceneElement {
         force[o] += (R.x * dx + U.x * dy) * pen;
         force[o + 1] += (R.y * dx + U.y * dy) * pen;
         force[o + 2] += (R.z * dx + U.z * dy) * pen;
+      }
+      // la poussée est ramenée dans le plan de l'arc (sa composante hors du plan est retirée)
+      if (hit && !snapped) {
+        const nx = planeN[l * 3], ny = planeN[l * 3 + 1], nz = planeN[l * 3 + 2];
+        for (let i = 0; i < NP; i++) {
+          const o = (l * NP + i) * 3, d = force[o] * nx + force[o + 1] * ny + force[o + 2] * nz;
+          force[o] -= d * nx; force[o + 1] -= d * ny; force[o + 2] -= d * nz;
+        }
       }
       if (snapped) {
         cool[l] = P.hold;
@@ -261,6 +279,7 @@ export function createMagnetar(): SceneElement {
         const base = l * NP * 3;
         // rigidité propre à la ligne : les petits arcs (L petit, champ fort près de l'étoile) résistent bien plus
         const sL = Math.min(12, Math.pow(LMAX / lineL[l], P.stiffPow));
+        const nx = planeN[l * 3], ny = planeN[l * 3 + 1], nz = planeN[l * 3 + 2];
         const k = wk * wk * sL, c = 2 * P.damping * wk * Math.sqrt(sL), T = P.tension * sL;
         for (let i = 1; i < SEG; i++) {
           const o = base + i * 3;
@@ -275,6 +294,11 @@ export function createMagnetar(): SceneElement {
         for (let i = 1; i < SEG; i++) {
           const o = base + i * 3;
           disp[o] += vel[o] * h; disp[o + 1] += vel[o + 1] * h; disp[o + 2] += vel[o + 2] * h;
+          // reste dans le plan de l'arc (il tourne lentement avec l'étoile : on reprojette à chaque sous-pas)
+          const dd = disp[o] * nx + disp[o + 1] * ny + disp[o + 2] * nz;
+          disp[o] -= dd * nx; disp[o + 1] -= dd * ny; disp[o + 2] -= dd * nz;
+          const dv = vel[o] * nx + vel[o + 1] * ny + vel[o + 2] * nz;
+          vel[o] -= dv * nx; vel[o + 1] -= dv * ny; vel[o + 2] -= dv * nz;
         }
       }
     }
@@ -327,6 +351,7 @@ export function createMagnetar(): SceneElement {
       lineL = new Float32Array(Ls);
       linePhi = new Float32Array(Ph);
       cool = new Float32Array(nLines);
+      planeN = new Float32Array(nLines * 3);
       const n3 = nLines * NP * 3;
       rest = new Float32Array(n3); disp = new Float32Array(n3); vel = new Float32Array(n3); force = new Float32Array(n3);
       scr = new Float32Array(nLines * NP);
