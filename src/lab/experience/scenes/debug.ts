@@ -7,7 +7,7 @@ import type { FrameParams, SceneContext, SceneElement } from "./types";
    Élément factice (dev uniquement, éteint par défaut) : prouve le registre et deux points d'insertion.
    - "back" : un cube en fil de fer près du trou noir (caché par l'ombre et le disque) ;
    - "sky"  : une grille de méridiens et parallèles dans le fond échantillonné (courbée par la lentille).
-   Actif sur S6 à S9. À allumer dans le panneau de réglages (Scènes → Test registre).
+   Actif sur S6. À allumer dans le panneau de réglages (Scènes → Test registre).
    ─────────────────────────────────────────────────────────── */
 
 const GRID_FRAG = /* glsl */ `
@@ -28,7 +28,7 @@ export function createDebugElement(): SceneElement {
   return {
     id: "debug",
     label: "Test registre (dev)",
-    slides: [S(6), S(7), S(8), S(9)],
+    slides: [S(6)],
     cost: "leger",
     minTier: "basse",
     layers: ["back", "sky"],

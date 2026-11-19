@@ -54,6 +54,15 @@ export interface BlackholeParams {
     a1: THREE.Vector4;
     a2: THREE.Vector4;
   };
+  /** 4 · nébuleuse : image raymarchée (patch gnomonique autour de la direction c.xyz), échantillonnée au bout des rayons
+   *  courbés. rgb = émission (prémultipliée), a = opacité (poussière : masque les étoiles derrière). c.w = gain (0 : inactif) ;
+   *  uv = (dot(dir, e1), dot(dir, e2)) / dot(dir, c.xyz) × 0,5 + 0,5 (e1, e2 divisés par la demi-ouverture). */
+  neb: {
+    tex: { value: THREE.Texture | null };
+    c: THREE.Vector4;
+    e1: THREE.Vector3;
+    e2: THREE.Vector3;
+  };
 }
 
 /** Ressources partagées, fournies une fois à init(). */
@@ -94,6 +103,9 @@ export interface FrameParams {
   dpr: number;
   /** Qualité automatique : true = décor léger à réduire (moins de particules, etc.). */
   reduced: boolean;
+  /** Qualité automatique : niveau et résolution interne du trou noir (pour les éléments qui adaptent leur propre résolution). */
+  tier: TierName;
+  res: number;
   composite: CompositeParams;
   bh: BlackholeParams;
 }

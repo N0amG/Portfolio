@@ -125,12 +125,11 @@ const OBJECTS: Obj[] = [
   { kind: 0, slide: 0, x: -16, y: 5, depth: 38, radius: 13, normal: [0.3, 0.8, 0.5], gain: 2.4, c1: "#6a85f2", c2: "#ffd39a", infall: 0, seed: 3 }, // S1 → aspirée jusqu'à S4
   { kind: 2, slide: 1, x: 10, y: 8, depth: 50, radius: 3.5, normal: [0, 1, 0], gain: 1.0, c1: "#9fd0ff", c2: "#ffffff", seed: 1 },
   { kind: 0, slide: 1, x: -18, y: -6, depth: 60, radius: 10, normal: [-0.5, 0.7, 0.2], gain: 1.6, c1: "#7fd6ff", c2: "#ffb347", seed: 8 },
-  { kind: 1, slide: 2, x: 8, y: -6, depth: 45, radius: 22, normal: [0, 1, 0], gain: 0.4, c1: "#3a56d8", c2: "#9a5cf0", seed: 5 }, // nébuleuse bleu-violet
-  { kind: 3, slide: 3, x: -12, y: 8, depth: 40, radius: 9, normal: [0, 1, 0], gain: 1.4, c1: "#7fd6ff", c2: "#ff5a1f", seed: 2 }, // rémanent de supernova
-  { kind: 0, slide: 4, x: 14, y: 4, depth: 40, radius: 9, normal: [0.6, 0.5, -0.4], gain: 2.4, c1: "#ffb347", c2: "#fff4e0", infall: 4, seed: 11 }, // S5 → aspirée jusqu'à S8
+  // (S3 : l'ancienne petite nébuleuse bleu-violet est remplacée par le volume de 4 · nébuleuse, nebula.ts, lot V4)
+  { kind: 3, slide: 2, x: -12, y: 8, depth: 40, radius: 9, normal: [0, 1, 0], gain: 1.4, c1: "#7fd6ff", c2: "#ff5a1f", seed: 2 }, // rémanent de supernova (S3 depuis le parcours V4 : S4 est le plan de la nébuleuse)
+  { kind: 0, slide: 4, x: 14, y: 4, depth: 40, radius: 9, normal: [0.6, 0.5, -0.4], gain: 2.4, c1: "#ffb347", c2: "#fff4e0", infall: 4, seed: 11 }, // S5 → aspirée vers S8 (le parcours s'arrête à S6 : à un tiers de sa chute)
   { kind: 1, slide: 5, x: -10, y: -8, depth: 40, radius: 20, normal: [0, 1, 0], gain: 0.4, c1: "#ff5a1f", c2: "#8a1a05", seed: 6 }, // nébuleuse chaude
-  { kind: 2, slide: 6, x: -8, y: 6, depth: 50, radius: 3, normal: [0, 1, 0], gain: 1.0, c1: "#ffb347", c2: "#ffffff", seed: 4 },
-  { kind: 1, slide: 7, x: 10, y: 8, depth: 45, radius: 18, normal: [0, 1, 0], gain: 0.4, c1: "#1b4dff", c2: "#7fd6ff", seed: 9 },
+  // (les objets des anciennes slides S7 et S8 sont retirés avec elles, 19/11/2026)
 ];
 
 const col = (hex: string) => new THREE.Color(hex);

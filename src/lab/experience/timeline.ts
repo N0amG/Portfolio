@@ -20,26 +20,31 @@ export const TRANSITION_EASE = "sine.inOut";
 /** Un nouveau geste commence après au moins GESTURE_GAP ms sans événement molette. */
 export const GESTURE_GAP = 220;
 
-// Trajectoire de la caméra (schéma de Noam) : un arrêt par slide, positions sur une sphère autour du trou noir.
-//   az = tour horizontal (négatif = à gauche), el = hauteur par rapport au plan du disque (négatif = en dessous),
-//   dist = distance au trou noir, look = décalage de la visée vers la droite/gauche (unités de scène).
-/** Pas d'azimut entre deux slides (rad) : la caméra tourne toujours dans le même sens autour du trou noir. */
+// Trajectoire de la caméra : un arrêt par slide. Chaque arrêt orbite autour d'un point focal `c` (le trou noir à
+//   l'origine par défaut) : az = tour horizontal, el = hauteur par rapport au plan du disque (négatif = en dessous),
+//   dist = distance au point focal, look = décalage de la visée vers la droite/gauche (unités de scène).
+/** Pas d'azimut entre deux slides (rad) : la caméra tourne toujours dans le même sens. */
 const STEP = 2.6;
-export const KEYS = [
-  // Depuis le 19/11/2026 : l'azimut avance de STEP à chaque slide, toujours dans le même sens (vrai détour autour du
-  // trou noir, pas de va-et-vient). Hauteur (el), distance et visée : les angles de vue validés par Noam.
-  { az: 0 * STEP, el: 0.13, dist: 22, look: 0 }, // 1 : vue de base, au-dessus du disque
-  { az: 1 * STEP, el: -0.34, dist: 22, look: -2 }, // 2 : dessous (le trou noir est à droite du cadre)
-  { az: 2 * STEP, el: 0.32, dist: 21, look: 1.5 }, // 3 : dessus (le trou noir est à gauche du cadre)
-  { az: 3 * STEP, el: -0.62, dist: 22, look: 2.5 }, // 4 : bien dessous, regard vers le haut, trou noir à gauche
-  { az: 4 * STEP, el: 0.72, dist: 20, look: -1.5 }, // 5 : presque à la verticale (vue de dessus), trou noir à droite (la planète traversera ici, lot V5)
-  // Parcours v2 (SPEC 5 bis) : slides vides pour l'instant, mises en scène par les lots suivants.
-  { az: 5 * STEP, el: -0.7, dist: 15, look: 1 }, // 6 : approche, très dessous ; le trou noir seul et grand
-  { az: 6 * STEP, el: 0.05, dist: 12, look: 0 }, // 7 : plongée, quasi dans le plan du disque (vue de profil) (lot V7)
-  { az: 7 * STEP, el: -0.5, dist: 12, look: -1 }, // 8 : point blanc, dessous (lot V7)
-  { az: 8 * STEP, el: 0.13, dist: 22, look: 0 }, // 9 : trou blanc, dessus, dézoom (lot V7)
-] as const;
-/** Index 0-based d'une slide du parcours : S(1) = 0 … S(9) = 8. */
+type Vec3 = readonly [number, number, number];
+const sph = (az: number, el: number, d: number): Vec3 => [Math.sin(az) * Math.cos(el) * d, Math.sin(el) * d, Math.cos(az) * Math.cos(el) * d];
+/** 4 · Centre de la nébuleuse (monde) : à 100 du trou noir, point focal de S4. */
+export const NEBULA_POS = sph(6.1, 0.35, 100);
+/** 6 · Position du pulsar (monde) : à 65 du trou noir, point focal de S5. */
+export const PULSAR_POS = sph(8.0, -0.25, 65);
+const O: Vec3 = [0, 0, 0];
+export const KEYS: readonly { c: Vec3; az: number; el: number; dist: number; look: number }[] = [
+  // Parcours du 19/11/2026 (retour de Noam sur V4) : trois plans sur le trou noir, puis la nébuleuse au centre (trou noir
+  // au loin dans le cadre), puis le pulsar au centre (trou noir au loin), puis retour au trou noir, caméra posée sur le
+  // disque juste devant l'horizon. Trajectoire vérifiée : la caméra reste à plus de 40 du centre de la nébuleuse (rayon 34).
+  { c: O, az: 0 * STEP, el: 0.13, dist: 22, look: 0 }, // 1 : vue de base, au-dessus du disque
+  { c: O, az: 1 * STEP, el: -0.34, dist: 22, look: -2 }, // 2 : dessous (le trou noir est à droite du cadre) ; étoile compagne
+  { c: O, az: 2 * STEP, el: 0.32, dist: 21, look: 1.5 }, // 3 : dessus (le trou noir est à gauche du cadre) ; jets, texte en anneau
+  { c: NEBULA_POS, az: 6.939, el: 0.349, dist: 78, look: 0 }, // 4 : la nébuleuse au centre ; trou noir à ≈ 25° de l'axe, à 165 (au fond)
+  { c: PULSAR_POS, az: 8.455, el: -0.268, dist: 14, look: 0 }, // 5 : le pulsar au centre ; trou noir à ≈ 21° de l'axe, à 78 (au fond)
+  { c: O, az: 9.255, el: 0.05, dist: 7.5, look: 0 }, // 6 (dernière) : posé sur le disque, juste devant l'horizon : l'ombre fait ≈ 80 % de la hauteur
+  // Les slides 7 à 9 (plongée, point blanc, trou blanc) sont retirées depuis le 19/11/2026 (décision de Noam).
+];
+/** Index 0-based d'une slide du parcours : S(1) = 0 … S(6) = 5. */
 export const S = (n: number) => n - 1;
 /** Index de la dernière slide. */
 export const LAST_SLIDE = KEYS.length - 1;
@@ -96,13 +101,17 @@ export function cameraPose(s: number, parAz: number, parEl: number, out: Pose): 
   const el = Math.max(-1.2, Math.min(1.2, A.el + ce * t + ne * bulge * bump + parEl));
   const dist = (A.dist + (B.dist - A.dist) * t) * (1 + DEZOOM * bump);
   const look = A.look + (B.look - A.look) * t;
+  // point focal interpolé (trou noir, nébuleuse ou pulsar) : la caméra voyage d'un objet à l'autre
+  const cx = A.c[0] + (B.c[0] - A.c[0]) * t, cy = A.c[1] + (B.c[1] - A.c[1]) * t, cz = A.c[2] + (B.c[2] - A.c[2]) * t;
   // la caméra s'incline dans le sens du virage, comme un travelling en courbe
   out.roll = ROLL * bump * Math.sign(ca || 1);
   out.pos.set(Math.sin(az) * Math.cos(el), Math.sin(el), Math.cos(az) * Math.cos(el)).multiplyScalar(dist);
   out.f.copy(out.pos).negate().normalize();
   out.r.crossVectors(out.f, UP).normalize();
   out.u.crossVectors(out.r, out.f);
-  out.target.copy(out.r).multiplyScalar(look); // visée décalée (le trou noir n'est pas forcément centré)
+  out.pos.x += cx; out.pos.y += cy; out.pos.z += cz;
+  out.target.copy(out.r).multiplyScalar(look); // visée décalée (l'objet n'est pas forcément centré)
+  out.target.x += cx; out.target.y += cy; out.target.z += cz;
   out.f.copy(out.target).sub(out.pos).normalize();
   out.r.crossVectors(out.f, UP).normalize();
   out.u.crossVectors(out.r, out.f);

@@ -1,6 +1,8 @@
 import { createComets } from "./comets";
 import { createCompanion } from "./companion";
 import { createJets } from "./jets";
+import { createNebula } from "./nebula";
+import { createPulsar } from "./pulsar";
 import { createFlare, createMotion, createWaves } from "./composite";
 import { createDebugElement } from "./debug";
 import { createDust } from "./dust";
@@ -24,6 +26,8 @@ export function createSceneElements(): SceneElement[] {
   list.push(createTitle(), createCursor(), createRing());
   // Lot V3 : étoile compagne dévorée + jets
   list.push(createCompanion(), createJets());
+  // Lot V4 : nébuleuse + pulsar
+  list.push(createNebula(), createPulsar());
   // Élément factice de test : dev uniquement (retiré du build de production), éteint par défaut.
   if (process.env.NODE_ENV !== "production") list.push(createDebugElement());
   return list;

@@ -4,7 +4,7 @@ import { LENS_FRAG, LENS_VERT, lensUniforms, updateLens, updateView } from "./le
 import type { FrameParams, SceneContext, SceneElement } from "./types";
 
 /* ───────────────────────────────────────────────────────────
-   11 · Jets relativistes (S5).
+   11 · Jets relativistes (S3).
    Deux jets polaires étroits (axe ±y, perpendiculaires au disque), en vraie géométrie 3D : rubans tournés vers la
    caméra autour de leur axe, couche "front" ; la partie située derrière le trou noir est courbée par la lentille et
    cachée par l'ombre et le disque (scenes/lens.ts) : vu d'au-dessus, le jet inférieur disparaît derrière le disque.
@@ -80,7 +80,7 @@ export function createJets(): SceneElement {
   return {
     id: "jets",
     label: "11 · Jets relativistes",
-    slides: [S(5)],
+    slides: [S(3)],
     cost: "moyen",
     minTier: "moyenne",
     layers: ["front"],
@@ -114,7 +114,7 @@ export function createJets(): SceneElement {
       scene = new THREE.Scene().add(mesh);
     },
     update(f: FrameParams) {
-      // apparition sur la moitié de fenêtre la plus proche de S5 (passage de relais du budget « moyen » sans saut)
+      // apparition sur la moitié de fenêtre la plus proche de S3 (passage de relais du budget « moyen » sans saut)
       const fade = THREE.MathUtils.smoothstep(f.weight, 0.5, 0.85);
       updateLens(lu, f, P.lens);
       const u = mat.uniforms;

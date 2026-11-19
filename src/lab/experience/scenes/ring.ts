@@ -4,7 +4,7 @@ import { S } from "../timeline";
 import type { FrameParams, SceneContext, SceneElement } from "./types";
 
 /* ───────────────────────────────────────────────────────────
-   20 · Texte en anneau (S6, l'approche).
+   20 · Texte en anneau (S3, avec les jets).
    Une phrase écrite sur un ruban cylindrique incliné qui entoure le trou noir et tourne lentement (la texture défile).
    Vraie géométrie 3D, projetée par la caméra de la scène : la perspective suit tous les angles de vue.
    Couche "front" (après la composition, net et à la couleur exacte du texte) ; la moitié de l'anneau située
@@ -79,7 +79,7 @@ export function createRing(): SceneElement {
   return {
     id: "anneau",
     label: "20 · Texte en anneau",
-    slides: [S(6)],
+    slides: [S(3)],
     cost: "leger",
     minTier: "basse",
     layers: ["front"],

@@ -173,21 +173,19 @@ Légende : coût GPU 🟢 léger · 🟠 moyen · 🔴 lourd.
 
 ### Parcours v2 (keyframes)
 
-Ce parcours remplace les pourcentages de la section 5. Chaque slide garde son bloc de texte provisoire. Les arrêts de caméra continuent d'alterner au-dessus et au-dessous du disque.
+Ce parcours remplace les pourcentages de la section 5. Chaque slide garde son bloc de texte provisoire. **Depuis le 19/11/2026 (retour de Noam sur V4)** : trois plans sur le trou noir (S1–S3, au-dessus et au-dessous du disque en alternance), puis la caméra quitte le trou noir pour la nébuleuse (S4) et le pulsar (S5), chacun au centre de son plan, puis revient se poser sur le disque (S6) avant la plongée.
 
 | Étape | Scène | Éléments propres |
 |---|---|---|
 | P | Préchargement | 1 |
 | S1 | Accueil, vue de base | 10, 18 |
 | S2 | Dessous, à gauche | 5 |
-| S3 | Dessus, à droite | 4, 9 |
-| S4 | Dessous | 6, 8 |
-| S5 | Dessus, la planète traverse le premier plan pendant l'arrivée | 7, 11 |
-| S6 | Approche : le trou noir seul et grand, sans texte | 20 |
-| S7 | Plongée | 2 |
-| S8 | Point blanc | 3 (début) |
-| S9 | Trou blanc | 3 |
-| S10 | Contact | (phase ultérieure) |
+| S3 | Dessus, à droite | 9, 11, 20 |
+| S4 | **La nébuleuse au centre**, trou noir petit et lointain dans le cadre | 4 (et 7, 8 : à replacer au lot V5) |
+| S5 | **Le pulsar au centre**, nébuleuse et trou noir au loin | 6 |
+| S6 | **Dernière slide** : retour au trou noir, caméra **posée sur le disque, juste devant l'horizon**, l'ombre prend l'essentiel de l'écran, sans texte | (4 au fond, courbée) |
+
+**Slides S7 à S9 retirées (décision de Noam du 19/11/2026)** : le parcours s'arrête sur S6. La plongée, le point blanc et le trou blanc (2, 3, lot V7), le contact et l'easter egg n'ont plus de slide ; leur place est à redéfinir.
 | + | Easter egg | (phase ultérieure) |
 
 **Effets présents partout :** 12, 13, 14, 15, 16, 17, 19.
@@ -342,7 +340,32 @@ Web Audio **procédural**, sans fichier au départ : aucune licence et un son en
 
 Une **session neuve par phase**, qui commence par lire ce fichier.
 
-**État au 19/11/2026 : lots V0 à V3 faits (V1, V2 et V3 en attente de validation par Noam). Prochaine étape : lot V4.**
+**État au 19/11/2026 : lots V0 à V4 faits (V1 à V4 en attente de validation par Noam). Parcours ramené à 6 slides (S1–S3 trou noir, S4 nébuleuse, S5 pulsar, S6 posé sur le disque). Prochaine étape : lot V5.**
+
+**Lot V4 (nébuleuse + pulsar), dans `experience/scenes/`, chacun avec son dossier lil-gui et son interrupteur :**
+- **Nouveau parcours (retour de Noam : le pulsar « faisait tache » en tournant au fond du trou noir)**. Dans `timeline.ts`, chaque arrêt de `KEYS` a un **point focal `c`** (trou noir à l'origine par défaut), interpolé pendant la transition : la caméra voyage d'un objet à l'autre.
+  - S1–S3 : trou noir (inchangés). S3 accueille maintenant les jets (11) et le texte en anneau (20).
+  - S4 : orbite autour de `NEBULA_POS` (à 100 du trou noir) à 78 ; la nébuleuse occupe le centre et le trou noir est à ≈ 25° de l'axe, à 165 (au fond, à droite).
+  - S5 : orbite autour de `PULSAR_POS` (à 65 du trou noir) à 14 ; pulsar au centre, nébuleuse au fond à gauche, trou noir à ≈ 21°, à 78.
+  - S6 : trou noir, distance 7,5, hauteur 0,05 rad (0,4 au-dessus du plan, au milieu du disque qui va de 2,9 à 12) : ombre ≈ 80 % de la hauteur d'écran.
+  - S7–S9 **retirées** à la demande de Noam : S6 est la dernière slide (compteur « 06 / 06 », indice « ← revenir »). Objets du ciel profond de S7/S8, lignes du HUD et fenêtre de l'élément de test ajustés.
+  - Trajectoire vérifiée par simulation (pas de 0,01) : la caméra reste à plus de 40 du centre de la nébuleuse (rayon 34), jamais à l'intérieur.
+  - Le rémanent de supernova de `deepsky.ts` passe de S4 à S3 (il tombait au milieu de la nébuleuse). Les autres objets du ciel profond sont placés depuis la pose de leur slide : ceux de S5 sont désormais derrière le trou noir (anneau d'Einstein bleuté), à revoir si besoin.
+- `nebula.ts` **4 nébuleuse** (🟠, S4, active sur S4, S5 et S6, dès « basse », couche `sky`). Un vrai volume fixe dans le monde (sphère englobante de rayon 34 centrée sur `NEBULA_POS`, ellipsoïde aplati tourné), **raymarché à chaque image depuis la vraie position de la caméra** (profondeur et parallaxe internes pendant les transitions).
+  - Rendu dans un **patch** (projection gnomonique autour de la direction caméra → nébuleuse), que le shader du trou noir échantillonne au bout de ses rayons courbés (`BlackholeParams.neb`, uniforms `uNeb*`, même principe que 18) : lentille, arcs et bloom gratuits ; la poussière (alpha du patch) masque les étoiles et le ciel profond situés derrière.
+  - Densité : bruit 3D précalculé (texture 64³ répétable, 4 canaux, générée en JS au démarrage), déformation de domaine (volutes), **filaments** (crêtes du bruit), **bandes de poussière** (champ séparé qui absorbe sans émettre), enveloppe ellipsoïdale douce.
+  - **4 étoiles jeunes** dans le volume : éclairage en 1/d², cavité creusée autour d'elles, points brillants atténués par le gaz situé devant (taille en texels du patch).
+  - Teinte de S3 : gaz bleu profond `#2440c8`, bords ionisés rouge-orangé `#c8402e` (entre `#ff5a1f` et `#8a1a05`), lumière des étoiles `#9fdcff`.
+  - **Qualité automatique** : patch 832² / 576² / 416² et 40 / 30 / 22 pas (haute / moyenne / basse), × la résolution interne (plancher 0,55) ; la 3e lecture de bruit (détail) est coupée en basse.
+  - La petite nébuleuse bleu-violet lointaine de S3 dans `deepsky.ts` est **supprimée** (remplacée par ce volume).
+  - Fondu seulement en bord de fenêtre (poids 0 → 0,3, réglable) : vers s = 1,0–1,3, elle entre par le coin bas droit pendant le mouvement.
+- `pulsar.ts` **6 pulsar** (🟠, S5, dès « moyenne », couche `front`, lentille et masquage par `lens.ts`). Étoile à neutrons fixe dans le monde en `PULSAR_POS`, au centre du plan de S5.
+  - Axe magnétique incliné de α = 0,5 rad sur l'axe de rotation, 0,9 tour/s ; l'axe de rotation est choisi pour que le cône balayé passe par la caméra de S5 : **un flash à chaque tour** (halo élargi, traînées horizontale et verticale).
+  - Faisceaux : deux rubans coniques (ouverture 0,085 rad, longueur 22) tournés vers la caméra, stries douces qui s'éloignent, plus brillants vus dans l'axe ; pendant S3 → S4 on les voit balayer tout le cadre.
+  - Panneau maillé 16×16 (suit la lentille) : cœur minuscule très brillant, halo, **nébuleuse de vent** (tore équatorial vu selon l'axe de rotation, petits jets polaires, volutes). Couleurs : blanc, `#7fd6ff`, `#1b4dff`. Fondu en bord de fenêtre comme la nébuleuse.
+- Budget (nouveau parcours) : S1↔S2 texte géant + étoile compagne, S2↔S3 étoile compagne + jets, S3↔S4 jets + nébuleuse, S4↔S6 nébuleuse + pulsar ; jamais plus de 2 moyens.
+- Infrastructure : `BlackholeParams.neb` (uniforms `uNebTex`, `uNebC`, `uNebE1`, `uNebE2`, remis à zéro à chaque image) ; `FrameParams.tier` et `FrameParams.res` (niveau et résolution interne, pour les éléments qui adaptent leur propre résolution).
+- **Mesures** (nouveau parcours, `__bench(120)`, médiane de 5, RTX 5070 Ti, interne 2079×1223, résolution 1) : S4 base 0,75 ms ; nébuleuse (patch agrandi) **+0,20** (haute), **+0,14** (moyenne), **+0,06** (basse). S5 base 1,03 ; pulsar **+0,03**. S6 (gros plan sur le disque, l'image la plus lourde du parcours) base 1,63 ; nébuleuse au fond +0,27. **Simulation ×9 en direct** (qualité automatique active) : S4 8,3 ms (≈ 120 fps), S6 14,8 ms (≈ 68 fps), sans dégradation (seuil de baisse : 18 ms). Parcours réel S1→S6 et retour : 180 fps tenus, jamais plus de 2 moyens, aucune erreur console. (Premières mesures, ancien parcours, nébuleuse en S3 : +0,23 ms ; ×9 en direct 9,6 ms contre 8,5 sans.)
 
 **Lot V3 (étoile compagne + jets), dans `experience/scenes/`, chacun avec son dossier lil-gui et son interrupteur :**
 - `lens.ts` (outil partagé des éléments en vraie géométrie 3D, couche `front`) : `lensProject()` projette par la caméra de la scène puis, pour un point situé derrière le plan qui passe par le trou noir perpendiculairement à la visée, applique une lentille ponctuelle (image primaire) avec le θE physique d'une source à distance finie, θE² = 2·Dls/(Dl·Ds) (même déviation 2/b que le raymarching, nul au passage du plan : pas de saut) ; `bhVis()` multiplie cette partie par la transmission du trou noir (cachée par l'ombre et derrière le disque, comme 20).
@@ -410,10 +433,10 @@ Une **session neuve par phase**, qui commence par lire ce fichier.
 | V1 | **Effets légers partout** : 12, 13, 14, 15, 16, 19, + 9 et 10 | Sonnet, moyen | Le rendu de toutes les slides |
 | V2 | **Lentille et texte** : 18, 17, 20 | Opus, moyen | S1 et S6 |
 | V3 | **Étoile compagne dévorée + jets** : 5, 11 (fait) | Opus, élevé | S2 et S5 |
-| V4 | **Nébuleuses + pulsar** : 4, 6 | Opus, élevé | S3 et S4 |
+| V4 | **Nébuleuses + pulsar** : 4, 6 (fait) | Opus, élevé | S3 et S4 |
 | V5 | **Astéroïdes + planète** : 8, 7 | Sonnet, moyen | S4 et S5 |
 | V6 | **Supernova** : 1 | Opus, élevé | Le préchargement |
-| V7 | **Plongée → trou blanc** : 2, 3 | Opus, élevé | S7 à S9 |
+| V7 | **Plongée → trou blanc** : 2, 3 (slides S7–S9 retirées le 19/11/2026 : à redéfinir) | Opus, élevé | — |
 | F1 | Son | Sonnet, moyen | L'ambiance complète |
 | F2 | Vrais textes (`content.ts`, polices en latin-ext pour « œ ») | Sonnet, moyen | Les textes |
 | F3 | Contact + easter egg | Sonnet, moyen | Fin du site |

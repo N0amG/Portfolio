@@ -139,6 +139,8 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
       uLensM: { value: new THREE.Vector4() },
       uTitleTex: { value: null as THREE.Texture | null }, uTitleO: { value: new THREE.Vector3() }, uTitleN: { value: new THREE.Vector3() },
       uTitleA1: { value: new THREE.Vector4() }, uTitleA2: { value: new THREE.Vector4() }, uTitleCol: { value: col("#f2efe8") },
+      uNebTex: { value: null as THREE.Texture | null }, uNebC: { value: new THREE.Vector4() },
+      uNebE1: { value: new THREE.Vector3() }, uNebE2: { value: new THREE.Vector3() },
     },
     vertexShader: FS_VERT,
     fragmentShader: BLACKHOLE_FRAG,
@@ -274,14 +276,15 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     hot: bu.uHot.value as THREE.Vector4,
     lensM: bu.uLensM.value as THREE.Vector4,
     title: { tex: bu.uTitleTex, o: bu.uTitleO.value, n: bu.uTitleN.value, a1: bu.uTitleA1.value, a2: bu.uTitleA2.value },
+    neb: { tex: bu.uNebTex, c: bu.uNebC.value, e1: bu.uNebE1.value, e2: bu.uNebE2.value },
   };
   const frameParams: FrameParams = {
     s: 0, slide: 0, weight: 0, dt: 0, time: 0, camPos, camF, camR, camU, viewProj, bhScreen, bhNdc, rhNdc,
-    mouse: new THREE.Vector2(), width: 1, height: 1, dpr: DPR, reduced: false, composite, bh: bhParams,
+    mouse: new THREE.Vector2(), width: 1, height: 1, dpr: DPR, reduced: false, tier: P.tier, res: P.resolution, composite, bh: bhParams,
   };
   function updateScenes(dt: number) {
     const f = frameParams;
-    f.s = cam.s; f.dt = dt; f.time = clock.elapsed; f.rhNdc = rhNdc;
+    f.s = cam.s; f.dt = dt; f.time = clock.elapsed; f.rhNdc = rhNdc; f.tier = P.tier; f.res = P.resolution;
     f.mouse.set(parX, parY); f.width = window.innerWidth; f.height = window.innerHeight;
     for (const w of composite.waves) w.set(0, 0, 0, 0);
     composite.motion.set(0, 0); composite.chroma = 0; composite.flare = 0;
@@ -289,6 +292,7 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     bhParams.hot.w = 0;
     bhParams.lensM.z = 0;
     bhParams.title.a2.w = 0;
+    bhParams.neb.c.w = 0;
     scenes.update(f, P.tier);
   }
   /** Rend une couche du registre dans la cible donnée, par-dessus son contenu. */

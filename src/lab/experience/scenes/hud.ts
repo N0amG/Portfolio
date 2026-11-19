@@ -20,9 +20,6 @@ const ROWS: Row[] = [
   { ra: 19.5798, dec: 35.2016, mass: 0.0155, rot: 0.47 }, // S4
   { ra: 9.0312, dec: -41.7764, mass: 1280, rot: 0.58 }, // S5
   { ra: 22.8841, dec: 5.9906, mass: 330, rot: 0.66 }, // S6
-  { ra: 14.1103, dec: -62.3159, mass: 88.2, rot: 0.73 }, // S7
-  { ra: 0.0, dec: 0.0, mass: 0.001, rot: 0.9 }, // S8
-  { ra: 6.2503, dec: 22.0147, mass: 52, rot: 0.12 }, // S9
 ];
 
 const pad = (n: number, w: number) => String(n).padStart(w, "0");
