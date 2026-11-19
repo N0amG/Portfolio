@@ -1,6 +1,7 @@
 import { createComets } from "./comets";
 import { createCompanion } from "./companion";
 import { createJets } from "./jets";
+import { createMagnetar } from "./magnetar";
 import { createNebula } from "./nebula";
 import { createPulsar } from "./pulsar";
 import { createFlare, createMotion, createWaves } from "./composite";
@@ -10,7 +11,6 @@ import { createEruption } from "./eruption";
 import { createDeepSky } from "./deepsky";
 import { createHud } from "./hud";
 import { createCursor } from "./cursor";
-import { createRing } from "./ring";
 import { createTitle } from "./title";
 import type { SceneElement } from "./types";
 
@@ -23,11 +23,14 @@ export function createSceneElements(): SceneElement[] {
   // Lot V1 : effets légers
   list.push(createWaves(), createMotion(), createFlare(), createDust(), createEruption(), createHud(), createComets(), createDeepSky());
   // Lot V2 : lentille et texte
-  list.push(createTitle(), createCursor(), createRing());
+  // (20 · texte en anneau retiré le 19/11/2026 à la demande de Noam ; le module ring.ts reste disponible)
+  list.push(createTitle(), createCursor());
   // Lot V3 : étoile compagne dévorée + jets
   list.push(createCompanion(), createJets());
   // Lot V4 : nébuleuse + pulsar
   list.push(createNebula(), createPulsar());
+  // Magnétar (S4, ajouté après V4 à la demande de Noam)
+  list.push(createMagnetar());
   // Élément factice de test : dev uniquement (retiré du build de production), éteint par défaut.
   if (process.env.NODE_ENV !== "production") list.push(createDebugElement());
   return list;

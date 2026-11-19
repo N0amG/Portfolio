@@ -11,7 +11,14 @@ export const BLACKHOLE_FRAG = /* glsl */ `
   uniform sampler2D uSkyTex; uniform float uSkyOn;
   uniform vec4 uLensM;   // 17 · curseur gravitationnel : (position uv, θE², rayon du cœur)
   uniform sampler2D uTitleTex; uniform vec3 uTitleO, uTitleN, uTitleCol; uniform vec4 uTitleA1, uTitleA2;   // 18 · texte géant   // couche "sky" du registre (équirectangulaire, repère monde)
-  uniform sampler2D uNebTex; uniform vec4 uNebC; uniform vec3 uNebE1, uNebE2;   // 4 · nébuleuse (patch raymarché, voir nebula.ts)
+  uniform sampler2D uNebTex; uniform vec4 uNebC; uniform vec3 uNebE1, uNebE2; uniform float uNebF;   // 4 · nébuleuse (patch raymarché, voir nebula.ts)
+  vec4 nebAt(vec3 dir){
+    float nc = dot(dir, uNebC.xyz);
+    if (nc <= 0.05) return vec4(0.0);
+    vec2 nuv = vec2(dot(dir, uNebE1), dot(dir, uNebE2)) / nc * 0.5 + 0.5;
+    if (abs(nuv.x - 0.5) >= 0.5 || abs(nuv.y - 0.5) >= 0.5) return vec4(0.0);
+    return textureLod(uNebTex, nuv, 0.0);
+  }
   uniform vec3 uCamPos, uCamR, uCamU, uCamF, uC0, uC1, uC2, uC3;
   ${COMMON}
   const float R_IN = 2.9;
@@ -170,16 +177,11 @@ export const BLACKHOLE_FRAG = /* glsl */ `
     if (!captured){
       bg = starField(dir) + title;
       if (uSkyOn > 0.5) bg += textureLod(uSkyTex, vec2(atan(dir.z, dir.x) * 0.15915494 + 0.5, asin(clamp(dir.y, -1.0, 1.0)) * 0.31830989 + 0.5), 0.0).rgb;
-      if (uNebC.w > 0.0){
-        // 4 · nébuleuse : devant le fond (sa poussière masque les étoiles), derrière le trou noir (lentille gratuite)
-        float nc = dot(dir, uNebC.xyz);
-        if (nc > 0.05){
-          vec2 nuv = vec2(dot(dir, uNebE1), dot(dir, uNebE2)) / nc * 0.5 + 0.5;
-          if (abs(nuv.x - 0.5) < 0.5 && abs(nuv.y - 0.5) < 0.5){
-            vec4 nb = textureLod(uNebTex, nuv, 0.0);
-            bg = bg * (1.0 - nb.a * min(uNebC.w, 1.0)) + nb.rgb * uNebC.w;
-          }
-        }
+      if (uNebC.w > 0.0 && uNebF < 1.0){
+        // 4 · nébuleuse derrière le trou noir : devant le fond (sa poussière masque les étoiles), lentille gratuite
+        vec4 nb = nebAt(dir);
+        float g = uNebC.w * (1.0 - uNebF);
+        bg = bg * (1.0 - nb.a * min(g, 1.0)) + nb.rgb * g;
       }
       // anneau de photons : rayons qui ont frôlé la sphère de photons (r = 1.5)
       float ring = exp(-pow((rmin - 1.5) * 6.0, 2.0));
@@ -188,6 +190,13 @@ export const BLACKHOLE_FRAG = /* glsl */ `
     acc_col += (1.0 - alpha) * bg;
     // alpha = transmission vers le fond : sert à composer les étoiles aspirées (pleine résolution) dans la passe finale
     float trans = captured ? 0.0 : (1.0 - alpha);
+    if (uNebC.w > 0.0 && uNebF > 0.0){
+      // 4 · caméra dans la nébuleuse (traversée) : le gaz est devant tout, trou noir compris (rayon droit, pas de lentille)
+      vec4 nb = nebAt(rd);
+      float g = uNebC.w * uNebF;
+      acc_col = acc_col * (1.0 - nb.a * min(g, 1.0)) + nb.rgb * g;
+      trans *= 1.0 - nb.a * min(g, 1.0);
+    }
     gl_FragColor = vec4(acc_col, trans);
   }
 `;

@@ -4,7 +4,7 @@ import { FS_VERT } from "./shaders/common";
 import { STARS_FRAG, STARS_VERT } from "./shaders/stars";
 import { BLACKHOLE_FRAG } from "./shaders/blackhole";
 import { BLUR_FRAG, BRIGHT_FRAG, FINAL_FRAG } from "./shaders/post";
-import { CAM_DIST, LAST_SLIDE, TAN_HALF, cameraPose, createNavigation, makePose, shadowNdc } from "./timeline";
+import { CAM_DIST, LAST_SLIDE, TAN_HALF, cameraPose, createNavigation, makePose, shadowNdc, transitionScale } from "./timeline";
 import { createLetters } from "./text/letters";
 import { createQuality, type TierName } from "./quality";
 import { createRegistry } from "./scenes/registry";
@@ -140,7 +140,7 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
       uTitleTex: { value: null as THREE.Texture | null }, uTitleO: { value: new THREE.Vector3() }, uTitleN: { value: new THREE.Vector3() },
       uTitleA1: { value: new THREE.Vector4() }, uTitleA2: { value: new THREE.Vector4() }, uTitleCol: { value: col("#f2efe8") },
       uNebTex: { value: null as THREE.Texture | null }, uNebC: { value: new THREE.Vector4() },
-      uNebE1: { value: new THREE.Vector3() }, uNebE2: { value: new THREE.Vector3() },
+      uNebE1: { value: new THREE.Vector3() }, uNebE2: { value: new THREE.Vector3() }, uNebF: { value: 0 },
     },
     vertexShader: FS_VERT,
     fragmentShader: BLACKHOLE_FRAG,
@@ -220,7 +220,7 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     els.letters.setAttribute("aria-label", slide < NS ? letters.blocks[slide].text : "");
     if (!busy) scenes.decor.set(0); // nouvelle slide posée : les décors coupés ont de nouveau leur chance
   }
-  const nav = createNavigation({ cam, last: LAST_SLIDE, duration: () => P.absorbDur, onChange: updateNav });
+  const nav = createNavigation({ cam, last: LAST_SLIDE, duration: (a, b) => P.absorbDur * transitionScale(a, b), onChange: updateNav });
 
   // -------------------------------------------------------------------------
   // Caméra
@@ -276,7 +276,7 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     hot: bu.uHot.value as THREE.Vector4,
     lensM: bu.uLensM.value as THREE.Vector4,
     title: { tex: bu.uTitleTex, o: bu.uTitleO.value, n: bu.uTitleN.value, a1: bu.uTitleA1.value, a2: bu.uTitleA2.value },
-    neb: { tex: bu.uNebTex, c: bu.uNebC.value, e1: bu.uNebE1.value, e2: bu.uNebE2.value },
+    neb: { tex: bu.uNebTex, c: bu.uNebC.value, e1: bu.uNebE1.value, e2: bu.uNebE2.value, front: bu.uNebF },
   };
   const frameParams: FrameParams = {
     s: 0, slide: 0, weight: 0, dt: 0, time: 0, camPos, camF, camR, camU, viewProj, bhScreen, bhNdc, rhNdc,

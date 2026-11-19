@@ -4,17 +4,18 @@ import { LENS_FRAG, LENS_VERT, lensUniforms, updateLens, updateView } from "./le
 import type { FrameParams, SceneContext, SceneElement } from "./types";
 
 /* ───────────────────────────────────────────────────────────
-   6 · Pulsar (S5).
-   Étoile à neutrons fixe dans le monde (PULSAR_POS, point focal de S5 : au centre du cadre, trou noir au loin),
+   6 · Pulsar (S4).
+   Étoile à neutrons fixe dans le monde (PULSAR_POS, point focal de S4 : au centre du cadre, trou noir au loin),
    en vraie géométrie 3D, couche "front", lentille et masquage par le trou noir via scenes/lens.ts.
    - Axe de rotation ω et axe magnétique m incliné de α par rapport à ω ; m tourne autour de ω (phare).
-     ω est choisi pour que le cône balayé par m passe par la caméra de S5 : un faisceau la balaie à chaque tour.
-   - Faisceaux : deux rubans coniques le long de ±m, tournés vers la caméra, stries qui s'éloignent ; plus brillants
+     ω est choisi pour que le cône balayé par m passe par la caméra de S4 : un faisceau la balaie à chaque tour.
+   - Faisceaux : deux cônes droits le long de ±m (étroits au départ, s'élargissent linéairement), rubans tournés vers
+     la caméra, sans ondulation ; plus brillants
      quand on regarde dans l'axe (ligne de visée plus longue dans le cône).
    - Panneau (maillage subdivisé pour suivre la lentille) : cœur minuscule très brillant, halo, flash quand un faisceau
      passe vers la caméra (halo élargi + traînées), et nébuleuse de vent : tore équatorial (ellipse vue selon ω),
      petits jets polaires et volutes de bruit.
-   Couleurs : blanc, horizon bleu #7fd6ff, bleu profond #1b4dff (teinte froide de S5).
+   Couleurs : blanc, horizon bleu #7fd6ff, bleu profond #1b4dff (teinte froide de S4).
    ─────────────────────────────────────────────────────────── */
 
 const NSEG = 64;
@@ -25,6 +26,7 @@ const BEAM_VERT = /* glsl */ `
   uniform vec3 uP, uM;
   uniform float uLen, uHalf;
   varying vec3 vU;
+  varying vec2 vS;   // (côté × largeur, largeur) : la coordonnée en travers est rendue exacte dans le fragment (sinon zigzag)
   varying float vBehind, vView;
   void main(){
     vec3 ax = uM * aU.z;
@@ -36,22 +38,26 @@ const BEAM_VERT = /* glsl */ `
     sd = l > 1e-4 ? sd / l : vec3(1.0, 0.0, 0.0);
     vView = dot(ax, v);
     vU = aU;
-    gl_Position = lensProject(c + sd * aU.y * (0.03 + tan(uHalf) * s) * 2.5, vBehind);   // ×2,5 : place pour la lueur
+    float w = (0.012 + tan(uHalf) * s) * 2.5;   // cône : largeur linéaire ; ×2,5 : place pour la lueur
+    vS = vec2(aU.y * w, w);
+    gl_Position = lensProject(c + sd * aU.y * w, vBehind);
   }
 `;
 const BEAM_FRAG = /* glsl */ `
   ${LENS_FRAG}
-  uniform float uTime, uFade, uBright, uStreak;
+  uniform float uTime, uFade, uBright;
   varying vec3 vU;
+  varying vec2 vS;
   varying float vBehind, vView;
   void main(){
-    float t = vU.x, v = vU.y * 2.5;
+    // chaque morceau du cône est un trapèze : interpoler vU.y sur ses deux triangles brise l'axe à chaque segment (zigzag) ;
+    // le rapport de deux grandeurs interpolées linéairement redonne la vraie position en travers
+    float t = vU.x, v = vS.x / vS.y * 2.5;
     float core = exp(-v * v * 2.5);
     float glow = exp(-v * v * 0.45) * 0.22;
-    float st = 1.0 - uStreak * smoothstep(0.05, 0.3, t) * (0.5 + 0.5 * sin(t * 28.0 - uTime * 14.0 + vU.z * 2.0));   // stries qui s'éloignent
     float along = smoothstep(0.0, 0.015, t) * exp(-t * 2.4) * (1.0 - smoothstep(0.75, 1.0, t));
     float los = 1.0 / (sqrt(max(1.0 - vView * vView, 0.0)) + 0.3);   // ligne de visée dans le cône
-    float I = along * (core * st + glow) * los * uBright;
+    float I = along * (core + glow) * los * uBright;
     vec3 col = mix(vec3(0.106, 0.302, 1.0), vec3(0.498, 0.839, 1.0), smoothstep(0.0, 0.5, core));
     col = mix(col, vec3(1.0), core * 0.55);
     gl_FragColor = vec4(1.0 - exp(-col * I), uFade * bhVis(vBehind));
@@ -97,7 +103,8 @@ const STAR_FRAG = /* glsl */ `
     float ca = cos(uTime * 0.05), sa = sin(uTime * 0.05);
     float n = fbm(mat2(ca, -sa, sa, ca) * p * 1.7 + 4.0);
     float ring = exp(-pow((er - uRing) / (uRing * 0.28), 2.0)) * (0.4 + 1.1 * n);
-    float pj = exp(-xa * xa * 30.0) * exp(-abs(ya) * 1.6) * (0.3 + 0.9 * n);
+    float pw = 0.04 + 0.12 * abs(ya);                                   // jets polaires : cônes droits, sans volutes
+    float pj = exp(-xa * xa / (pw * pw)) * exp(-abs(ya) * 1.4) * 0.8;
     float haze = exp(-r2 * 0.3) * smoothstep(0.35, 0.8, n) * 0.6;
     float wind = (ring * 0.55 + pj * 0.5 + haze) * uWind;
     vec3 col = vec3(1.0) * core + vec3(0.75, 0.9, 1.0) * halo + vec3(0.85, 0.95, 1.0) * fl
@@ -109,7 +116,7 @@ const STAR_FRAG = /* glsl */ `
 
 export function createPulsar(): SceneElement {
   const P = {
-    spin: 0.9, incl: 0.5, half: 0.085, length: 22, bright: 1.6, streak: 0.2,
+    spin: 0.9, incl: 0.5, half: 0.085, length: 22, bright: 1.6,
     core: 0.07, halo: 1, flash: 1.6, wind: 0.8, ring: 1.4,
     lens: true, edge: 0.3,
   };
@@ -123,13 +130,13 @@ export function createPulsar(): SceneElement {
 
   return {
     id: "pulsar",
-    label: "6 · Pulsar (S5)",
-    slides: [S(5)],
+    label: "6 · Pulsar (S4)",
+    slides: [S(4)],
     cost: "moyen",
     minTier: "moyenne",
     layers: ["front"],
     init(ctx: SceneContext) {
-      cameraPose(S(5), 0, 0, pose);
+      cameraPose(S(4), 0, 0, pose);
       lu = lensUniforms(ctx);
       const U: number[] = [], idx: number[] = [];
       for (const j of [1, -1]) {
@@ -148,7 +155,7 @@ export function createPulsar(): SceneElement {
       beamMat = new THREE.ShaderMaterial({
         uniforms: {
           ...lu, uP: { value: pos }, uM: { value: m }, uLen: { value: 20 }, uHalf: { value: 0.08 },
-          uTime: { value: 0 }, uFade: { value: 0 }, uBright: { value: 1 }, uStreak: { value: 0.3 },
+          uTime: { value: 0 }, uFade: { value: 0 }, uBright: { value: 1 },
         },
         vertexShader: BEAM_VERT, fragmentShader: BEAM_FRAG, ...common,
       });
@@ -167,7 +174,7 @@ export function createPulsar(): SceneElement {
       scene = new THREE.Scene().add(beams, star);
     },
     update(f: FrameParams) {
-      // axe de rotation : incliné de (α − δ) par rapport à la direction de la caméra de S5 → un faisceau la balaie à chaque tour
+      // axe de rotation : incliné de (α − δ) par rapport à la direction de la caméra de S4 → un faisceau la balaie à chaque tour
       toCam.copy(pose.pos).sub(pos).normalize();
       perp.copy(pose.u).addScaledVector(toCam, -pose.u.dot(toCam)).normalize();
       tmp.crossVectors(toCam, perp);
@@ -187,7 +194,7 @@ export function createPulsar(): SceneElement {
       updateLens(lu, f, P.lens);
       const bu = beamMat.uniforms, su = starMat.uniforms;
       bu.uLen.value = P.length; bu.uHalf.value = P.half; bu.uTime.value = f.time; bu.uFade.value = fade;
-      bu.uBright.value = P.bright; bu.uStreak.value = P.streak;
+      bu.uBright.value = P.bright;
       su.uSize.value = 5; su.uCore.value = P.core; su.uHalo.value = P.halo * (1 + flash * 0.6); su.uFlash.value = flash;
       su.uTime.value = f.time; su.uFade.value = fade; su.uWind.value = P.wind; su.uRing.value = P.ring;
       su.uCosI.value = Math.abs(w.dot(view));
@@ -209,7 +216,6 @@ export function createPulsar(): SceneElement {
       folder.add(P, "half", 0.02, 0.25, 0.005).name("Ouverture des faisceaux");
       folder.add(P, "length", 5, 50, 0.5).name("Longueur des faisceaux");
       folder.add(P, "bright", 0, 5, 0.05).name("Éclat des faisceaux");
-      folder.add(P, "streak", 0, 1, 0.05).name("Stries");
       folder.add(P, "core", 0.02, 0.3, 0.005).name("Taille du cœur");
       folder.add(P, "halo", 0, 4, 0.05).name("Halo");
       folder.add(P, "flash", 0, 5, 0.05).name("Flash");

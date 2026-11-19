@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { GLYPH_FRAG, GLYPH_VERT } from "../shaders/glyphs";
-import { cameraPose, makePose, TAN_HALF, TEXT_DEPTH } from "../timeline";
+import { cameraPose, makePose, TAN_HALF, TEXT_DEPTH, transitionScale, viaEntry } from "../timeline";
 
 /* ───────────────────────────────────────────────────────────
    Texte : un bloc par slide.
@@ -263,7 +263,11 @@ export function createLetters(texts: readonly string[], pageEl: HTMLElement, let
       vTmp2.copy(L.world).addScaledVector(L.wr, L.w).project(view.textCam);
       const rs = Math.hypot(((vTmp2.x - vTmp.x) / 2) * W, ((vTmp2.y - vTmp.y) / 2) * H) / Math.max(L.w, 1);
       // désintégration : commence quand le bloc est parti sur le côté, les lettres de tête d'abord
-      const pBlock = Math.min(1, Math.max(0, (d - 0.1) / 0.9));
+      // (traversée de la nébuleuse, S4 → S5 : le bloc doit avoir disparu avant que la caméra n'entre dans le gaz)
+      //  progression en temps réel τ (l'ease sine.inOut défait) : fini à 90 % du temps d'arrivée dans le gaz)
+      const pBlock = transitionScale(L.b, L.b + 1) > 1
+        ? Math.min(1, Math.max(0, (Math.acos(1 - 2 * Math.min(1, Math.max(0, d))) / Math.PI - 0.01) / (0.9 * viaEntry(L.b) - 0.01)))
+        : Math.min(1, Math.max(0, (d - 0.1) / 0.9));
       const xN = ((homeX - B.cx) / B.halfW) * 0.5 + 0.5;
       const delay = (0.55 * r1 + 0.45 * (1 - xN)) * DMAX; // côté droit d'abord : il reste le plus longtemps dans le cadre
       const u = Math.min(1, Math.max(0, (pBlock - delay) / (1 - DMAX)));

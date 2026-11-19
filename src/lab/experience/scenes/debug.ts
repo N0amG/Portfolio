@@ -28,7 +28,7 @@ export function createDebugElement(): SceneElement {
   return {
     id: "debug",
     label: "Test registre (dev)",
-    slides: [S(6)],
+    slides: [S(7)],
     cost: "leger",
     minTier: "basse",
     layers: ["back", "sky"],

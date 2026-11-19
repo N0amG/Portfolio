@@ -17,6 +17,7 @@ const ROWS: Row[] = [
   { ra: 17.7611, dec: -29.0078, mass: 4.3, rot: 0.52 }, // S1 accueil
   { ra: 12.5137, dec: 12.3911, mass: 6500, rot: 0.61 }, // S2
   { ra: 3.3014, dec: -9.4225, mass: 19.4, rot: 0.34 }, // S3
+  { ra: 16.1351, dec: -47.6093, mass: 1.9, rot: 0.13 }, // S4 pulsar
   { ra: 19.5798, dec: 35.2016, mass: 0.0155, rot: 0.47 }, // S4
   { ra: 9.0312, dec: -41.7764, mass: 1280, rot: 0.58 }, // S5
   { ra: 22.8841, dec: 5.9906, mass: 330, rot: 0.66 }, // S6

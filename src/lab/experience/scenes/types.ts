@@ -62,6 +62,8 @@ export interface BlackholeParams {
     c: THREE.Vector4;
     e1: THREE.Vector3;
     e2: THREE.Vector3;
+    /** 0 = derrière le trou noir (courbée par la lentille), 1 = devant tout (caméra dans le volume, traversée). */
+    front: { value: number };
   };
 }
 
