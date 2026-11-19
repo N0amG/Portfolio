@@ -146,7 +146,10 @@ export function createMagnetar(): SceneElement {
     // cordes : doigt et rupture en unités d'écran (demi-hauteur), entre les premiers réglages et le maximum (retour de Noam)
     finger: 0.07, rupture: 0.25, hold: 0.6, spring: 1.3, damping: 0.11, tension: 1200, push: 30000,
     // forme de la déformation (retour de Noam : une grosse ondulation locale, comme un élastique ou un blob, pas des vaguelettes)
-    blob: 6, blobGain: 4, smooth: 40,
+    blob: 6, blobGain: 2.4, smooth: 40,
+    // retour de Noam : les petits arcs près de l'étoile doivent beaucoup plus résister (rigidité × (Lmax / L)^stiffPow),
+    // et le doigt n'agit qu'une fois la caméra arrivée sur la slide (poids > arrive)
+    stiffPow: 1.4, arrive: 0.998,
     lensK: 0.07,
   };
   let scene: THREE.Scene, lineMat: THREE.ShaderMaterial, starMat: THREE.ShaderMaterial;
@@ -193,8 +196,9 @@ export function createMagnetar(): SceneElement {
     const dt = Math.min(f.dt, 1 / 30), asp = f.width / f.height, e = f.viewProj.elements;
     mouseV.copy(mouse).sub(lastMouse);
     lastMouse.copy(mouse);
-    // le doigt n'agit que si la souris est dans la fenêtre et la slide assez présente
-    const touching = mouseIn && fade > 0.5;
+    // le doigt n'agit que si la souris est dans la fenêtre et la caméra arrivée sur la slide (pendant l'approche, les lignes
+    // défilent sous une souris immobile : sans ça, elles s'emballaient)
+    const touching = mouseIn && fade > 0.5 && f.weight > P.arrive;
     if (!touching && energy < 1e-7) return false;
     const R = f.camR, U = f.camU;
     force.fill(0);
@@ -249,12 +253,15 @@ export function createMagnetar(): SceneElement {
     // cordes : rappel vers le repos (k), tension entre voisins (T), amortissement (c) ; 4 sous-pas, pieds fixes
     // amortissement « visqueux » (Laplacien des vitesses, S = smooth) : il éteint les vaguelettes rapides et laisse la grosse
     // ondulation (le rebond de la bosse) ; 6 sous-pas pour rester stable
-    const wk = 2 * Math.PI * P.spring, k = wk * wk, c = 2 * P.damping * wk, T = P.tension, sub = 6, h = dt / sub;
+    const wk = 2 * Math.PI * P.spring, sub = 6, h = dt / sub;
     const Sv = Math.min(P.smooth, 0.45 / h);
     energy = 0;
     for (let st = 0; st < sub; st++) {
       for (let l = 0; l < nLines; l++) {
         const base = l * NP * 3;
+        // rigidité propre à la ligne : les petits arcs (L petit, champ fort près de l'étoile) résistent bien plus
+        const sL = Math.min(12, Math.pow(LMAX / lineL[l], P.stiffPow));
+        const k = wk * wk * sL, c = 2 * P.damping * wk * Math.sqrt(sL), T = P.tension * sL;
         for (let i = 1; i < SEG; i++) {
           const o = base + i * 3;
           for (let a = 0; a < 3; a++) {
@@ -437,6 +444,7 @@ export function createMagnetar(): SceneElement {
       folder.add(P, "blob", 1, 20, 0.5).name("Déformation : largeur de la bosse (points)");
       folder.add(P, "blobGain", 0.5, 10, 0.1).name("Déformation : force de la bosse");
       folder.add(P, "smooth", 0, 80, 1).name("Déformation : lissage des vaguelettes");
+      folder.add(P, "stiffPow", 0, 3, 0.05).name("Petits arcs : rigidité (exposant)");
       folder.add(P, "lensK", 0, 1, 0.01).name("Lentille du curseur sur les lignes");
       folder.add(P, "lens").name("Lentille (partie derrière)");
       folder.add(P, "edge", 0, 1, 0.05).name("Fondu en bord de fenêtre");
