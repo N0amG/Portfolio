@@ -135,6 +135,7 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
       uSkyRot: { value: new THREE.Matrix3() }, uClock: { value: 0 },
       uSkyTex: { value: null as THREE.Texture | null }, uSkyOn: { value: 0 },
       uErupt: { value: new THREE.Vector4() },
+      uHot: { value: new THREE.Vector4() },
       uLensM: { value: new THREE.Vector4() },
       uTitleTex: { value: null as THREE.Texture | null }, uTitleO: { value: new THREE.Vector3() }, uTitleN: { value: new THREE.Vector3() },
       uTitleA1: { value: new THREE.Vector4() }, uTitleA2: { value: new THREE.Vector4() }, uTitleCol: { value: col("#f2efe8") },
@@ -270,6 +271,7 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
   const bu = bhMat.uniforms;
   const bhParams: BlackholeParams = {
     erupt: bu.uErupt.value as THREE.Vector4,
+    hot: bu.uHot.value as THREE.Vector4,
     lensM: bu.uLensM.value as THREE.Vector4,
     title: { tex: bu.uTitleTex, o: bu.uTitleO.value, n: bu.uTitleN.value, a1: bu.uTitleA1.value, a2: bu.uTitleA2.value },
   };
@@ -284,6 +286,7 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     for (const w of composite.waves) w.set(0, 0, 0, 0);
     composite.motion.set(0, 0); composite.chroma = 0; composite.flare = 0;
     bhParams.erupt.set(0, 0, 0, 0);
+    bhParams.hot.w = 0;
     bhParams.lensM.z = 0;
     bhParams.title.a2.w = 0;
     scenes.update(f, P.tier);
@@ -450,6 +453,8 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
   return {
     P,
     cam,
+    /** Dev : une image à la demande (pour tester quand le rAF est suspendu, ex. onglet en arrière-plan). */
+    step: frame,
     stats,
     bhMat,
     nav,

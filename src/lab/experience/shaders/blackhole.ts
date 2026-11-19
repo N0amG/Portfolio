@@ -7,6 +7,7 @@ export const BLACKHOLE_FRAG = /* glsl */ `
   uniform vec2 uRes; uniform float uTime, uTanHalf, uIntensity, uDoppler, uStepK, uOct, uClock;
   uniform mat3 uSkyRot;
   uniform vec4 uErupt;   // 16 · éruption du disque : (azimut de départ, âge, vitesse angulaire, amplitude)
+  uniform vec4 uHot;     // 5 · point chaud du filament de l'étoile compagne : (azimut, rayon, largeur radiale, amplitude)
   uniform sampler2D uSkyTex; uniform float uSkyOn;
   uniform vec4 uLensM;   // 17 · curseur gravitationnel : (position uv, θE², rayon du cœur)
   uniform sampler2D uTitleTex; uniform vec3 uTitleO, uTitleN, uTitleCol; uniform vec4 uTitleA1, uTitleA2;   // 18 · texte géant   // couche "sky" du registre (équirectangulaire, repère monde)
@@ -62,6 +63,15 @@ export const BLACKHOLE_FRAG = /* glsl */ `
       float e = tail * rad * uErupt.w * (0.65 + 0.7 * n);
       bright = bright * (1.0 + 3.5 * e) + prof * e * 7.0 * uIntensity;
       c = mix(c, ramp(0.9), clamp(e, 0.0, 1.0) * 0.7);
+    }
+    if (uHot.w > 0.0){
+      // 5 · point chaud : là où le filament de l'étoile compagne frappe le disque. Le plasma chauffé est entraîné
+      // par la rotation (azimut décroissant) : queue qui s'étire en aval, front net en amont.
+      float dl = mod(uHot.x - phi + 3.14159265, 6.2831853) - 3.14159265;
+      float tail = dl >= 0.0 ? exp(-dl * 1.8) : exp(dl * 12.0);
+      float e = tail * exp(-pow((r - uHot.y) / uHot.z, 2.0)) * uHot.w * (0.6 + 0.8 * n);
+      bright += e * shift * shift * 5.0 * uIntensity;
+      c = mix(c, ramp(0.97), clamp(e * 1.4, 0.0, 1.0) * 0.75);
     }
     float alpha = clamp(prof * (0.8 + 0.5 * n), 0.0, 0.97);
     return vec4(c * bright, alpha);

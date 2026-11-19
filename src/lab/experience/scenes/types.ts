@@ -39,6 +39,8 @@ export interface CompositeParams {
 export interface BlackholeParams {
   /** 16 · éruption du disque : x = azimut de départ (rad), y = âge (s), z = vitesse angulaire signée (rad/s), w = amplitude (0 = inactif). */
   erupt: THREE.Vector4;
+  /** 5 · point chaud (impact du filament de l'étoile compagne sur le disque) : x = azimut (rad), y = rayon, z = largeur radiale, w = amplitude (0 = inactif). */
+  hot: THREE.Vector4;
   /** 17 · curseur gravitationnel : xy = position (repère uv du shader : y vers le haut, x × aspect), z = θE², w = rayon du cœur (z = 0 : inactif). */
   lensM: THREE.Vector4;
   /** 18 · texte géant de fond : plan échantillonné à travers les rayons courbés (voir title.ts). a2.w = intensité (0 : inactif). */

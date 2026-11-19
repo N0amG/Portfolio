@@ -32,7 +32,8 @@ export function createCursor(): SceneElement {
     id: "curseur",
     label: "17 · Curseur gravitationnel",
     slides: "all",
-    cost: "moyen",
+    // léger depuis le lot V3 (mesuré à +0,00 ms au lot V2) : présent partout, il occupait en permanence une des 2 places « moyen »
+    cost: "leger",
     minTier: "basse",
     layers: [],
     init(ctx: SceneContext) {

@@ -342,7 +342,19 @@ Web Audio **procédural**, sans fichier au départ : aucune licence et un son en
 
 Une **session neuve par phase**, qui commence par lire ce fichier.
 
-**État au 19/11/2026 : lots V0, V1 et V2 faits (V1 et V2 en attente de validation par Noam). Prochaine étape : lot V3.**
+**État au 19/11/2026 : lots V0 à V3 faits (V1, V2 et V3 en attente de validation par Noam). Prochaine étape : lot V4.**
+
+**Lot V3 (étoile compagne + jets), dans `experience/scenes/`, chacun avec son dossier lil-gui et son interrupteur :**
+- `lens.ts` (outil partagé des éléments en vraie géométrie 3D, couche `front`) : `lensProject()` projette par la caméra de la scène puis, pour un point situé derrière le plan qui passe par le trou noir perpendiculairement à la visée, applique une lentille ponctuelle (image primaire) avec le θE physique d'une source à distance finie, θE² = 2·Dls/(Dl·Ds) (même déviation 2/b que le raymarching, nul au passage du plan : pas de saut) ; `bhVis()` multiplie cette partie par la transmission du trou noir (cachée par l'ombre et derrière le disque, comme 20).
+- `companion.ts` **5 étoile compagne** (🟠, S2, dès « moyenne »). **Jamais de fondu** (retour de Noam du 19/11/2026) : l'étoile est une vraie géométrie fixe dans le monde (distance 19, azimut 0,65 rad, 7 au-dessus du disque : coin haut gauche de S2, hors champ sur S1), visible dès qu'elle entre dans le cadre.
+  - **Posée sur S2** : goutte (lobe de Roche) qui respire, surface qui coule vers la pointe (granulation advectée + coulées), face éclairée par le disque. **Effet d'optique** autour : la zone de l'image autour de l'étoile est copiée (`copyFramebufferToTexture`, 1024 px) puis rééchantillonnée en lentille (θ − θE²/θ), tourbillon et ondes de chaleur animés, jusqu'à 3 rayons d'étoile. Halo additif (pas de bloom en couche `front`).
+  - **Filament** : ruban tourné vers la caméra le long d'une spirale calculée en JS depuis le centre de l'étoile (départ radial, enroulement 2,4 rad dans le sens de rotation du disque, arrivée tangentielle dans son plan à r = 9), deux brins tressés, grumeaux qui défilent, bleu-blanc → `#fff4e0` → ambre → orange plasma, bords qui absorbent un peu le disque, saturation douce, fondu seulement quand la caméra le frôle. L'étoile cache le filament (tampon de profondeur vidé au début de sa passe).
+  - **S2 → S3 : dévoration pilotée par `s`** (réversible, l'exact inverse au retour), entre s = 1,02 et 1,9 : l'étoile s'étire (spaghettification), chauffe, glisse le long du filament en rétrécissant et plonge dans le disque ; éclair du point chaud quand son cœur arrive (e ≈ 0,86), puis la queue du filament s'y vide. Plus rien à s = 1,9, avant la fin de sa fenêtre.
+  - **Point chaud** dans le shader du trou noir (`uHot`, `f.bh.hot`) : vraie lentille, bloom, queue entraînée par la rotation du disque ; il s'allume entre s = 0 et 0,5.
+- `jets.ts` **11 jets relativistes** (🟠, S5, dès « moyenne ») : deux rubans le long de ±y (longueur 30, base 1,3), ouverture légère, axe en hélice lente (torsion), nœuds qui remontent, cœur blanc → `#7fd6ff` → `#1b4dff`. Beaming par sommet, éclat × D^p avec D = 1/(γ(1 − β cos θ)) (β = 0,6, p = 2,5) : le jet tourné vers la caméra domine, l'autre s'éteint presque ; vu de S5 (dessus), le jet inférieur est caché derrière le disque.
+- Budget : **le curseur 17 passe en léger** (mesuré à +0,00 ms au lot V2) : il occupait en permanence une des 2 places « moyen », et l'étoile n'aurait pu apparaître qu'en fondu à mi-transition. Sur S1↔S2 : texte géant + étoile = 2 moyens. Vérifié par pas de 0,125 sur S1→S9 : jamais plus de 2 moyens. Les jets gardent un fondu sur le poids 0,5 → 0,85 (non revu par Noam).
+- Infrastructure : `BlackholeParams.hot` (uniform `uHot`) ; `engine.step` / `__frame()` en console (une image à la demande, pour tester quand le rAF est suspendu).
+- **Mesures** (`__bench(200)`, médiane de 5, RTX 5070 Ti, interne 2000×1125, résolution 1, haute) : S2 base 0,87 ms, étoile compagne (première version) +0,01 ; S5 base 0,83 (bruit ±0,01), jets +0,01. Étoile avec dévoration et effet d'optique : pas d'écart mesurable (1,34–1,35 ms avec, 1,41–1,43 sans, mesures très bruitées ce jour-là, GPU partagé). Aucune erreur console sur S1→S9 et retour. À refaire sur la simulation ×9 / ×90.
 
 **Lot V2 (lentille et texte), dans `experience/scenes/`, chacun avec son dossier lil-gui et son interrupteur :**
 - `title.ts` **18 texte géant** (🟠, S1) : « NOAM GUEZ » (`TITLE_TEXT` dans `content.ts`) en contour Syne 800 + halo léger, dessiné une fois sur un canvas 2D (4096 px de large, mipmaps, anisotropie 8). Le texte est un **plan fixe dans le monde**, face à la caméra de S1, 40 unités derrière le trou noir, avec une lente dérive latérale. Il n'est **pas** dans la cible équirectangulaire `sky` (≈ 6 px par degré : contours flous) : le shader du trou noir l'échantillonne directement au bout de chaque rayon courbé (uniforms `uTitle*`, via `f.bh.title`). Lentille et anneau d'Einstein gratuits, net en pleine résolution. Lire l'**alpha** du canvas (son RGB non prémultiplié vaut 1 partout).
@@ -397,7 +409,7 @@ Une **session neuve par phase**, qui commence par lire ce fichier.
 | V0 | **Socle** : registre de scènes, parcours étendu à S1–S9 (`KEYS`, une slide vide par scène à venir), règles de performance, dossier de réglages par élément | Opus, moyen | Navigation S1→S9 et retour, perfs identiques |
 | V1 | **Effets légers partout** : 12, 13, 14, 15, 16, 19, + 9 et 10 | Sonnet, moyen | Le rendu de toutes les slides |
 | V2 | **Lentille et texte** : 18, 17, 20 | Opus, moyen | S1 et S6 |
-| V3 | **Étoile compagne dévorée + jets** : 5, 11 | Opus, élevé | S2 et S5 |
+| V3 | **Étoile compagne dévorée + jets** : 5, 11 (fait) | Opus, élevé | S2 et S5 |
 | V4 | **Nébuleuses + pulsar** : 4, 6 | Opus, élevé | S3 et S4 |
 | V5 | **Astéroïdes + planète** : 8, 7 | Sonnet, moyen | S4 et S5 |
 | V6 | **Supernova** : 1 | Opus, élevé | Le préchargement |

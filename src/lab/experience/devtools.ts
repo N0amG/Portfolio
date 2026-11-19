@@ -88,6 +88,7 @@ export function mountDevtools(engine: Engine) {
   w.__go = engine.nav.go;
   w.__nav = engine.nav.state;
   w.__bench = engine.bench;
+  w.__frame = engine.step;
   w.__calibrate = calibrate;
   w.__scenes = engine.scenes;
   w.__composite = engine.composite;
@@ -102,6 +103,6 @@ export function mountDevtools(engine: Engine) {
 
   return () => {
     gui.destroy();
-    for (const k of ["__P", "__stats", "__cam", "__go", "__nav", "__bench", "__calibrate", "__setRes", "__calib", "__scenes", "__composite", "__bhParams"]) delete w[k];
+    for (const k of ["__P", "__stats", "__cam", "__go", "__nav", "__bench", "__frame", "__calibrate", "__setRes", "__calib", "__scenes", "__composite", "__bhParams"]) delete w[k];
   };
 }
