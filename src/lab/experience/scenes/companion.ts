@@ -11,9 +11,12 @@ import type { FrameParams, SceneContext, SceneElement } from "./types";
    - Jamais de fondu : l'étoile est là dès qu'elle entre dans le cadre (hors champ sur S1).
    - Sur S2, posée : la surface coule vers la pointe, la goutte respire, et l'arrière-plan autour d'elle ondule et
      tourbillonne (effet d'optique : copie de l'image autour de l'étoile, rééchantillonnée en lentille + remous).
-   - S2 → S3 : l'étoile est réellement dévorée, pilotée par s (donc réversible) : elle s'étire (spaghettification),
-     glisse le long du filament en rétrécissant, plonge dans le disque (éclair du point chaud), puis la queue du
-     filament s'y vide. Au retour S3 → S2, l'exact inverse.
+   - S1 → S2 : le filament pousse progressivement de la pointe de l'étoile jusqu'au disque (front lumineux), et le
+     point chaud ne s'allume qu'à son arrivée.
+   - S2 → S3 : l'étoile est réellement dévorée, pilotée par s (donc réversible). Dès le début, sa matière remplit tout
+     le filament (plus large, plus brillant, bleu-blanc, gros paquets qui coulent) pendant qu'elle rétrécit, s'étire
+     et glisse le long du filament ; elle plonge dans le disque (éclair du point chaud), puis la traînée s'y vide.
+     Au retour S3 → S2, l'exact inverse.
    - Étoile, halo et filament : couche "front" ; la partie située derrière le trou noir est courbée par la lentille et
      cachée par l'ombre et le disque (scenes/lens.ts).
    - Point chaud : dans le shader du trou noir (uniform uHot) : vraie lentille, bloom, queue entraînée par le disque.
@@ -48,7 +51,7 @@ const STAR_VERT = /* glsl */ `
 const STAR_FRAG = /* glsl */ `
   ${LENS_FRAG}
   uniform vec3 uCamPos, uToBH;
-  uniform float uTime, uEat, uBright;
+  uniform float uTime, uEat, uBright, uSurfSpeed, uSurfAmt;
   varying vec3 vP, vW;
   varying float vBehind, vTip;
   float h3(vec3 p){ p = fract(p * 0.1031); p += dot(p, p.zyx + 31.32); return fract((p.x + p.y) * p.z); }
@@ -63,10 +66,13 @@ const STAR_FRAG = /* glsl */ `
     float c = dot(n, uToBH);
     vec3 lat = n - c * uToBH;
     // la matière glisse sur la surface vers la pointe : granulation advectée + coulées étirées
-    float gran = vn(n * 9.0 - uToBH * uTime * 0.7) * 0.6 + vn(n * 23.0 - uToBH * uTime * 1.4) * 0.4;
-    float streak = vn(lat * 13.0 + uToBH * (c * 3.0 - uTime * 1.1)) * smoothstep(-0.2, 0.9, c);
+    float t = uTime * uSurfSpeed;
+    float gran = vn(n * 9.0 - uToBH * t * 0.7) * 0.6 + vn(n * 23.0 - uToBH * t * 1.4) * 0.4;
+    float streak = vn(lat * 13.0 + uToBH * (c * 3.0 - t * 1.1)) * smoothstep(-0.2, 0.9, c);
     vec3 col = mix(vec3(0.50, 0.78, 1.0), vec3(0.93, 0.97, 1.0), pow(mu, 0.6));   // bord #7fd6ff -> cœur blanc bleuté
-    col *= (0.55 + 0.45 * pow(mu, 0.5)) * (0.8 + 0.3 * gran + 0.35 * streak);
+    // contraste centré sur la luminosité moyenne : uSurfAmt = 1 redonne le rendu d'origine
+    float tex = 0.3 * (gran - 0.5) + 0.35 * (streak - 0.25);
+    col *= (0.55 + 0.45 * pow(mu, 0.5)) * max(1.04 + uSurfAmt * tex, 0.2);
     // face tournée vers le trou noir éclairée par le disque, pointe arrachée qui chauffe
     col += vec3(1.0, 0.70, 0.28) * 0.35 * pow(max(c, 0.0), 2.0);
     col = mix(col, vec3(1.0, 0.957, 0.878), smoothstep(0.7, 1.0, vTip) * 0.6);
@@ -142,7 +148,7 @@ const STREAM_VERT = /* glsl */ `
 
 const STREAM_FRAG = /* glsl */ `
   ${LENS_FRAG}
-  uniform float uTime, uFlow, uBright, uAbsorb, uStart;
+  uniform float uTime, uFlow, uBright, uAbsorb, uStart, uReach, uHeadW, uGrown, uFeed;
   varying vec3 vU;
   varying float vBehind, vNear;
   float h1(float x){ return fract(sin(x * 127.1) * 43758.5453); }
@@ -154,16 +160,25 @@ const STREAM_FRAG = /* glsl */ `
     float c1 = exp(-pow((v - o) * 2.4, 2.0)), c2 = exp(-pow((v + o * 0.8) * 2.6, 2.0));
     float core = max(c1, c2 * 0.8);
     float clump = 0.55 + 0.9 * n1(s * 1.6) * n1(s * 0.47 + 9.0);
-    float halo = exp(-pow(v * 0.9, 2.0)) * 0.22;
-    // naît à la pointe de l'étoile (uStart, qui avance quand l'étoile est dévorée), chauffe, se fond dans le point chaud
-    float along = smoothstep(uStart, uStart + 0.5, sa) * (0.4 + 0.8 * t * t) * (1.0 - smoothstep(0.86, 1.0, t));
+    // étoile en cours de dévoration (uFeed) : sa matière remplit tout le filament, en gros paquets qui coulent
+    clump = mix(clump, 0.45 + 1.3 * n1(s * 1.05) * n1(s * 0.31 + 4.0), uFeed);
+    float halo = exp(-pow(v * 0.9, 2.0)) * (0.22 + 0.2 * uFeed);
+    // naît à la pointe de l'étoile (uStart), chauffe, se fond dans le point chaud
+    float along = smoothstep(uStart, uStart + 0.5, sa) * mix(0.4 + 0.8 * t * t, 1.0, uFeed) * (1.0 - smoothstep(0.86, 1.0, t));
+    // pousse depuis l'étoile vers le disque pendant l'approche de la caméra (uReach), front doux et plus brillant
+    float head = 1.0 - smoothstep(uReach - uHeadW, uReach, sa);
+    float front = exp(-pow((sa - uReach + uHeadW * 0.6) / (uHeadW * 0.35), 2.0)) * (1.0 - uGrown);
+    along *= head;
     vec3 col = mix(vec3(0.80, 0.90, 1.0), vec3(1.0, 0.957, 0.878), smoothstep(0.0, 0.3, t));   // bleu-blanc -> #fff4e0
     col = mix(col, vec3(1.0, 0.702, 0.278), smoothstep(0.25, 0.65, t));                       // -> ambre #ffb347
     col = mix(col, vec3(1.0, 0.353, 0.122), smoothstep(0.6, 1.0, t) * 0.75);                   // -> orange plasma #ff5a1f
+    // matière de l'étoile : bleu-blanc sur toute la longueur, qui ne chauffe qu'en approchant du disque
+    vec3 starCol = mix(vec3(0.78, 0.90, 1.0), vec3(1.0, 0.86, 0.62), smoothstep(0.55, 1.0, t));
+    col = mix(col, starCol, uFeed * 0.75);
     col = mix(col, vec3(1.0, 0.96, 0.9), core * clump * 0.35);
-    float I = along * (core * clump + halo) * uBright;
+    float I = (along * (core * clump * (1.0 + 1.2 * uFeed) + halo) + front * core * 1.5) * uBright;
     // bords plus froids : ils absorbent un peu la lumière du disque derrière (contraste)
-    float ab = uAbsorb * exp(-pow(v * 0.75, 2.0)) * smoothstep(uStart, uStart + 0.5, sa) * (1.0 - smoothstep(0.8, 1.0, t));
+    float ab = uAbsorb * exp(-pow(v * 0.75, 2.0)) * smoothstep(uStart, uStart + 0.5, sa) * head * (1.0 - smoothstep(0.8, 1.0, t));
     float k = bhVis(vBehind) * vNear;
     gl_FragColor = vec4((1.0 - exp(-col * I * 1.6)) * k, ab * k);   // prémultiplié, saturation douce
   }
@@ -172,8 +187,10 @@ const STREAM_FRAG = /* glsl */ `
 export function createCompanion(): SceneElement {
   const P = {
     orbitR: 19, phi: 0.65, height: 7, radius: 1.35, elong: 0.6,
-    spiral: 2.4, joinR: 9.0, width: 0.16, flow: 1.6, stream: 1.6, absorb: 0.45,
-    star: 1.0, halo: 0.7, hot: 0.9, flash: 3.5, optic: 1.0, opticLens: 0.75, eatStart: 1.02, eatEnd: 1.9, lens: true,
+    spiral: 2.4, joinR: 9.0, width: 0.2, flow: 2.2, stream: 1.9, absorb: 0,
+    star: 1.0, halo: 0.5, hot: 0.75, flash: 8, optic: 0.25, opticLens: 0.23, eatStart: 1.0, eatEnd: 2.0, lens: true,
+    surfSpeed: 2.5, surfAmt: 2.0, // matière qui coule à la surface de l'étoile : vitesse et contraste
+    growFrom: 0.3, growTo: 0.95, // le filament pousse de l'étoile au disque pendant l'approche S1 → S2 (position caméra)
   };
   let scene: THREE.Scene, opticScene: THREE.Scene;
   let starMat: THREE.ShaderMaterial, haloMat: THREE.ShaderMaterial, opticMat: THREE.ShaderMaterial, streamMat: THREE.ShaderMaterial;
@@ -241,7 +258,7 @@ export function createCompanion(): SceneElement {
       const common = { ...lu, uTime: { value: 0 }, uStar: { value: center } };
       starGeo = new THREE.SphereGeometry(1, 72, 48);
       starMat = new THREE.ShaderMaterial({
-        uniforms: { ...common, uToBH: { value: dir }, uRad: { value: 1 }, uElong: { value: 0 }, uBright: { value: 1 }, uEat: { value: 0 } },
+        uniforms: { ...common, uToBH: { value: dir }, uRad: { value: 1 }, uElong: { value: 0 }, uBright: { value: 1 }, uEat: { value: 0 }, uSurfSpeed: { value: 1 }, uSurfAmt: { value: 1 } },
         vertexShader: STAR_VERT, fragmentShader: STAR_FRAG,
         transparent: true, depthTest: true, depthWrite: true,
       });
@@ -267,7 +284,8 @@ export function createCompanion(): SceneElement {
       streamGeo.setIndex(idx);
       build();
       streamMat = new THREE.ShaderMaterial({
-        uniforms: { ...common, uWidth: { value: 1 }, uFlow: { value: 1 }, uBright: { value: 1 }, uAbsorb: { value: 0 }, uStart: { value: 0 } },
+        uniforms: { ...common, uWidth: { value: 1 }, uFlow: { value: 1 }, uBright: { value: 1 }, uAbsorb: { value: 0 }, uStart: { value: 0 },
+          uReach: { value: 0 }, uHeadW: { value: 1 }, uGrown: { value: 0 }, uFeed: { value: 0 } },
         vertexShader: STREAM_VERT, fragmentShader: STREAM_FRAG,
         transparent: true, side: THREE.DoubleSide, depthTest: true, depthWrite: false,
         blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor,
@@ -284,24 +302,34 @@ export function createCompanion(): SceneElement {
       updateLens(lu, f, P.lens);
       // progression de la dévoration, pilotée par la position de la caméra (réversible) : 0 sur S2, 1 avant S3
       const e = THREE.MathUtils.smoothstep(f.s, P.eatStart, P.eatEnd);
-      const gone = THREE.MathUtils.smoothstep(e, 0.35, 0.88);
+      // dès le début de la dévoration, l'étoile se vide dans tout le filament (feed), et rétrécit régulièrement
+      const feed = THREE.MathUtils.smoothstep(e, 0, 0.3) * (1 - THREE.MathUtils.smoothstep(e, 0.9, 1));
+      const gone = THREE.MathUtils.smoothstep(e, 0.05, 0.85);
       const rad = P.radius * (1 - gone);
       const elong = P.elong + 3.5 * Math.pow(e, 1.3);
-      // le centre glisse le long du filament ; une fois l'étoile disparue, la queue du filament se vide dans le disque
+      // le cœur glisse le long du filament ; derrière lui, la traînée de matière reste (le filament remonte jusqu'à
+      // la position d'origine de l'étoile), puis la queue se vide dans le disque à la toute fin
       const sCenter = len * 0.92 * Math.pow(e, 1.25);
-      const start = Math.max(sCenter + rad * (1 + elong) * 0.85, len * THREE.MathUtils.smoothstep(e, 0.8, 1));
+      const restTip = P.radius * (1 + P.elong) * 0.85;
+      const start = Math.max(restTip * (1 - feed), len * THREE.MathUtils.smoothstep(e, 0.78, 1));
+      // apparition : le filament pousse de la pointe de l'étoile jusqu'au disque pendant l'approche de la caméra
+      const grow = THREE.MathUtils.smoothstep(f.s, P.growFrom, P.growTo);
+      const headW = len * 0.08;
+      const reach = restTip + (len + headW - restTip) * grow;
       along(sCenter, center, dir);
 
       starMat.uniforms.uTime.value = f.time;
       const su = starMat.uniforms;
       su.uRad.value = rad; su.uElong.value = elong; su.uBright.value = P.star; su.uEat.value = e;
+      su.uSurfSpeed.value = P.surfSpeed; su.uSurfAmt.value = P.surfAmt;
       const hu = haloMat.uniforms, ou = opticMat.uniforms;
       hu.uR.value.copy(f.camR); hu.uU.value.copy(f.camU);
       hu.uSize.value = Math.max(rad, 0.01) * 4.5; hu.uHalo.value = P.halo;
       const u = streamMat.uniforms;
-      u.uWidth.value = P.width * (1 + 1.5 * e * (1 - THREE.MathUtils.smoothstep(e, 0.85, 1)));
-      u.uFlow.value = P.flow * (1 + 1.5 * e); u.uBright.value = P.stream * (1 + 1.2 * e);
+      u.uWidth.value = P.width * (1 + 1.8 * feed);
+      u.uFlow.value = P.flow * (1 + 1.5 * e); u.uBright.value = P.stream * (1 + 1.2 * feed);
       u.uAbsorb.value = P.absorb; u.uStart.value = start;
+      u.uReach.value = reach; u.uHeadW.value = headW; u.uGrown.value = grow; u.uFeed.value = feed;
 
       // effet d'optique : centre et rayon apparents de l'étoile (même lentille que les shaders)
       lensNdc(center, f, ndc);
@@ -312,7 +340,7 @@ export function createCompanion(): SceneElement {
 
       // point chaud : ravivé quand on quitte S1, éclair quand le cœur de l'étoile plonge, puis il s'éteint avant S3
       const flash = P.flash * Math.exp(-Math.pow((e - 0.86) / 0.07, 2));
-      const hot = P.hot * THREE.MathUtils.smoothstep(f.s, 0, 0.5) * (1 - THREE.MathUtils.smoothstep(e, 0.88, 1)) + flash * (1 - THREE.MathUtils.smoothstep(e, 0.9, 1));
+      const hot = P.hot * THREE.MathUtils.smoothstep(grow, 0.85, 1) * (1 -THREE.MathUtils.smoothstep(e, 0.88, 1)) + flash * (1 - THREE.MathUtils.smoothstep(e, 0.9, 1));
       const fl = P.flash > 0 ? flash / P.flash : 0;
       f.bh.hot.set(joinPhi, P.joinR, 1.1 + 1.2 * fl, hot * (0.85 + 0.15 * Math.sin(f.time * 5.3) * Math.sin(f.time * 2.1)));
     },
@@ -353,6 +381,8 @@ export function createCompanion(): SceneElement {
       geo.add(P, "joinR", 4, 12, 0.1).name("Rayon d'impact sur le disque").onChange(build);
       geo.close();
       folder.add(P, "star", 0, 2, 0.05).name("Éclat de l'étoile");
+      folder.add(P, "surfSpeed", 0, 6, 0.1).name("Surface : vitesse");
+      folder.add(P, "surfAmt", 0, 4, 0.1).name("Surface : contraste");
       folder.add(P, "halo", 0, 2, 0.05).name("Halo");
       folder.add(P, "optic", 0, 1, 0.05).name("Effet d'optique autour");
       folder.add(P, "opticLens", 0, 1.2, 0.01).name("Effet d'optique : lentille");
@@ -362,6 +392,8 @@ export function createCompanion(): SceneElement {
       folder.add(P, "flow", 0, 5, 0.05).name("Vitesse de la matière");
       folder.add(P, "hot", 0, 3, 0.05).name("Point chaud");
       folder.add(P, "flash", 0, 8, 0.1).name("Éclair à l'impact");
+      folder.add(P, "growFrom", 0, 1, 0.01).name("Filament : apparition début (s)");
+      folder.add(P, "growTo", 0, 1, 0.01).name("Filament : apparition fin (s)");
       folder.add(P, "eatStart", 1, 1.5, 0.01).name("Dévoration : début (s)");
       folder.add(P, "eatEnd", 1.5, 2, 0.01).name("Dévoration : fin (s)");
       folder.add(P, "lens").name("Lentille (partie derrière)");
