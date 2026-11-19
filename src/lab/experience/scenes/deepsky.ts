@@ -57,7 +57,7 @@ const FRAG = /* glsl */ `
     float r2 = dot(g, g);
     if (r2 > 2.2) return vec3(0.0);
     float n = fbm(g * 1.7 + A.w), n2 = fbm(g * 3.1 - A.w);
-    float env = exp(-r2 * 1.1);
+    float env = exp(-r2 * 1.1) * (1.0 - smoothstep(0.9, 2.2, r2));   // tombe à zéro avant la coupure : aucun bord net
     float dens = smoothstep(0.3, 0.85, n) * env;
     return mix(c1, c2, smoothstep(0.3, 0.8, n2)) * dens * 0.55 + c1 * env * 0.05;
   }

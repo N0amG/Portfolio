@@ -65,6 +65,10 @@ export const BLACKHOLE_FRAG = /* glsl */ `
     return vec4(c * bright, alpha);
   }
 
+  // Déviation restante de s (abscisse signée depuis le périastre) jusqu'à l'infini, pour la MÊME force que le raymarching (∝ 1/r⁴).
+  // Cohérente avec lui à la jonction b = B_FAR : sans ça, un cercle net apparaît autour du trou noir sur les fonds lisses.
+  float tailDefl(float s, float b){ float q = s * s + b * b; return (1.0 - s * (2.0 * s * s + 3.0 * b * b) / (2.0 * q * sqrt(q))) / b; }
+
   vec3 starField(vec3 d){
     d = uSkyRot * d;                   // le ciel tourne lentement : il défile à travers la lentille
     vec3 c = vec3(0.0);
@@ -101,7 +105,7 @@ export const BLACKHOLE_FRAG = /* glsl */ `
       // Rayon lointain : il ne croise ni le disque ni la zone de champ fort.
       // Déviation analytique en champ faible, de la caméra jusqu'à l'infini : (1/b)(1 - s0/sqrt(s0²+b²)).
       float s0 = dot(uCamPos, rd);
-      float defl = (1.0 - s0 / sqrt(s0 * s0 + h2)) / b;
+      float defl = tailDefl(s0, b);
       vec3 toC = normalize(-uCamPos + dot(uCamPos, rd) * rd);
       dir = normalize(rd * cos(defl) + toC * sin(defl));
     } else {
@@ -129,7 +133,7 @@ export const BLACKHOLE_FRAG = /* glsl */ `
       float s1 = dot(pos, dir);
       vec3 perp = -pos + s1 * dir;
       float bb = max(length(perp), 1e-3);
-      float defl = (1.0 - s1 / sqrt(s1 * s1 + bb * bb)) / bb;
+      float defl = tailDefl(s1, bb);
       dir = normalize(dir * cos(defl) + perp / bb * sin(defl));
     }
     vec3 bg = vec3(0.0);
