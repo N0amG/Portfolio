@@ -23,23 +23,28 @@ export const GESTURE_GAP = 220;
 // Trajectoire de la caméra (schéma de Noam) : un arrêt par slide, positions sur une sphère autour du trou noir.
 //   az = tour horizontal (négatif = à gauche), el = hauteur par rapport au plan du disque (négatif = en dessous),
 //   dist = distance au trou noir, look = décalage de la visée vers la droite/gauche (unités de scène).
+/** Pas d'azimut entre deux slides (rad) : la caméra tourne toujours dans le même sens autour du trou noir. */
+const STEP = 2.6;
 export const KEYS = [
-  { az: 0.0, el: 0.13, dist: 22, look: 0 }, // 1 : vue de base, au-dessus du disque
-  { az: -0.6, el: -0.32, dist: 22, look: -2 }, // 2 : dessous, à gauche (le trou noir est à droite du cadre)
-  { az: 0.45, el: 0.3, dist: 21, look: 1.5 }, // 3 : dessus, à droite (le trou noir est à gauche du cadre)
-  { az: 0.1, el: -0.38, dist: 22, look: 0 }, // 4 : dessous, regard vers le haut
-  { az: 0.0, el: 0.13, dist: 22, look: 0 }, // 5 : retour à la vue de base (la planète traversera ici, lot V5)
+  // Depuis le 19/11/2026 : l'azimut avance de STEP à chaque slide, toujours dans le même sens (vrai détour autour du
+  // trou noir, pas de va-et-vient). Hauteur (el), distance et visée : les angles de vue validés par Noam.
+  { az: 0 * STEP, el: 0.13, dist: 22, look: 0 }, // 1 : vue de base, au-dessus du disque
+  { az: 1 * STEP, el: -0.34, dist: 22, look: -2 }, // 2 : dessous (le trou noir est à droite du cadre)
+  { az: 2 * STEP, el: 0.32, dist: 21, look: 1.5 }, // 3 : dessus (le trou noir est à gauche du cadre)
+  { az: 3 * STEP, el: -0.62, dist: 22, look: 2.5 }, // 4 : bien dessous, regard vers le haut, trou noir à gauche
+  { az: 4 * STEP, el: 0.72, dist: 20, look: -1.5 }, // 5 : presque à la verticale (vue de dessus), trou noir à droite (la planète traversera ici, lot V5)
   // Parcours v2 (SPEC 5 bis) : slides vides pour l'instant, mises en scène par les lots suivants.
-  { az: -0.3, el: -0.2, dist: 15, look: 0 }, // 6 : approche, dessous ; le trou noir seul et grand
-  { az: 0.25, el: 0.22, dist: 12, look: 0 }, // 7 : plongée, dessus (lot V7)
-  { az: -0.15, el: -0.16, dist: 12, look: 0 }, // 8 : point blanc, dessous (lot V7)
-  { az: 0.0, el: 0.13, dist: 22, look: 0 }, // 9 : trou blanc, dessus, dézoom (lot V7)
+  { az: 5 * STEP, el: -0.7, dist: 15, look: 1 }, // 6 : approche, très dessous ; le trou noir seul et grand
+  { az: 6 * STEP, el: 0.05, dist: 12, look: 0 }, // 7 : plongée, quasi dans le plan du disque (vue de profil) (lot V7)
+  { az: 7 * STEP, el: -0.5, dist: 12, look: -1 }, // 8 : point blanc, dessous (lot V7)
+  { az: 8 * STEP, el: 0.13, dist: 22, look: 0 }, // 9 : trou blanc, dessus, dézoom (lot V7)
 ] as const;
 /** Index 0-based d'une slide du parcours : S(1) = 0 … S(9) = 8. */
 export const S = (n: number) => n - 1;
 /** Index de la dernière slide. */
 export const LAST_SLIDE = KEYS.length - 1;
-const BULGE = 0.9; // ampleur des boucles vers l'extérieur entre deux arrêts
+const BULGE = 0.9; // ampleur des boucles vers l'extérieur entre deux arrêts (× la longueur du trajet)
+const BULGE_MAX = 0.75; // plafond (rad) : avec des trajets plus longs, la boucle garde la même amplitude qu'avant
 const DEZOOM = 0.32; // recul de la caméra au milieu d'une boucle
 const ROLL = 0.14; // inclinaison de la caméra dans les virages (rad)
 /** Profondeur des plans de texte devant la caméra (le trou noir est à 22) : forte parallaxe. */
@@ -81,12 +86,14 @@ export function cameraPose(s: number, parAz: number, parEl: number, out: Pose): 
     len = Math.hypot(ca, ce) || 1;
   let na = -ce / len,
     ne = ca / len;
-  if (na * (A.az + B.az) + ne * (A.el + B.el) < 0) {
+  // la boucle part vers l'extérieur en hauteur (côté opposé au plan du disque) ; l'azimut, lui, avance toujours dans le même sens
+  if (ne * (A.el + B.el || 1) < 0) {
     na = -na;
     ne = -ne;
-  } // toujours vers l'extérieur
-  const az = A.az + ca * t + na * BULGE * len * bump + parAz;
-  const el = Math.max(-1.2, Math.min(1.2, A.el + ce * t + ne * BULGE * len * bump + parEl));
+  }
+  const bulge = Math.min(BULGE * len, BULGE_MAX);
+  const az = A.az + ca * t + na * bulge * bump + parAz;
+  const el = Math.max(-1.2, Math.min(1.2, A.el + ce * t + ne * bulge * bump + parEl));
   const dist = (A.dist + (B.dist - A.dist) * t) * (1 + DEZOOM * bump);
   const look = A.look + (B.look - A.look) * t;
   // la caméra s'incline dans le sens du virage, comme un travelling en courbe

@@ -9,7 +9,8 @@ const inLab = (pathname: string) => pathname === LAB_PREFIX || pathname.startsWi
    - Tout le monde voit la page « en construction » (/lab/construction).
    - lab.noamguez.fr/?acces=<LAB_ACCESS_KEY> pose un cookie httpOnly sur ce navigateur
      → il voit l'expérience. lab.noamguez.fr/?acces=off retire l'accès.
-   - Sans variable LAB_ACCESS_KEY, personne n'a accès (sécurité par défaut).
+   - Sans variable LAB_ACCESS_KEY, personne n'a accès (sécurité par défaut), sauf en développement
+     (NODE_ENV ≠ production) où la vérification est désactivée.
    - À l'ouverture : supprimer ce bloc (et la variable d'environnement).
    ─────────────────────────────────────────────────────────── */
 const ACCESS_COOKIE = "lab_access";
@@ -67,7 +68,8 @@ export function proxy(request: NextRequest) {
 
     // Sans accès : toute page du lab (sauf robots.txt) affiche « en construction »
     const cookie = request.cookies.get(ACCESS_COOKIE)?.value ?? "";
-    const allowed = token !== null && sameToken(cookie, token);
+    // En développement (npm run dev), pas de vérification : l'expérience est toujours accessible.
+    const allowed = process.env.NODE_ENV !== "production" || (token !== null && sameToken(cookie, token));
     if (!allowed && path !== "/robots") url.pathname = CONSTRUCTION;
     return NextResponse.rewrite(url);
   }
