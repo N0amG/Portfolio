@@ -12,6 +12,8 @@ import { createEruption } from "./eruption";
 import { createDeepSky } from "./deepsky";
 import { createHud } from "./hud";
 import { createCursor } from "./cursor";
+import { createDebris } from "./debris";
+import { createPlanet } from "./planet";
 import { createTitle } from "./title";
 import type { SceneElement } from "./types";
 
@@ -34,6 +36,8 @@ export function createSceneElements(): SceneElement[] {
   list.push(createMagnetar());
   // Lot V7 : fin du parcours (plongée, trou de ver, point blanc → trou blanc), trois éléments lourds
   list.push(createDive(), createWormhole(), createWhiteHole());
+  // Lot V5 : astéroïdes (autour du pulsar) + planète à anneaux (S4 → S5)
+  list.push(createDebris(), createPlanet());
   // Élément factice de test : dev uniquement (retiré du build de production), éteint par défaut.
   if (process.env.NODE_ENV !== "production") list.push(createDebugElement());
   return list;
