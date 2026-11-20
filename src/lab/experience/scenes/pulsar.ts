@@ -133,7 +133,7 @@ export function createPulsar(): SceneElement {
     label: "6 · Pulsar (S4)",
     slides: [S(4)],
     cost: "moyen",
-    minTier: "moyenne",
+    minTier: "basse", // rien n'est retiré selon le niveau (20/11/2026)
     layers: ["front"],
     init(ctx: SceneContext) {
       cameraPose(S(4), 0, 0, pose);

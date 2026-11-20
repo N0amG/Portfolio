@@ -33,18 +33,19 @@ function formatDiag(d: ReturnType<Engine["diag"]>) {
     `GPU      ${d.gpu.name}${d.gpu.unmasked ? "" : " (nom masqué par le navigateur)"}`,
     `         ${d.gpu.vendor} · ${d.gpu.raw}`,
     `ext      timer GPU ${d.ext.timer ? "oui" : "non"} · compilation parallèle ${d.ext.parallel ? "oui" : "non"}`,
-    `qualité  ${d.tier} · ${d.auto ? "auto" : "manuelle"} · résolution ${pct(d.res)} (basse sous ${pct(q.floor)}) · décor ${d.decor}` +
+    `qualité  ${d.tier} · ${d.auto ? "auto" : "manuelle"} · ${q.step} · trou noir ${pct(d.res)} de la sortie` +
       (q.blocked ? ` · ${q.blocked} état(s) en attente` : ""),
-    `interne  ${d.internal} · écran ${d.screen} · dpr ${d.dpr}`,
+    `sortie   ${d.output} · trou noir ${d.internal} · écran ${d.screen} · dpr ${d.dpr}`,
     `images   ${d.frames.fps.toFixed(0)} fps · moy. ${d.frames.avgMs.toFixed(1)} ms · pire ${d.frames.worstMs.toFixed(1)} ms (2 s)`,
     `mesure   ${q.last.ms ? `${q.last.ms.toFixed(2)} ms ${q.last.gpu ? "GPU (médiane 2 s)" : "entre images (médiane 2 s, sans timer GPU)"}` : "—"}`,
-    `slide    s = ${d.slide.toFixed(2)} · moyens actifs : ${d.active.join(", ") || "aucun"}`,
+    `slide    s = ${d.slide.toFixed(2)} · moyens actifs : ${d.active.join(", ") || "aucun"} · décor ${d.decor}`,
     `shaders  ${d.warm.ms < 0 ? "précompilation en cours…" : `${d.warm.programs} programmes prêts en ${d.warm.ms} ms`}`,
   ];
   if (c) {
     lines.push(
-      `calib.   ${c.tier} ${pct(c.res)} en ${c.ms} ms (${c.gpuTimed ? "temps GPU" : "images synchronisées"}) · ${c.why} · ${c.hints.cores} cœurs, ${c.hints.mem} Go`,
-      ...c.tried.map((t) => `         ${t.tier.padEnd(8)} ${t.msAt060} ms à 60 %, ${t.msAt035} ms à 35 % → max ${pct(t.resMax)}`),
+      `calib.   ${c.tier} ${c.lines ? `${c.lines}p` : "écran"}${c.res < 0.999 ? ` · trou noir ${pct(c.res)}` : ""} en ${c.ms} ms (${c.gpuTimed ? "temps GPU" : "images synchronisées"}) · ${c.why} · ${c.hints.cores} cœurs, ${c.hints.mem} Go`,
+      // points de mesure du test (pas l'état choisi, qui est sur la ligne « qualité » / « sortie »)
+      ...c.tried.map((t) => `         test ${t.tier} : ${t.msFull} ms à l'écran, ${t.msSmall} ms en ${t.small.replace(/^\S+ /, "")}`),
     );
   }
   if (d.quality.events.length) lines.push("journal", ...d.quality.events.map((e) => `         ${e}`));

@@ -135,6 +135,8 @@ export interface FrameParams {
   /** Qualité automatique : niveau et résolution interne du trou noir (pour les éléments qui adaptent leur propre résolution). */
   tier: TierName;
   res: number;
+  /** Qualité automatique : échelle de la résolution de sortie (1 = écran, 0,5 = deux fois moins de lignes). */
+  outScale: number;
   composite: CompositeParams;
   bh: BlackholeParams;
 }

@@ -363,7 +363,7 @@ export function createMagnetar(): SceneElement {
     label: "Magnétar (S6)",
     slides: [S(6)],
     cost: "moyen",
-    minTier: "moyenne",
+    minTier: "basse", // rien n'est retiré selon le niveau (20/11/2026)
     layers: ["front"],
     init(ctx: SceneContext) {
       cameraPose(S(6), 0, 0, pose);

@@ -152,7 +152,7 @@ export function createJets(): SceneElement {
     label: "11 · Jets relativistes",
     slides: [S(3)],
     cost: "moyen",
-    minTier: "moyenne",
+    minTier: "basse", // rien n'est retiré selon le niveau (20/11/2026)
     layers: ["front"],
     init: (ctx) => jets.init(ctx),
     update(f: FrameParams) {

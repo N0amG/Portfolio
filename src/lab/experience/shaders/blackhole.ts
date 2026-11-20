@@ -277,13 +277,15 @@ export const BLACKHOLE_FRAG = /* glsl */ `
       dir = farDir(rd, b);
     } else {
       vec3 pos = uCamPos, vel = rd;
+      float r2 = length(pos);   // distance au centre, reprise d'un pas à l'autre (une seule racine par pas)
       for (int i = 0; i < 200; i++){
-        float r = length(pos);
+        float r = r2;
         float dt = clamp(uStepK * r, 0.02, 1.5);
         vec3 prev = pos;
-        vel += -1.5 * h2 * pos / (r * r * r * r * r) * dt;
+        float ir = 1.0 / r, ir2 = ir * ir;
+        vel += pos * (-1.5 * h2 * ir2 * ir2 * ir * dt);   // force ∝ 1/r⁴ (h2 / r⁵ · pos)
         pos += vel * dt;
-        float r2 = length(pos);
+        r2 = length(pos);
         rmin = min(rmin, r2);
         if (prev.y * pos.y < 0.0){
           vec3 hit = mix(prev, pos, prev.y / (prev.y - pos.y));

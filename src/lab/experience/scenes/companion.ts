@@ -327,7 +327,7 @@ export function createCompanion(): SceneElement {
     label: "5 · Étoile compagne dévorée",
     slides: [S(2)],
     cost: "moyen",
-    minTier: "moyenne",
+    minTier: "basse", // rien n'est retiré selon le niveau (20/11/2026)
     layers: ["front"],
     init(ctx: SceneContext) {
       lu = lensUniforms(ctx);

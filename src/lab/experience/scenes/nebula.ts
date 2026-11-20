@@ -228,8 +228,8 @@ export function createNebula(): SceneElement {
       scene = new THREE.Scene().add(m);
     },
     update(f: FrameParams) {
-      // résolution du patch : niveau de qualité × résolution interne du trou noir
-      const base = PATCH[f.tier] * Math.min(1, Math.max(0.55, f.res));
+      // résolution du patch : niveau de qualité × résolution interne du trou noir (sortie comprise)
+      const base = PATCH[f.tier] * Math.min(1, Math.max(0.55, f.res * f.outScale));
       rel.copy(f.camPos).sub(center);
       const dist = rel.length();
       // Deux cadrages du patch (le contenu raymarché est le même) :

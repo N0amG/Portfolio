@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { gsap } from "gsap";
-import { FS_VERT } from "./shaders/common";
+import { FS_VERT, makeHashTexture } from "./shaders/common";
 import { STARS_FRAG, STARS_VERT } from "./shaders/stars";
 import { BLACKHOLE_FRAG } from "./shaders/blackhole";
 import { BLUR_FRAG, BRIGHT_FRAG, FINAL_FRAG, VEIL_FRAG } from "./shaders/post";
@@ -29,7 +29,8 @@ export const DEFAULTS = {
   starTrail: 1.0, // longueur de la traînée laissée par les étoiles pendant leur aspiration
   explosion: 0, // explosion des lettres avant l'aspiration (désactivée pour l'instant ; 1.93 = ancien réglage)
   absorbDur: 3.2, // durée (s) d'une transition
-  resolution: 1.0,
+  resolution: 1.0, // trou noir seul, relatif à la sortie (dernier recours de la qualité auto)
+  output: 0, // résolution de sortie en lignes (1440, 1080, 900, 720) ; 0 = celle de l'écran
   simGpu: 1, // multiplicateur de charge GPU (simulation d'une carte plus faible, outil de dev)
   auto: true, // qualité et résolution réglées automatiquement selon le matériel
   tier: "haute" as TierName,
@@ -134,6 +135,7 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
   // 2) Trou noir : raymarching plein écran
   // -------------------------------------------------------------------------
   const col = (hex: string) => new THREE.Color(hex); // conversion sRGB -> linéaire (ColorManagement actif)
+  const hashTex = makeHashTexture();
   const bhMat = new THREE.ShaderMaterial({
     uniforms: {
       uRes: { value: new THREE.Vector2(1, 1) },
@@ -160,6 +162,7 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
       uTunSpin: { value: 0 }, uCapTex: { value: null as THREE.Texture | null }, uCap: { value: new THREE.Vector4() },
       // 3 · palette du trou blanc (section 4) : bleu profond assombri au bord, #1b4dff, #7fd6ff, blanc au cœur
       uW0: { value: col("#1b4dff").multiplyScalar(0.3) }, uW1: { value: col("#1b4dff") }, uW2: { value: col("#7fd6ff") }, uW3: { value: col("#ffffff") },
+      uHashTex: { value: hashTex }, // bruit de valeur lu dans une texture (shaders/common.ts)
     },
     vertexShader: FS_VERT,
     fragmentShader: BLACKHOLE_FRAG,
@@ -182,7 +185,7 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
       uBloom: { value: 0.9 }, uGrain: { value: 0.045 }, uTime: { value: 0 }, uAspect: { value: 1 },
       uWaves: { value: [0, 1, 2, 3].map(() => new THREE.Vector4()) }, uMotion: { value: new THREE.Vector2() },
       uChroma: { value: 0 }, uFlare: { value: 0 }, uStreak: { value: new THREE.Vector4() }, uRing: { value: 1 },
-      uRayHist: { value: new Array(12).fill(0) }, uRayOn: { value: 0 }, uSharp: { value: 0 },
+      uRayHist: { value: new Array(12).fill(0) }, uRayOn: { value: 0 }, uSharp: { value: 0 }, uUpscale: { value: 1 },
     },
     vertexShader: FS_VERT,
     fragmentShader: FINAL_FRAG,
@@ -213,16 +216,30 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
   bhMat.uniforms.uCapTex.value = rt.cap.texture;
   rt.sky.texture.wrapS = THREE.RepeatWrapping; // équirectangulaire : la longitude boucle (filtrage continu à la couture)
   bhMat.uniforms.uSkyTex.value = rt.sky.texture;
-  let iw = 1, ih = 1;
+  let iw = 1, ih = 1, fw = 1, fh = 1;
+  /** Pixels rendus par pixel CSS : DPR × échelle de la résolution de sortie (voir P.output). */
+  let pr = DPR;
 
+  /**
+   * Résolution de sortie (P.output, en lignes : 1440, 1080, 900, 720 ; 0 = celle de l'écran) : TOUTE l'image est
+   * rendue plus petite (trou noir, étoiles, lettres, composition) et le navigateur l'agrandit en douceur. Moins choquant
+   * qu'un trou noir pixelisé sous des étoiles et des lettres nettes, et le coût des passes plein écran baisse aussi.
+   * P.resolution (trou noir seul, relatif à la sortie) ne sert plus qu'en dernier recours.
+   */
   function resizeTargets() {
     const w = window.innerWidth, h = window.innerHeight;
+    const nativeH = h * DPR;
+    pr = DPR * (P.output > 0 && P.output < nativeH ? P.output / nativeH : 1);
+    renderer.setPixelRatio(pr);
     renderer.setSize(w, h, false);
-    iw = Math.max(64, Math.round(w * DPR * P.resolution));
-    ih = Math.max(64, Math.round(h * DPR * P.resolution));
-    const fw = Math.round(w * DPR), fh = Math.round(h * DPR);
+    fw = Math.round(w * pr); fh = Math.round(h * pr);
+    iw = Math.max(64, Math.round(fw * P.resolution));
+    ih = Math.max(64, Math.round(fh * P.resolution));
+    frameParams.dpr = pr;
+    frameParams.outScale = pr / DPR;
     rt.stars.setSize(fw, fh); rt.letters.setSize(fw, fh); rt.scene.setSize(iw, ih); rt.cap.setSize(iw, ih);
     finalMat.uniforms.uTexel.value.set(1 / iw, 1 / ih);
+    finalMat.uniforms.uUpscale.value = iw === fw && ih === fh ? 0 : 1;
     rt.a1.setSize(iw >> 1, ih >> 1); rt.t1.setSize(iw >> 1, ih >> 1);
     rt.a2.setSize(iw >> 2, ih >> 2); rt.t2.setSize(iw >> 2, ih >> 2);
     bhMat.uniforms.uRes.value.set(iw, ih);
@@ -231,7 +248,7 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
     finalMat.uniforms.uAspect.value = w / h;
     veilMat.uniforms.uAspect.value = w / h;
     veilMat.uniforms.uPx.value = 2 / fh;
-    if (els.hud) els.hud.res.textContent = `interne ${iw}×${ih} (${Math.round(P.resolution * 100)} %) · écran ${fw}×${fh}`;
+    if (els.hud) els.hud.res.textContent = `sortie ${fw}×${fh}${P.output ? ` (${P.output}p)` : ""} · trou noir ${Math.round(P.resolution * 100)} %`;
   }
 
   function pass(mat: THREE.Material, target: THREE.WebGLRenderTarget | null) {
@@ -254,7 +271,6 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
     els.hint.textContent = slide === LAST_SLIDE ? "← revenir" : "Scroll →";
     els.hint.style.opacity = busy ? "0" : slide === 0 || slide === LAST_SLIDE ? "1" : "0";
     els.letters.setAttribute("aria-label", slide < NS ? letters.blocks[slide].text : "");
-    if (!busy) quality.slidePosed(); // nouvelle slide posée : les décors coupés ont de nouveau leur chance
   }
   const nav = createNavigation({ cam, last: LAST_SLIDE, duration: (a, b) => P.absorbDur * transitionScale(a, b), onChange: updateNav });
 
@@ -326,7 +342,7 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
   };
   const frameParams: FrameParams = {
     s: 0, slide: 0, weight: 0, dt: 0, time: 0, camPos, camF, camR, camU, viewProj, bhScreen, bhNdc, rhNdc, tanHalf, fin,
-    mouse: new THREE.Vector2(), width: 1, height: 1, dpr: DPR, reduced: false, tier: P.tier, res: P.resolution, composite, bh: bhParams,
+    mouse: new THREE.Vector2(), width: 1, height: 1, dpr: DPR, reduced: false, tier: P.tier, res: P.resolution, outScale: 1, composite, bh: bhParams,
   };
   function updateScenes(dt: number) {
     prepareFrame(dt);
@@ -568,8 +584,8 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
   const gpuName = gpuInfo.name;
   const listeners = { paramsChanged: () => {} };
   const quality = createQuality({
-    P, gl: gl as WebGL2RenderingContext, gpuName, dpr: DPR, render, resizeTargets,
-    decor: scenes.decor,
+    P, gl: gl as WebGL2RenderingContext, gpuName, render, resizeTargets,
+    nativeLines: () => window.innerHeight * DPR,
     setTier: (t) => {
       bhMat.uniforms.uStepK.value = t.stepK;
       bhMat.uniforms.uOct.value = t.oct;
@@ -659,6 +675,9 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
   return {
     P,
     cam,
+    /** Dev : renderer three (profilage par passe en console) et horloges (images reproductibles pour les comparaisons). */
+    renderer,
+    clock,
     /** Dev : une image à la demande (pour tester quand le rAF est suspendu, ex. onglet en arrière-plan). */
     step: frame,
     stats,
@@ -686,6 +705,7 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
         auto: P.auto,
         res: P.resolution,
         internal: `${iw}×${ih}`,
+        output: `${fw}×${fh}${P.output ? ` (${P.output}p)` : " (écran)"}`,
         screen: `${Math.round(window.innerWidth * DPR)}×${Math.round(window.innerHeight * DPR)}`,
         dpr: DPR,
         decor: scenes.decor.level(),
@@ -749,6 +769,7 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
       [starMat, bhMat, brightMat, blurMat, finalMat, veilMat].forEach((m) => m.dispose());
       fsGeo.dispose();
       starGeo.dispose();
+      hashTex.dispose();
       renderer.dispose();
     },
   };

@@ -32,8 +32,11 @@ export const FINAL_FRAG = /* glsl */ `
   // traits de lumière : intensité de naissance sur les 1,2 dernières secondes (case k = il y a k × 0,1 s), allumés ?
   uniform float uRayHist[12]; uniform float uRayOn;
   uniform float uSharp;  // accentuation après l'upscale (0 en pleine résolution, voir la qualité automatique)
-  // Upscale bicubique Catmull-Rom en 9 lectures (net même à basse résolution interne)
+  uniform float uUpscale;  // 1 : trou noir plus petit que la sortie (bicubique) ; 0 : même taille, une lecture suffit
+  // Upscale bicubique Catmull-Rom en 9 lectures (net même à basse résolution interne). À la même taille, aux centres des
+  // pixels, il vaut exactement le texel : une seule lecture (hors ondes, où l'écart est invisible).
   vec4 sampleCR(sampler2D tex, vec2 uv){
+    if (uUpscale < 0.5) return max(texture2D(tex, uv), 0.0);
     vec2 sp = uv / uTexel, tc = floor(sp - 0.5) + 0.5, f = sp - tc;
     vec2 w0 = f * (-0.5 + f * (1.0 - 0.5 * f)), w1 = 1.0 + f * f * (-2.5 + 1.5 * f);
     vec2 w2 = f * (0.5 + f * (2.0 - 1.5 * f)), w3 = f * f * (-0.5 + 0.5 * f);

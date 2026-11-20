@@ -46,6 +46,15 @@ export function mountDevtools(engine: Engine) {
       engine.updateQualityLabel();
     })
     .onFinishChange(engine.resizeTargets);
+  gui
+    .add(P, "output", { "Écran": 0, "1440p": 1440, "1080p": 1080, "900p": 900, "720p": 720 })
+    .name("Résolution de sortie")
+    .onChange(() => {
+      P.auto = false;
+      engine.resizeTargets();
+      refreshGui();
+      engine.updateQualityLabel();
+    });
   gui.add({ recal: () => { P.auto = true; calibrate(); } }, "recal").name("Recalibrer");
   // Ratios de puissance de calcul (FP32) par rapport à une RTX 5070 Ti (~44 TFLOPS) :
   // GTX 1660 ~5 TFLOPS -> ×9 ; Intel UHD 630 (i3 10e gen) ~0,45 TFLOPS -> ×90.
