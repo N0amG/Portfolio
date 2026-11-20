@@ -64,6 +64,8 @@ export interface BlackholeParams {
     e2: THREE.Vector3;
     /** 0 = derrière le trou noir (courbée par la lentille), 1 = devant tout (caméra dans le volume, traversée). */
     front: { value: number };
+    /** 1 = patch cadré sur le champ caméra (de près) : là où un rayon courbé sort du patch, on comble avec le rayon droit. */
+    fill: { value: number };
   };
 }
 

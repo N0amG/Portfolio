@@ -270,6 +270,7 @@ export function createNebula(): SceneElement {
       nb.e2.copy(e2).divideScalar(tanY);
       // devant ou derrière le trou noir : dans le volume, le gaz est entre la caméra et tout le reste
       nb.front.value = 1 - THREE.MathUtils.smoothstep(dist, P.radius * 0.95, P.radius * 1.25);
+      nb.fill.value = inside ? 1 : 0;
     },
     render(_layer, ctx: SceneContext) {
       // le patch est rendu juste avant la passe du trou noir (couche "sky"), dans sa propre cible

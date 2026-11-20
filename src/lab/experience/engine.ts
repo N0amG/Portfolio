@@ -36,6 +36,12 @@ export const DEFAULTS = {
   bloom: 0.6,
   grain: 0.11,
   doppler: 0.95,
+  // raccord entre rayons raymarchés et rayons à déviation analytique (sans quoi un cercle net entoure le trou noir)
+  bFar: 15, // paramètre d'impact de bascule
+  bBlend: 4, // largeur du fondu (en b) juste avant la bascule
+  defl2: 1, // poids du terme de 2e ordre dans la déviation analytique (1 = physique, 0 = ancien rendu)
+  skySec: 0.25, // poids des images secondaires du ciel profond (1 = physique ; < 1 atténue l'anneau fin autour de l'ombre)
+  skySecW: 0.15, // largeur du fondu de cette atténuation (rad, côté image secondaire)
 };
 export type Params = typeof DEFAULTS;
 
@@ -140,7 +146,8 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
       uTitleTex: { value: null as THREE.Texture | null }, uTitleO: { value: new THREE.Vector3() }, uTitleN: { value: new THREE.Vector3() },
       uTitleA1: { value: new THREE.Vector4() }, uTitleA2: { value: new THREE.Vector4() }, uTitleCol: { value: col("#f2efe8") },
       uNebTex: { value: null as THREE.Texture | null }, uNebC: { value: new THREE.Vector4() },
-      uNebE1: { value: new THREE.Vector3() }, uNebE2: { value: new THREE.Vector3() }, uNebF: { value: 0 },
+      uNebE1: { value: new THREE.Vector3() }, uNebE2: { value: new THREE.Vector3() }, uNebF: { value: 0 }, uNebFill: { value: 0 },
+      uBFar: { value: new THREE.Vector3(15, 4, 1) }, uSkySec: { value: new THREE.Vector2(0.25, 0.15) },
     },
     vertexShader: FS_VERT,
     fragmentShader: BLACKHOLE_FRAG,
@@ -276,7 +283,7 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     hot: bu.uHot.value as THREE.Vector4,
     lensM: bu.uLensM.value as THREE.Vector4,
     title: { tex: bu.uTitleTex, o: bu.uTitleO.value, n: bu.uTitleN.value, a1: bu.uTitleA1.value, a2: bu.uTitleA2.value },
-    neb: { tex: bu.uNebTex, c: bu.uNebC.value, e1: bu.uNebE1.value, e2: bu.uNebE2.value, front: bu.uNebF },
+    neb: { tex: bu.uNebTex, c: bu.uNebC.value, e1: bu.uNebE1.value, e2: bu.uNebE2.value, front: bu.uNebF, fill: bu.uNebFill },
   };
   const frameParams: FrameParams = {
     s: 0, slide: 0, weight: 0, dt: 0, time: 0, camPos, camF, camR, camU, viewProj, bhScreen, bhNdc, rhNdc,
@@ -351,6 +358,8 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     u.uCamPos.value.copy(camPos); u.uCamF.value.copy(camF); u.uCamR.value.copy(camR); u.uCamU.value.copy(camU);
     u.uIntensity.value = P.plasmaIntensity;
     u.uDoppler.value = P.doppler;
+    u.uBFar.value.set(P.bFar, Math.min(P.bBlend, P.bFar - 3), P.defl2);
+    u.uSkySec.value.set(P.skySec, Math.max(P.skySecW, 1e-3));
     u.uSkyRot.value.setFromMatrix4(skyM4.makeRotationAxis(SKY_AXIS, clock.sky));
     u.uClock.value = clock.elapsed;
     pass(bhMat, rt.scene);

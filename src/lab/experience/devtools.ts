@@ -61,6 +61,13 @@ export function mountDevtools(engine: Engine) {
   more.add(P, "bloom", 0, 2, 0.01).name("Bloom");
   more.add(P, "grain", 0, 0.15, 0.005).name("Grain");
   more.close();
+  const lens = gui.addFolder("Lentille : raccord de la bulle");
+  lens.add(P, "bFar", 8, 40, 0.5).name("Bascule raymarching → analytique (b)");
+  lens.add(P, "bBlend", 0, 10, 0.25).name("Largeur du fondu (b)");
+  lens.add(P, "defl2", 0, 1, 0.05).name("Terme de 2e ordre (analytique)");
+  lens.add(P, "skySec", 0, 1, 0.05).name("Ciel profond : images secondaires");
+  lens.add(P, "skySecW", 0.01, 0.6, 0.01).name("Ciel profond : fondu (rad)");
+  lens.close();
 
   // Registre de scènes : un dossier par élément, avec son interrupteur (pour mesurer son coût seul au __bench)
   const sc = gui.addFolder("Scènes (registre)");

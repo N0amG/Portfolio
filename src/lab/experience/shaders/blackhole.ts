@@ -11,20 +11,29 @@ export const BLACKHOLE_FRAG = /* glsl */ `
   uniform sampler2D uSkyTex; uniform float uSkyOn;
   uniform vec4 uLensM;   // 17 · curseur gravitationnel : (position uv, θE², rayon du cœur)
   uniform sampler2D uTitleTex; uniform vec3 uTitleO, uTitleN, uTitleCol; uniform vec4 uTitleA1, uTitleA2;   // 18 · texte géant   // couche "sky" du registre (équirectangulaire, repère monde)
-  uniform sampler2D uNebTex; uniform vec4 uNebC; uniform vec3 uNebE1, uNebE2; uniform float uNebF;   // 4 · nébuleuse (patch raymarché, voir nebula.ts)
-  vec4 nebAt(vec3 dir){
+  uniform sampler2D uNebTex; uniform vec4 uNebC; uniform vec3 uNebE1, uNebE2; uniform float uNebF, uNebFill;   // 4 · nébuleuse (patch raymarché, voir nebula.ts)
+  // couverture du patch (1 dedans, fondu vers 0 sur son bord) et coordonnées
+  float nebCov(vec3 dir, out vec2 nuv){
     float nc = dot(dir, uNebC.xyz);
-    if (nc <= 0.05) return vec4(0.0);
-    vec2 nuv = vec2(dot(dir, uNebE1), dot(dir, uNebE2)) / nc * 0.5 + 0.5;
-    if (abs(nuv.x - 0.5) >= 0.5 || abs(nuv.y - 0.5) >= 0.5) return vec4(0.0);
-    return textureLod(uNebTex, nuv, 0.0);
+    if (nc <= 0.05){ nuv = vec2(0.0); return 0.0; }
+    nuv = vec2(dot(dir, uNebE1), dot(dir, uNebE2)) / nc * 0.5 + 0.5;
+    vec2 ed = abs(nuv - 0.5);
+    // fondu sur le bord du patch : en cadrage caméra (traversée), les rayons courbés près du trou noir sortent du patch ;
+    // sans fondu, la nébuleuse s'y arrête net (bord de « bulle »). Le fondu commence hors écran (marge du patch : ×1,12).
+    return 1.0 - smoothstep(0.455, 0.5, max(ed.x, ed.y));
+  }
+  vec4 nebAt(vec3 dir){
+    vec2 nuv;
+    float cv = nebCov(dir, nuv);
+    return cv > 0.0 ? textureLod(uNebTex, nuv, 0.0) * cv : vec4(0.0);
   }
   uniform vec3 uCamPos, uCamR, uCamU, uCamF, uC0, uC1, uC2, uC3;
+  uniform vec3 uBFar;    // raccord rayons raymarchés / analytiques : (b de bascule, largeur du fondu en b, poids du terme de 2e ordre)
+  uniform vec2 uSkySec;  // images secondaires du ciel profond : (poids, largeur du fondu en rad)
   ${COMMON}
   const float R_IN = 2.9;
   const float R_OUT = 12.0;
   const float PERIOD = 40.0;
-  const float B_FAR = 15.0;    // au-delà : déviation analytique, pas de raymarching
   const float R_EXIT = 16.0;   // rayon de sortie du raymarching
 
   vec3 ramp(float x){
@@ -86,8 +95,18 @@ export const BLACKHOLE_FRAG = /* glsl */ `
   }
 
   // Déviation restante de s (abscisse signée depuis le périastre) jusqu'à l'infini, pour la MÊME force que le raymarching (∝ 1/r⁴).
-  // Cohérente avec lui à la jonction b = B_FAR : sans ça, un cercle net apparaît autour du trou noir sur les fonds lisses.
+  // Cohérente avec lui à la bascule b = uBFar.x (voir farDir pour le 2e ordre) : sans ça, un cercle net apparaît autour du trou noir sur les fonds lisses.
   float tailDefl(float s, float b){ float q = s * s + b * b; return (1.0 - s * (2.0 * s * s + 3.0 * b * b) / (2.0 * q * sqrt(q))) / b; }
+
+  // Direction finale d'un rayon lointain (b > uBFar.x - uBFar.y), sans raymarching : déviation analytique de la caméra à l'infini.
+  // Le raymarching intègre la force exacte, qui contient le terme de 2e ordre de Schwarzschild (15π/16b², ≈ 13 mrad à b = 15) :
+  // on l'ajoute ici (même répartition le long du rayon que le 1er ordre), sinon un cercle net apparaît à la bascule.
+  vec3 farDir(vec3 rd, float b){
+    float s0 = dot(uCamPos, rd);
+    float defl = tailDefl(s0, b) * (1.0 + uBFar.z * 1.47262156 / b);   // × (1 + (15π/32) / b)
+    vec3 toC = normalize(-uCamPos + s0 * rd);
+    return normalize(rd * cos(defl) + toC * sin(defl));
+  }
 
   vec3 starField(vec3 d){
     d = uSkyRot * d;                   // le ciel tourne lentement : il défile à travers la lentille
@@ -121,13 +140,9 @@ export const BLACKHOLE_FRAG = /* glsl */ `
     float alpha = 0.0, rmin = 1e3;
     bool captured = false;
     vec3 dir;
-    if (b > B_FAR){
-      // Rayon lointain : il ne croise ni le disque ni la zone de champ fort.
-      // Déviation analytique en champ faible, de la caméra jusqu'à l'infini : (1/b)(1 - s0/sqrt(s0²+b²)).
-      float s0 = dot(uCamPos, rd);
-      float defl = tailDefl(s0, b);
-      vec3 toC = normalize(-uCamPos + dot(uCamPos, rd) * rd);
-      dir = normalize(rd * cos(defl) + toC * sin(defl));
+    if (b > uBFar.x){
+      // Rayon lointain : il ne croise ni le disque ni la zone de champ fort, déviation analytique.
+      dir = farDir(rd, b);
     } else {
       vec3 pos = uCamPos, vel = rd;
       for (int i = 0; i < 200; i++){
@@ -155,6 +170,10 @@ export const BLACKHOLE_FRAG = /* glsl */ `
       float bb = max(length(perp), 1e-3);
       float defl = tailDefl(s1, bb);
       dir = normalize(dir * cos(defl) + perp / bb * sin(defl));
+      // fondu vers la déviation analytique à l'approche de la bascule : le reste d'écart (pas d'intégration) s'étale
+      // sur toute la bande au lieu de former un cercle net
+      float wf = smoothstep(uBFar.x - uBFar.y, uBFar.x, b);
+      if (wf > 0.0 && !captured) dir = normalize(mix(dir, farDir(rd, b), wf));
     }
     if (uLensM.z > 0.0){
       // 17 · curseur gravitationnel : lentille ponctuelle douce autour de la souris, sur le fond seulement (β = θ − θE² θ/|θ|²)
@@ -176,10 +195,28 @@ export const BLACKHOLE_FRAG = /* glsl */ `
     vec3 bg = vec3(0.0);
     if (!captured){
       bg = starField(dir) + title;
-      if (uSkyOn > 0.5) bg += textureLod(uSkyTex, vec2(atan(dir.z, dir.x) * 0.15915494 + 0.5, asin(clamp(dir.y, -1.0, 1.0)) * 0.31830989 + 0.5), 0.0).rgb;
+      if (uSkyOn > 0.5){
+        // Image secondaire (rayon passé de l'autre côté de l'axe caméra → trou noir) : ses objets sont comprimés en
+        // anneau fin autour de l'ombre (ex. S3, galaxie aspirée), exagéré ici car le ciel est traité comme infiniment
+        // lointain alors que ses objets ont une position finie, parfois proche du trou noir. Atténuation progressive :
+        // le poids passe continûment de 1 à uSkySec.x autour de l'anneau d'Einstein (source pile derrière, β = 0).
+        float wsec = 1.0;
+        if (uSkySec.x < 1.0){
+          vec3 ax = normalize(-uCamPos);
+          vec3 it = rd - ax * dot(ax, rd);
+          float beta = dot(dir - ax * dot(ax, dir), it) * inversesqrt(max(dot(it, it), 1e-12));
+          wsec = mix(uSkySec.x, 1.0, smoothstep(-uSkySec.y, uSkySec.y * 0.25, beta));
+        }
+        bg += wsec * textureLod(uSkyTex, vec2(atan(dir.z, dir.x) * 0.15915494 + 0.5, asin(clamp(dir.y, -1.0, 1.0)) * 0.31830989 + 0.5), 0.0).rgb;
+      }
       if (uNebC.w > 0.0 && uNebF < 1.0){
         // 4 · nébuleuse derrière le trou noir : devant le fond (sa poussière masque les étoiles), lentille gratuite
-        vec4 nb = nebAt(dir);
+        vec2 nuv;
+        float cv = nebCov(dir, nuv);
+        vec4 nb = cv > 0.0 ? textureLod(uNebTex, nuv, 0.0) * cv : vec4(0.0);
+        // de près (patch cadré sur la caméra) : là où le rayon courbé sort du patch, le gaz vu est surtout entre la
+        // caméra et le trou noir → rayon droit, en fondu (sinon une bulle vide entoure le trou noir)
+        if (uNebFill > 0.5 && cv < 1.0) nb += (1.0 - cv) * nebAt(rd);
         float g = uNebC.w * (1.0 - uNebF);
         bg = bg * (1.0 - nb.a * min(g, 1.0)) + nb.rgb * g;
       }

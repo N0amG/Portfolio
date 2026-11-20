@@ -65,7 +65,7 @@ const FRAG = /* glsl */ `
     float r = length(g);
     float core = exp(-r * r * 160.0) * 2.2 + exp(-r * 9.0) * 0.18;
     float spk = exp(-abs(g.x) * 70.0) * exp(-abs(g.y) * 3.0) + exp(-abs(g.y) * 70.0) * exp(-abs(g.x) * 3.0);
-    return mix(vec3(1.0), c1, 0.6) * (core + spk * 0.45);
+    return mix(vec3(1.0), c1, 0.6) * (core + spk * 0.45) * (1.0 - smoothstep(1.6, 2.4, r));   // nul avant la coupure
   }
   vec3 remnant(vec2 g, vec4 A, vec3 c1, vec3 c2){
     float r = length(g);
@@ -87,15 +87,19 @@ const FRAG = /* glsl */ `
       float br = uE2[i].w;
       if (br <= 0.0) continue;
       float c = dot(d, uC[i].xyz);
-      if (c < 0.3) continue;
+      if (c < 0.02) continue;
       vec2 g = vec2(dot(d, uE1[i].xyz), dot(d, uE2[i].xyz)) / c / uC[i].w;
-      if (dot(g, g) > 6.0) continue;
       float st = uS[i].x;
+      if (dot(g, g) > 6.0 * st * st) continue;           // élimination rapide, étirement compris (sinon : bord net)
       if (st > 1.001){
         vec2 sd = vec2(cos(uS[i].y), sin(uS[i].y));
         float al = dot(g, sd);
         g = sd * (al / st) + (g - al * sd) * sqrt(st);   // spaghettification : étiré vers le trou noir
       }
+      // Coupure APRÈS l'étirement : chaque profil est déjà nul au-delà de |g|² = 6. Avant, elle était faite sur les
+      // coordonnées non étirées et tranchait la galaxie aspirée sur un cercle du ciel juste derrière le trou noir,
+      // que la lentille transformait en anneau net autour de l'ombre.
+      if (dot(g, g) > 6.0) continue;
       float t = uE1[i].w;
       vec3 o = t < 0.5 ? galaxy(g, uA[i], uCol1[i], uCol2[i])
              : t < 1.5 ? nebula(g, uA[i], uCol1[i], uCol2[i])
