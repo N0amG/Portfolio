@@ -31,6 +31,7 @@ export const FINAL_FRAG = /* glsl */ `
   uniform float uRing;   // rayon de l'anneau de photons (NDC verticales) : départ des traits de lumière
   // traits de lumière : intensité de naissance sur les 1,2 dernières secondes (case k = il y a k × 0,1 s), allumés ?
   uniform float uRayHist[12]; uniform float uRayOn;
+  uniform float uSharp;  // accentuation après l'upscale (0 en pleine résolution, voir la qualité automatique)
   // Upscale bicubique Catmull-Rom en 9 lectures (net même à basse résolution interne)
   vec4 sampleCR(sampler2D tex, vec2 uv){
     vec2 sp = uv / uTexel, tc = floor(sp - 0.5) + 0.5, f = sp - tc;
@@ -80,6 +81,15 @@ export const FINAL_FRAG = /* glsl */ `
     } else {
       sc = sampleCR(uScene, uv);
       st = texture2D(uStars, uv).rgb;
+    }
+    if (uSharp > 0.0){
+      // accentuation légère quand la résolution interne baisse (après l'upscale bicubique) : multiplicative, sur la
+      // luminance, bornée (sûre en HDR : pas de halo sombre autour du disque ni de l'anneau de photons)
+      vec3 nb = (texture2D(uScene, uv + vec2(uTexel.x, 0.0)).rgb + texture2D(uScene, uv - vec2(uTexel.x, 0.0)).rgb
+               + texture2D(uScene, uv + vec2(0.0, uTexel.y)).rgb + texture2D(uScene, uv - vec2(0.0, uTexel.y)).rgb) * 0.25;
+      const vec3 LW = vec3(0.2126, 0.7152, 0.0722);
+      float ls = dot(sc.rgb, LW), lb = dot(nb, LW);
+      sc.rgb *= clamp(pow((ls + 0.02) / (lb + 0.02), uSharp), 0.8, 1.3);
     }
     vec3 hdr = sc.rgb + st * clamp(sc.a, 0.0, 1.0);
     hdr += uBloom * (texture2D(uB1, uv).rgb * 0.55 + texture2D(uB2, uv).rgb * 0.9);

@@ -18,7 +18,7 @@ export function mountDevtools(engine: Engine) {
   const refreshGui = () => gui.controllersRecursive().forEach((c) => c.updateDisplay());
   engine.listeners.paramsChanged = refreshGui;
 
-  const calibrate = () => (w.__calib = quality.calibrate());
+  const calibrate = () => quality.calibrate().then((c) => (w.__calib = c));
   gui.add(P, "diskSpeed", 0, 4, 0.01).name("Vitesse du disque");
   gui.add(P, "plasmaIntensity", 0.2, 3, 0.01).name("Intensité plasma");
   gui.addColor(P, "plasmaColor").name("Couleur plasma").onChange((v: string) => (bhMat.uniforms.uC1.value as THREE.Color).set(v));
@@ -60,6 +60,7 @@ export function mountDevtools(engine: Engine) {
   more.add(P, "doppler", 0, 0.95, 0.01).name("Doppler");
   more.add(P, "bloom", 0, 2, 0.01).name("Bloom");
   more.add(P, "grain", 0, 0.15, 0.005).name("Grain");
+  more.add(P, "sharpen", 0, 2, 0.05).name("Accentuation de l'upscale");
   more.close();
   const lens = gui.addFolder("Lentille : raccord de la bulle");
   lens.add(P, "bFar", 8, 40, 0.5).name("Bascule raymarching → analytique (b)");

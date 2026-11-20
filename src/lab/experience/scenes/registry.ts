@@ -78,11 +78,40 @@ export function createRegistry(elements: SceneElement[], ctx: SceneContext) {
     for (const e of activeLayers[layer]) e.el.render(layer, ctx);
   }
 
+  /**
+   * Précompilation (chargement) : chaque élément allumé est mis à jour comme s'il était posé sur sa slide (ou au milieu
+   * de sa plage), puis rendu une fois. Le moteur remplace alors renderer.render par une compilation asynchrone : rien
+   * n'est dessiné, mais tous les programmes sont prêts avant d'entrer dans la fenêtre de l'élément.
+   * @param at place la caméra et prépare `f` pour la position s
+   * @param layerTarget règle la cible de rendu de la couche (les programmes dépendent de la cible)
+   */
+  function warmup(f: FrameParams, at: (s: number) => void, layerTarget: (layer: Layer) => void) {
+    for (const e of entries) {
+      if (!e.enabled) continue;
+      const { slides, range } = e.el;
+      const s = range ? (range[0] + range[1]) / 2 : slides === "all" ? f.s : slides[0];
+      try {
+        at(s);
+        f.slide = Math.round(s);
+        f.weight = 1;
+        f.reduced = false;
+        e.el.update(f);
+        for (const l of e.el.layers) {
+          layerTarget(l);
+          e.el.render(l, ctx);
+        }
+      } catch (err) {
+        console.warn(`[lab] précompilation de « ${e.el.id} » :`, err);
+      }
+    }
+  }
+
   return {
     entries,
     init,
     update,
     render,
+    warmup,
     has: (layer: Layer) => activeLayers[layer].length > 0,
     decor: {
       level: () => decor,

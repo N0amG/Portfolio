@@ -3,7 +3,7 @@
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { lab } from "@/lab/config";
 import { CONTACT_TEXT, TEXTS } from "@/lab/content";
-import { createEngine } from "./engine";
+import { createEngine, type Engine } from "./engine";
 
 /* ───────────────────────────────────────────────────────────
    Expérience du lab : un seul <canvas> fixe + couche DOM (mise en page et accessibilité).
@@ -21,6 +21,35 @@ const subscribe = (cb: () => void) => {
 };
 const isTouch = () => window.matchMedia(TOUCH_QUERY).matches;
 const onServer = () => null;
+
+// ?diag=1 : diagnostic de performance (aussi en production, pour les retours sur d'autres machines)
+const noop = () => () => {};
+const wantsDiag = () => new URLSearchParams(window.location.search).get("diag") === "1";
+function formatDiag(d: ReturnType<Engine["diag"]>) {
+  const pct = (r: number) => `${Math.round(r * 100)} %`;
+  const q = d.quality;
+  const c = q.calib;
+  const lines = [
+    `GPU      ${d.gpu.name}${d.gpu.unmasked ? "" : " (nom masqué par le navigateur)"}`,
+    `         ${d.gpu.vendor} · ${d.gpu.raw}`,
+    `ext      timer GPU ${d.ext.timer ? "oui" : "non"} · compilation parallèle ${d.ext.parallel ? "oui" : "non"}`,
+    `qualité  ${d.tier} · ${d.auto ? "auto" : "manuelle"} · résolution ${pct(d.res)} (basse sous ${pct(q.floor)}) · décor ${d.decor}` +
+      (q.blocked ? ` · ${q.blocked} état(s) en attente` : ""),
+    `interne  ${d.internal} · écran ${d.screen} · dpr ${d.dpr}`,
+    `images   ${d.frames.fps.toFixed(0)} fps · moy. ${d.frames.avgMs.toFixed(1)} ms · pire ${d.frames.worstMs.toFixed(1)} ms (2 s)`,
+    `mesure   ${q.last.ms ? `${q.last.ms.toFixed(2)} ms ${q.last.gpu ? "GPU (médiane 2 s)" : "entre images (médiane 2 s, sans timer GPU)"}` : "—"}`,
+    `slide    s = ${d.slide.toFixed(2)} · moyens actifs : ${d.active.join(", ") || "aucun"}`,
+    `shaders  ${d.warm.ms < 0 ? "précompilation en cours…" : `${d.warm.programs} programmes prêts en ${d.warm.ms} ms`}`,
+  ];
+  if (c) {
+    lines.push(
+      `calib.   ${c.tier} ${pct(c.res)} en ${c.ms} ms (${c.gpuTimed ? "temps GPU" : "images synchronisées"}) · ${c.why} · ${c.hints.cores} cœurs, ${c.hints.mem} Go`,
+      ...c.tried.map((t) => `         ${t.tier.padEnd(8)} ${t.msAt060} ms à 60 %, ${t.msAt035} ms à 35 % → max ${pct(t.resMax)}`),
+    );
+  }
+  if (d.quality.events.length) lines.push("journal", ...d.quality.events.map((e) => `         ${e}`));
+  return lines.join("\n");
+}
 
 export default function Experience() {
   const touch = useSyncExternalStore(subscribe, isTouch, onServer);
@@ -51,6 +80,8 @@ function Scene() {
   const res = useRef<HTMLSpanElement>(null);
   const gpu = useRef<HTMLSpanElement>(null);
   const qual = useRef<HTMLSpanElement>(null);
+  const diag = useRef<HTMLPreElement>(null);
+  const showDiag = useSyncExternalStore(noop, wantsDiag, () => false);
 
   useEffect(() => {
     const engine = createEngine(
@@ -73,8 +104,15 @@ function Scene() {
       });
     }
     engine.start();
+    // ?diag=1 (production comprise) : overlay de diagnostic, rafraîchi 4 fois par seconde hors de la boucle de rendu
+    let diagTimer: number | undefined;
+    if (diag.current) {
+      const el = diag.current;
+      diagTimer = window.setInterval(() => (el.textContent = formatDiag(engine.diag())), 250);
+    }
     return () => {
       alive = false;
+      window.clearInterval(diagTimer);
       unmountDev?.();
       engine.destroy();
     };
@@ -96,6 +134,7 @@ function Scene() {
           <span ref={qual}>—</span>
         </div>
       )}
+      {showDiag && <pre ref={diag} className="lab-diag mono" aria-hidden="true" />}
       <div className="lab-brand mono">Noam Guez — lab</div>
       <div ref={hint} className="lab-hint mono">
         Scroll →

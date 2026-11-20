@@ -35,6 +35,7 @@ export const DEFAULTS = {
   tier: "haute" as TierName,
   bloom: 0.6,
   grain: 0.11,
+  sharpen: 1, // accentuation après l'upscale quand la résolution interne baisse (multiplicateur ; 0 = aucune)
   doppler: 0.95,
   // raccord entre rayons raymarchés et rayons à déviation analytique (sans quoi un cercle net entoure le trou noir)
   bFar: 15, // paramètre d'impact de bascule
@@ -181,7 +182,7 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
       uBloom: { value: 0.9 }, uGrain: { value: 0.045 }, uTime: { value: 0 }, uAspect: { value: 1 },
       uWaves: { value: [0, 1, 2, 3].map(() => new THREE.Vector4()) }, uMotion: { value: new THREE.Vector2() },
       uChroma: { value: 0 }, uFlare: { value: 0 }, uStreak: { value: new THREE.Vector4() }, uRing: { value: 1 },
-      uRayHist: { value: new Array(12).fill(0) }, uRayOn: { value: 0 },
+      uRayHist: { value: new Array(12).fill(0) }, uRayOn: { value: 0 }, uSharp: { value: 0 },
     },
     vertexShader: FS_VERT,
     fragmentShader: FINAL_FRAG,
@@ -253,7 +254,7 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
     els.hint.textContent = slide === LAST_SLIDE ? "← revenir" : "Scroll →";
     els.hint.style.opacity = busy ? "0" : slide === 0 || slide === LAST_SLIDE ? "1" : "0";
     els.letters.setAttribute("aria-label", slide < NS ? letters.blocks[slide].text : "");
-    if (!busy) scenes.decor.set(0); // nouvelle slide posée : les décors coupés ont de nouveau leur chance
+    if (!busy) quality.slidePosed(); // nouvelle slide posée : les décors coupés ont de nouveau leur chance
   }
   const nav = createNavigation({ cam, last: LAST_SLIDE, duration: (a, b) => P.absorbDur * transitionScale(a, b), onChange: updateNav });
 
@@ -328,6 +329,11 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
     mouse: new THREE.Vector2(), width: 1, height: 1, dpr: DPR, reduced: false, tier: P.tier, res: P.resolution, composite, bh: bhParams,
   };
   function updateScenes(dt: number) {
+    prepareFrame(dt);
+    scenes.update(frameParams, P.tier);
+  }
+  /** Remplit frameParams et remet à zéro les paramètres partagés (composition, shader du trou noir) avant les update(). */
+  function prepareFrame(dt: number) {
     const f = frameParams;
     f.s = cam.s; f.dt = dt; f.time = clock.elapsed; f.rhNdc = rhNdc; f.tanHalf = tanHalf; f.tier = P.tier; f.res = P.resolution;
     f.mouse.set(parX, parY); f.width = window.innerWidth; f.height = window.innerHeight;
@@ -342,7 +348,53 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
     bhParams.tunnel.x = 0;
     bhParams.white.x = 0;
     bhParams.cap.x = 0;
-    scenes.update(f, P.tier);
+  }
+
+  /**
+   * Précompilation de tous les programmes au chargement (cause des saccades mesurée : la première compilation d'un
+   * shader se faisait à l'entrée dans la fenêtre de l'élément, ex. nébuleuse ≈ 1,2 s à froid, magnétar 0,1 s, planète
+   * 0,1 s, tous autour de S3 → S6). Chaque élément est préparé comme posé sur sa slide, et renderer.render est remplacé
+   * le temps de l'appel par renderer.compileAsync : avec KHR_parallel_shader_compile, le navigateur compile en
+   * arrière-plan sans bloquer les images. Sans cette extension, la compilation se fait ici, au chargement.
+   */
+  const warm = { programs: 0, ms: -1 };
+  function precompile() {
+    const t0 = performance.now();
+    const keepS = cam.s;
+    const jobs: Promise<unknown>[] = [];
+    const r = renderer;
+    const draw = r.render, copy = r.copyFramebufferToTexture;
+    r.render = (scene, camera) => { jobs.push(r.compileAsync(scene, camera).catch(() => {})); };
+    r.copyFramebufferToTexture = () => {};
+    try {
+      // passes du moteur (étoiles, lettres, trou noir, bloom, composition), dans leurs vraies cibles, puis le voile de la fin
+      render();
+      fsMesh.material = veilMat;
+      r.setRenderTarget(null);
+      r.render(fsScene, orthoCam);
+      scenes.warmup(
+        frameParams,
+        (s) => {
+          cam.s = s;
+          finale(s, fin);
+          updateCamera(0);
+          prepareFrame(0);
+        },
+        (layer) => r.setRenderTarget(layer === "sky" ? rt.sky : layer === "back" ? rt.stars : null),
+      );
+    } finally {
+      r.render = draw;
+      r.copyFramebufferToTexture = copy;
+      r.setRenderTarget(null);
+      cam.s = keepS;
+      finale(keepS, fin);
+      updateCamera(0);
+      updateScenes(0);
+    }
+    return Promise.all(jobs).then(() => {
+      warm.programs = r.info.programs?.length ?? 0;
+      warm.ms = Math.round(performance.now() - t0);
+    });
   }
   /** Rend une couche du registre dans la cible donnée, par-dessus son contenu. */
   function renderLayer(layer: Layer, target: THREE.WebGLRenderTarget | null) {
@@ -487,6 +539,9 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
     f.uStreak.value.set((bhNdc.x + 1) / 2, (bhNdc.y + 1) / 2, composite.streak, STREAK_TAPS[P.tier]);
     f.uRing.value = Math.min(rhNdc, 4);
     f.uRayOn.value = rays.on ? 1 : 0;
+    // accentuation de l'upscale : nulle à 95 % de résolution et plus, 0,15 à 55 % et moins (réglé sur la netteté moyenne
+    // de l'image à 50 %, qui rejoint celle de la pleine résolution ; 0,3 et 0,45 la dépassaient de 5 et 8 %)
+    f.uSharp.value = 0.15 * P.sharpen * (1 - THREE.MathUtils.smoothstep(P.resolution, 0.55, 0.95));
     pass(finalMat, null);
 
     // 6. couche "front" du registre, directement à l'écran
@@ -503,15 +558,17 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
   // -------------------------------------------------------------------------
   // Qualité automatique
   // -------------------------------------------------------------------------
-  const gpuName = (() => {
+  const gpuInfo = (() => {
     const ext = gl.getExtension("WEBGL_debug_renderer_info");
     const raw: string = ext ? gl.getParameter(ext.UNMASKED_RENDERER_WEBGL) : gl.getParameter(gl.RENDERER);
+    const vendor: string = ext ? gl.getParameter(ext.UNMASKED_VENDOR_WEBGL) : gl.getParameter(gl.VENDOR);
     const m = /ANGLE \([^,]+,\s*([^(]+?)\s*(\(|Direct3D|,)/.exec(raw);
-    return (m ? m[1] : raw).trim();
+    return { name: (m ? m[1] : raw).trim(), raw, vendor, unmasked: !!ext };
   })();
+  const gpuName = gpuInfo.name;
   const listeners = { paramsChanged: () => {} };
   const quality = createQuality({
-    P, gl, gpuName, render, resizeTargets,
+    P, gl: gl as WebGL2RenderingContext, gpuName, dpr: DPR, render, resizeTargets,
     decor: scenes.decor,
     setTier: (t) => {
       bhMat.uniforms.uStepK.value = t.stepK;
@@ -536,6 +593,20 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
   const stats = { fps: 0, ms: 0, samples: [] as number[] };
   let fpsFrames = 0, fpsAcc = 0;
   let last = -1;
+  // temps entre images, image par image, sur les 2 dernières secondes (diagnostic : pire image ; tampon circulaire)
+  const RING = 1024;
+  const ringT = new Float64Array(RING), ringMs = new Float32Array(RING);
+  let ringI = 0;
+  function recentFrames(windowMs = 2000) {
+    const now = performance.now();
+    let n = 0, sum = 0, worst = 0;
+    for (let k = 1; k <= RING; k++) {
+      const i = (ringI - k + RING) % RING;
+      if (ringT[i] === 0 || now - ringT[i] > windowMs) break;
+      n++; sum += ringMs[i]; worst = Math.max(worst, ringMs[i]);
+    }
+    return { n, fps: n ? (n * 1000) / sum : 0, avgMs: n ? sum / n : 0, worstMs: worst };
+  }
 
   function frame() {
     const now = performance.now();
@@ -544,6 +615,7 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
     const dt = Math.min(0.05, rawMs / 1000);
     last = now;
     clock.elapsed += dt;
+    ringT[ringI] = now; ringMs[ringI] = rawMs; ringI = (ringI + 1) % RING;
 
     fpsFrames++;
     fpsAcc += rawMs;
@@ -569,10 +641,11 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
     letters.update({ camS: cam.s, explosion: P.explosion, bhScreen, rhNdc, textCam });
     updateScenes(dt);
     updateRays(dt);
+    quality.beginFrame(); // temps GPU réel de l'image (requête), pour la qualité automatique
     render();
     // Simulation d'un GPU plus faible (dev) : le rendu complet est refait N-1 fois de plus (charge GPU × N)
     for (let k = 1; k < P.simGpu; k++) render();
-    quality.adapt(rawMs);
+    quality.endFrame(rawMs);
   }
 
   const onResize = () => {
@@ -601,6 +674,28 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
     resizeTargets,
     updateGpuLabel,
     updateQualityLabel,
+    /** Diagnostic (?diag=1, production comprise) : GPU, qualité et pourquoi, résolution interne, fps et pire image sur 2 s. */
+    diag() {
+      return {
+        gpu: gpuInfo,
+        ext: {
+          timer: !!gl.getExtension("EXT_disjoint_timer_query_webgl2"),
+          parallel: !!gl.getExtension("KHR_parallel_shader_compile"),
+        },
+        tier: P.tier,
+        auto: P.auto,
+        res: P.resolution,
+        internal: `${iw}×${ih}`,
+        screen: `${Math.round(window.innerWidth * DPR)}×${Math.round(window.innerHeight * DPR)}`,
+        dpr: DPR,
+        decor: scenes.decor.level(),
+        quality: quality.diag(),
+        frames: recentFrames(2000),
+        warm,
+        slide: cam.s,
+        active: scenes.entries.filter((e) => e.active && e.el.cost !== "leger").map((e) => e.el.id),
+      };
+    },
     /** Banc d'essai GPU (indépendant du rAF) : bench(120) -> ms/frame. */
     bench(n = 120) {
       const px = new Uint8Array(4);
@@ -631,8 +726,13 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
       updateNav(0, false);
       updateGpuLabel();
       quality.applyTier(P.tier);
-      if (P.auto) quality.calibrate();
+      // tous les programmes compilés en parallèle avant la première image et la calibration (qui mesure ainsi des
+      // shaders prêts) ; plafond de 12 s : au-delà, ce qui reste se compilera à la première utilisation
+      await Promise.race([precompile(), new Promise((r) => setTimeout(r, 12000))]);
+      if (disposed) return;
+      if (P.auto) await quality.calibrate();
       else updateQualityLabel();
+      if (disposed) return;
       gsap.ticker.add(frame);
       started = true;
     },
@@ -642,6 +742,7 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
       window.removeEventListener("resize", onResize);
       window.removeEventListener("pointermove", onPointer);
       nav.destroy();
+      quality.dispose();
       letters.dispose();
       scenes.dispose();
       Object.values(rt).forEach((t) => t.dispose());

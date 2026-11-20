@@ -104,6 +104,13 @@ body {
 /* HUD de dev (absent en production) */
 .lab-hud { position: fixed; left: 24px; top: 18px; z-index: 3; line-height: 1.7; color: rgba(242, 239, 232, 0.75); }
 .lab-hud b { color: var(--lab-amber); font-weight: 400; }
+/* Diagnostic (?diag=1, production comprise) : sélectionnable pour être copié et envoyé */
+.lab-diag {
+  position: fixed; left: 16px; bottom: 16px; z-index: 11; max-width: min(560px, calc(100vw - 32px));
+  margin: 0; padding: 10px 12px; font-size: 11px; line-height: 1.55; white-space: pre-wrap; word-break: break-word;
+  color: rgba(242, 239, 232, 0.9); background: rgba(10, 8, 6, 0.82); border: 1px solid rgba(242, 239, 232, 0.15);
+  user-select: text; pointer-events: auto;
+}
 
 .lil-gui.root {
   --background-color: rgba(10, 8, 6, 0.82);
