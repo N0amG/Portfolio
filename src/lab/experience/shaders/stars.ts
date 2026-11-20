@@ -3,6 +3,7 @@
 export const STARS_VERT = /* glsl */ `
   attribute vec4 aSeed;
   uniform float uT, uAspect, uRh, uPx, uTrail;
+  uniform float uDir;  // 1 = aspirées ; −1 = éjectées (trou blanc, 3 : le temps s'inverse, la traînée reste derrière l'étoile)
   uniform vec2 uC;   // centre du trou noir à l'écran (NDC)
   varying float vAcross, vAlong, vB, vAbs; varying vec3 vCol;
 
@@ -27,7 +28,7 @@ export const STARS_VERT = /* glsl */ `
     vAbs = absorbTrail / df;
     float x = position.x;
     float t = max(x, 0.0);
-    float ft = max(f - df * t, 0.0);
+    float ft = clamp(f - uDir * df * t, 0.0, 1.0);
     vec2 p = pathPos(ft, a0, r0);
     vec2 tg = pathPos(min(ft + 0.003, 0.9999), a0, r0) - pathPos(max(ft - 0.003, 0.0), a0, r0);
     float tl = length(tg);
@@ -43,7 +44,8 @@ export const STARS_VERT = /* glsl */ `
     float fadeOut = smoothstep(uRh * 1.0, uRh * 1.35, length(p));
     float fadeIn = smoothstep(0.0, 0.12, f);    // apparition douce
     vB = (0.25 + 1.2 * pow(aSeed.w, 3.0)) * (1.0 + 4.0 * pow(f, 5.0)) * fadeIn * fadeOut;
-    vCol = mix(vec3(0.78, 0.86, 1.0), vec3(1.0, 0.72, 0.42), smoothstep(0.55, 1.0, ft));
+    // près de l'horizon : ambre (trou noir) ou horizon bleu (trou blanc, étoiles éjectées)
+    vCol = mix(vec3(0.78, 0.86, 1.0), uDir > 0.0 ? vec3(1.0, 0.72, 0.42) : vec3(0.5, 0.84, 1.0), smoothstep(0.55, 1.0, ft));
     gl_Position = vec4(p.x / uAspect + uC.x, p.y + uC.y, 0.0, 1.0);
   }
 `;

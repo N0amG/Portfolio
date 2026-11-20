@@ -61,6 +61,7 @@ export function updateLens(u: LensU, f: FrameParams, lens: boolean) {
   u.uBhNdc.value.copy(f.bhNdc);
   u.uAspect.value = f.width / f.height;
   u.uLensOn.value = lens ? 1 : 0;
+  u.uLensK.value = 2 / (f.tanHalf * f.tanHalf); // le champ s'élargit pendant la plongée et le dézoom de la fin
 }
 const _v = new THREE.Vector3();
 /** Même projection + lentille que lensProject(), côté JS : position NDC (x, y) d'un point monde, z = profondeur de visée. */
@@ -71,7 +72,7 @@ export function lensNdc(w: THREE.Vector3, f: FrameParams, out: THREE.Vector3) {
   if (dls > 0 && depth > 0) {
     const qx = (out.x - f.bhNdc.x) * asp, qy = out.y - f.bhNdc.y;
     const b = Math.max(Math.hypot(qx, qy), 1e-5);
-    const te2 = ((2 / (TAN_HALF * TAN_HALF)) * dls) / (dl * (dl + dls));
+    const te2 = ((2 / (f.tanHalf * f.tanHalf)) * dls) / (dl * (dl + dls));
     const k = (0.5 * (b + Math.sqrt(b * b + 4 * te2))) / b;
     out.x = f.bhNdc.x + (qx * k) / asp;
     out.y = f.bhNdc.y + qy * k;

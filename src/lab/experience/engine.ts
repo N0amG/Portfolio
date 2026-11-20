@@ -3,8 +3,8 @@ import { gsap } from "gsap";
 import { FS_VERT } from "./shaders/common";
 import { STARS_FRAG, STARS_VERT } from "./shaders/stars";
 import { BLACKHOLE_FRAG } from "./shaders/blackhole";
-import { BLUR_FRAG, BRIGHT_FRAG, FINAL_FRAG } from "./shaders/post";
-import { CAM_DIST, LAST_SLIDE, TAN_HALF, cameraPose, createNavigation, makePose, shadowNdc, transitionScale } from "./timeline";
+import { BLUR_FRAG, BRIGHT_FRAG, FINAL_FRAG, VEIL_FRAG } from "./shaders/post";
+import { CAM_DIST, LAST_SLIDE, TAN_HALF, cameraPose, createNavigation, finale, makeFinale, makePose, shadowNdc, transitionScale } from "./timeline";
 import { createLetters } from "./text/letters";
 import { createQuality, type TierName } from "./quality";
 import { createRegistry } from "./scenes/registry";
@@ -55,9 +55,15 @@ export interface EngineEls {
   hud?: { fps: HTMLElement; res: HTMLElement; gpu: HTMLElement; qual: HTMLElement };
 }
 
-export function createEngine(els: EngineEls, texts: readonly string[]) {
+/**
+ * @param texts blocs de texte des premières slides (un par slide, dans l'ordre)
+ * @param lastText bloc posé sur la dernière slide (contact, provisoire jusqu'au lot F3)
+ */
+export function createEngine(els: EngineEls, texts: readonly string[], lastText = "") {
   const P: Params = { ...DEFAULTS };
   const cam = { s: 0 };
+  /** Fin du parcours (lot V7) : paramètres nommés lus par les éléments, le shader et (lot F1) le son. */
+  const fin = makeFinale();
   let camDist = CAM_DIST,
     rhNdc = shadowNdc(CAM_DIST);
 
@@ -111,7 +117,7 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
   starGeo.instanceCount = STAR_COUNT;
   const starMat = new THREE.ShaderMaterial({
     uniforms: {
-      uT: { value: 0 }, uAspect: { value: 1 }, uRh: { value: rhNdc }, uPx: { value: 0.002 }, uTrail: { value: 1 },
+      uT: { value: 0 }, uAspect: { value: 1 }, uRh: { value: rhNdc }, uPx: { value: 0.002 }, uTrail: { value: 1 }, uDir: { value: 1 },
       uC: { value: new THREE.Vector2() },
     },
     vertexShader: STARS_VERT,
@@ -148,6 +154,10 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
       uNebTex: { value: null as THREE.Texture | null }, uNebC: { value: new THREE.Vector4() },
       uNebE1: { value: new THREE.Vector3() }, uNebE2: { value: new THREE.Vector3() }, uNebF: { value: 0 }, uNebFill: { value: 0 },
       uBFar: { value: new THREE.Vector3(15, 4, 1) }, uSkySec: { value: new THREE.Vector2(0.25, 0.15) },
+      uDive: { value: new THREE.Vector4() }, uTunnel: { value: new THREE.Vector4() }, uTunBend: { value: new THREE.Vector2() },
+      uWhite: { value: new THREE.Vector4() },
+      // 3 · palette du trou blanc (section 4) : bleu profond assombri au bord, #1b4dff, #7fd6ff, blanc au cœur
+      uW0: { value: col("#1b4dff").multiplyScalar(0.3) }, uW1: { value: col("#1b4dff") }, uW2: { value: col("#7fd6ff") }, uW3: { value: col("#ffffff") },
     },
     vertexShader: FS_VERT,
     fragmentShader: BLACKHOLE_FRAG,
@@ -169,10 +179,19 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
       uTexel: { value: new THREE.Vector2(1, 1) },
       uBloom: { value: 0.9 }, uGrain: { value: 0.045 }, uTime: { value: 0 }, uAspect: { value: 1 },
       uWaves: { value: [0, 1, 2, 3].map(() => new THREE.Vector4()) }, uMotion: { value: new THREE.Vector2() },
-      uChroma: { value: 0 }, uFlare: { value: 0 },
+      uChroma: { value: 0 }, uFlare: { value: 0 }, uStreak: { value: new THREE.Vector4() }, uRing: { value: 1 },
     },
     vertexShader: FS_VERT,
     fragmentShader: FINAL_FRAG,
+  });
+  // 2, 3 · voile final (noir, point blanc, blanc) : par-dessus tout, mélange prémultiplié
+  const veilMat = new THREE.ShaderMaterial({
+    uniforms: { uVeil: { value: new THREE.Vector4() }, uAspect: { value: 1 }, uPx: { value: 0.002 } },
+    vertexShader: FS_VERT,
+    fragmentShader: VEIL_FRAG,
+    transparent: true, depthTest: false, depthWrite: false,
+    blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor,
+    blendSrcAlpha: THREE.OneFactor, blendDstAlpha: THREE.OneMinusSrcAlphaFactor,
   });
 
   // -------------------------------------------------------------------------
@@ -204,6 +223,8 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     starMat.uniforms.uAspect.value = w / h;
     starMat.uniforms.uPx.value = 2 / fh;
     finalMat.uniforms.uAspect.value = w / h;
+    veilMat.uniforms.uAspect.value = w / h;
+    veilMat.uniforms.uPx.value = 2 / fh;
     if (els.hud) els.hud.res.textContent = `interne ${iw}×${ih} (${Math.round(P.resolution * 100)} %) · écran ${fw}×${fh}`;
   }
 
@@ -216,8 +237,10 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
   // -------------------------------------------------------------------------
   // Texte
   // -------------------------------------------------------------------------
-  const letters = createLetters(texts, els.page, els.letters);
-  const NS = letters.blocks.length; // slides 0..NS-1 : un bloc chacune ; les suivantes, jusqu'à LAST_SLIDE, sont sans texte
+  // un bloc par slide : les premiers textes, des slides sans texte, puis le bloc de la dernière slide (contact)
+  const slideTexts = Array.from({ length: LAST_SLIDE + 1 }, (_, i) => (i < texts.length ? texts[i] : i === LAST_SLIDE ? lastText : ""));
+  const letters = createLetters(slideTexts, els.page, els.letters);
+  const NS = letters.blocks.length;
 
   function updateNav(slide: number, busy: boolean) {
     const pad = (n: number) => String(n).padStart(2, "0");
@@ -240,7 +263,7 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
   const bhScreen = new THREE.Vector2(); // centre du trou noir à l'écran (px)
   const bhNdc = new THREE.Vector2();
   const vTmp = new THREE.Vector3();
-  let mouseX = 0, mouseY = 0, parX = 0, parY = 0;
+  let mouseX = 0, mouseY = 0, parX = 0, parY = 0, tanHalf = TAN_HALF;
 
   function updateCamera(dt: number) {
     parX += (mouseX - parX) * (1 - Math.exp(-dt * 2));
@@ -254,9 +277,11 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     camU.multiplyScalar(cr).addScaledVector(camR, -sr);
     camR.copy(vTmp);
     camDist = camPos.length();
-    rhNdc = shadowNdc(camDist);
+    tanHalf = pose.tanHalf;
+    rhNdc = shadowNdc(camDist, tanHalf);
     const W = window.innerWidth, H = window.innerHeight;
     textCam.aspect = W / H;
+    textCam.fov = (2 * Math.atan(tanHalf) * 180) / Math.PI;
     textCam.updateProjectionMatrix();
     textCam.position.copy(camPos);
     textCam.up.copy(camU);
@@ -276,6 +301,8 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     motion: finalMat.uniforms.uMotion.value as THREE.Vector2,
     chroma: 0,
     flare: 0,
+    streak: 0,
+    veil: veilMat.uniforms.uVeil.value as THREE.Vector4,
   };
   const bu = bhMat.uniforms;
   const bhParams: BlackholeParams = {
@@ -284,22 +311,29 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     lensM: bu.uLensM.value as THREE.Vector4,
     title: { tex: bu.uTitleTex, o: bu.uTitleO.value, n: bu.uTitleN.value, a1: bu.uTitleA1.value, a2: bu.uTitleA2.value },
     neb: { tex: bu.uNebTex, c: bu.uNebC.value, e1: bu.uNebE1.value, e2: bu.uNebE2.value, front: bu.uNebF, fill: bu.uNebFill },
+    dive: bu.uDive.value as THREE.Vector4,
+    tunnel: bu.uTunnel.value as THREE.Vector4,
+    tunnelBend: bu.uTunBend.value as THREE.Vector2,
+    white: bu.uWhite.value as THREE.Vector4,
   };
   const frameParams: FrameParams = {
-    s: 0, slide: 0, weight: 0, dt: 0, time: 0, camPos, camF, camR, camU, viewProj, bhScreen, bhNdc, rhNdc,
+    s: 0, slide: 0, weight: 0, dt: 0, time: 0, camPos, camF, camR, camU, viewProj, bhScreen, bhNdc, rhNdc, tanHalf, fin,
     mouse: new THREE.Vector2(), width: 1, height: 1, dpr: DPR, reduced: false, tier: P.tier, res: P.resolution, composite, bh: bhParams,
   };
   function updateScenes(dt: number) {
     const f = frameParams;
-    f.s = cam.s; f.dt = dt; f.time = clock.elapsed; f.rhNdc = rhNdc; f.tier = P.tier; f.res = P.resolution;
+    f.s = cam.s; f.dt = dt; f.time = clock.elapsed; f.rhNdc = rhNdc; f.tanHalf = tanHalf; f.tier = P.tier; f.res = P.resolution;
     f.mouse.set(parX, parY); f.width = window.innerWidth; f.height = window.innerHeight;
     for (const w of composite.waves) w.set(0, 0, 0, 0);
-    composite.motion.set(0, 0); composite.chroma = 0; composite.flare = 0;
+    composite.motion.set(0, 0); composite.chroma = 0; composite.flare = 0; composite.streak = 0; composite.veil.set(0, 0, 0, 0);
     bhParams.erupt.set(0, 0, 0, 0);
     bhParams.hot.w = 0;
     bhParams.lensM.z = 0;
     bhParams.title.a2.w = 0;
     bhParams.neb.c.w = 0;
+    bhParams.dive.set(0, 0, 0, 0);
+    bhParams.tunnel.x = 0;
+    bhParams.white.x = 0;
     scenes.update(f, P.tier);
   }
   /** Rend une couche du registre dans la cible donnée, par-dessus son contenu. */
@@ -322,12 +356,21 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
   const SKY_AXIS = new THREE.Vector3(0.35, 1, 0.2).normalize();
   const skyM4 = new THREE.Matrix4();
 
+  /** Nombre de prises des traînées radiales (2, 3) selon le niveau de qualité. */
+  const STREAK_TAPS = { haute: 14, moyenne: 10, basse: 6 } as const;
   function render() {
+    // voile opaque (noir total ou écran blanc, fin du parcours) : rien d'autre à rendre
+    const veil = composite.veil;
+    if (veil.x >= 0.999 || veil.y >= 0.999) {
+      pass(veilMat, null);
+      return;
+    }
     // 1. étoiles aspirées
     starMat.uniforms.uT.value = clock.suction;
+    starMat.uniforms.uDir.value = fin.whiteHole > 0.5 ? -1 : 1;
     starMat.uniforms.uRh.value = rhNdc;
     starMat.uniforms.uC.value.copy(bhNdc);
-    starMat.uniforms.uTrail.value = P.starTrail;
+    starMat.uniforms.uTrail.value = P.starTrail * (fin.whiteHole > 0.5 ? 0.25 : 1); // éjectées : traînées courtes
     renderer.setRenderTarget(rt.stars);
     renderer.render(starScene, orthoCam);
     if (scenes.has("back")) renderLayer("back", rt.stars);
@@ -355,6 +398,7 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
       renderLayer("sky", rt.sky);
     }
     u.uTime.value = clock.disk;
+    u.uTanHalf.value = tanHalf;
     u.uCamPos.value.copy(camPos); u.uCamF.value.copy(camF); u.uCamR.value.copy(camR); u.uCamU.value.copy(camU);
     u.uIntensity.value = P.plasmaIntensity;
     u.uDoppler.value = P.doppler;
@@ -377,10 +421,19 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     f.uB1.value = rt.a1.texture; f.uB2.value = rt.a2.texture;
     f.uBloom.value = P.bloom; f.uGrain.value = P.grain; f.uTime.value = clock.elapsed;
     f.uChroma.value = composite.chroma; f.uFlare.value = composite.flare; // uWaves et uMotion partagent leurs vecteurs avec `composite`
+    f.uStreak.value.set((bhNdc.x + 1) / 2, (bhNdc.y + 1) / 2, composite.streak, STREAK_TAPS[P.tier]);
+    f.uRing.value = Math.min(rhNdc, 4);
     pass(finalMat, null);
 
     // 6. couche "front" du registre, directement à l'écran
     if (scenes.has("front")) renderLayer("front", null);
+
+    // 7. voile (fin du parcours) : noir, point blanc, blanc
+    if (veil.x > 0 || veil.y > 0 || veil.z > 0) {
+      renderer.autoClear = false;
+      pass(veilMat, null);
+      renderer.autoClear = true;
+    }
   }
 
   // -------------------------------------------------------------------------
@@ -442,8 +495,10 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     }
 
     // Temps propres : la rotation du disque et l'aspiration s'accumulent (pas de saut quand on change un réglage)
+    finale(cam.s, fin);
     clock.disk += dt * 1.6 * P.diskSpeed;
-    clock.suction += dt * P.suction;
+    // trou blanc : les étoiles sont éjectées au lieu d'être aspirées (le temps de l'aspiration s'inverse)
+    clock.suction += dt * P.suction * (fin.whiteHole > 0.5 ? -1 : 1);
     clock.sky += dt * P.skyDrift;
 
     updateCamera(dt);
@@ -474,6 +529,8 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
     scenes,
     composite,
     bhParams,
+    /** Fin du parcours : paramètres nommés (dont les crochets du son : silence, note). */
+    fin,
     listeners,
     quality,
     resizeTargets,
@@ -522,7 +579,7 @@ export function createEngine(els: EngineEls, texts: readonly string[]) {
       letters.dispose();
       scenes.dispose();
       Object.values(rt).forEach((t) => t.dispose());
-      [starMat, bhMat, brightMat, blurMat, finalMat].forEach((m) => m.dispose());
+      [starMat, bhMat, brightMat, blurMat, finalMat, veilMat].forEach((m) => m.dispose());
       fsGeo.dispose();
       starGeo.dispose();
       renderer.dispose();

@@ -20,7 +20,10 @@ const ROWS: Row[] = [
   { ra: 16.1351, dec: -47.6093, mass: 1.9, rot: 0.13 }, // S4 pulsar
   { ra: 19.5798, dec: 35.2016, mass: 0.0155, rot: 0.47 }, // S4
   { ra: 9.0312, dec: -41.7764, mass: 1280, rot: 0.58 }, // S5
-  { ra: 22.8841, dec: 5.9906, mass: 330, rot: 0.66 }, // S6
+  { ra: 22.8841, dec: 5.9906, mass: 330, rot: 0.66 }, // S7 posé sur le disque
+  { ra: 22.8841, dec: 5.9906, mass: 330, rot: 0.99 }, // S8 trou de ver
+  { ra: 4.6702, dec: -61.0344, mass: 330, rot: 0.71 }, // S9 trou blanc
+  { ra: 4.6702, dec: -61.0344, mass: 330, rot: 0.71 }, // S10 contact
 ];
 
 const pad = (n: number, w: number) => String(n).padStart(w, "0");

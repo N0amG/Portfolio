@@ -96,7 +96,8 @@ export function createDust(): SceneElement {
       u.uSize.value = P.size;
       u.uMouseK.value = P.mouse;
       u.uMouse.value.copy(f.mouse);
-      u.uIntensity.value = P.intensity;
+      u.uIntensity.value = P.intensity * (1 - f.fin.tunnel); // pas de poussière dans le trou de ver (2)
+      u.uTanHalf.value = f.tanHalf;
       geo.setDrawRange(0, f.reduced ? COUNT / 2 : COUNT);
     },
     render(_layer, ctx: SceneContext) {

@@ -6,6 +6,7 @@ import { createNebula } from "./nebula";
 import { createPulsar } from "./pulsar";
 import { createFlare, createMotion, createWaves } from "./composite";
 import { createDebugElement } from "./debug";
+import { createDive, createWhiteHole, createWormhole } from "./finale";
 import { createDust } from "./dust";
 import { createEruption } from "./eruption";
 import { createDeepSky } from "./deepsky";
@@ -31,6 +32,8 @@ export function createSceneElements(): SceneElement[] {
   list.push(createNebula(), createPulsar());
   // Magnétar (S4, ajouté après V4 à la demande de Noam)
   list.push(createMagnetar());
+  // Lot V7 : fin du parcours (plongée, trou de ver, point blanc → trou blanc), trois éléments lourds
+  list.push(createDive(), createWormhole(), createWhiteHole());
   // Élément factice de test : dev uniquement (retiré du build de production), éteint par défaut.
   if (process.env.NODE_ENV !== "production") list.push(createDebugElement());
   return list;

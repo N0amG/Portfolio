@@ -107,7 +107,10 @@ export function createQuality({ P, gl, gpuName, render, resizeTargets, setTier, 
 
   // Ajustement continu : on baisse si les images dépassent ~18 ms en moyenne sur 1 s, on remonte prudemment.
   function adaptQuality(rawMs: number) {
-    if (!P.auto || rawMs > 250) return; // onglet revenu au premier plan, etc.
+    // onglet revenu au premier plan, etc. ; page cachée (onglet, fenêtre couverte) : le navigateur ralentit les images
+    // à ~1–5 par seconde, ce n'est pas la machine qui décroche (sinon la résolution baisse et reste verrouillée)
+    if (!P.auto || rawMs > 250) return;
+    if (document.hidden) { adapt.acc = 0; adapt.n = 0; adapt.cool = 800; return; }
     if (adapt.cool > 0) { adapt.cool -= rawMs; return; }
     adapt.acc += rawMs;
     adapt.n++;
@@ -118,8 +121,11 @@ export function createQuality({ P, gl, gpuName, render, resizeTargets, setTier, 
     if (avg > 18) {
       adapt.good = 0; adapt.fast = 0; adapt.locked = true; // plafond verrouillé après un décrochage
       const dl = decor ? decor.level() : 2;
-      if (dl < 2 && decor!.useful(dl + 1)) {
-        decor!.set(dl + 1); // d'abord les décors (moyens coupés, puis légers réduits)
+      // d'abord les décors (moyens coupés, puis légers réduits) ; sans moyen actif (ex. fin du parcours, S8–S10),
+      // on passe directement à la réduction des légers au lieu de sauter l'étape
+      const next = dl >= 2 ? 0 : decor!.useful(dl + 1) ? dl + 1 : dl + 2 <= 2 && decor!.useful(dl + 2) ? dl + 2 : 0;
+      if (next) {
+        decor!.set(next);
       } else if (P.resolution > RES_MIN + 0.001) {
         autoCeil = Math.max(RES_MIN, P.resolution - 0.05); // ne pas remonter au niveau qui a décroché
         P.resolution = Math.max(RES_MIN, Math.round((P.resolution - 0.1) * 20) / 20);

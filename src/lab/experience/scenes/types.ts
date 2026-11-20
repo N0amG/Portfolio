@@ -1,6 +1,7 @@
 import type * as THREE from "three";
 import type GUI from "lil-gui";
 import type { TierName } from "../quality";
+import type { Finale } from "../timeline";
 
 /* ───────────────────────────────────────────────────────────
    Registre de scènes : interface commune des éléments visuels (catalogue de la section 5 bis).
@@ -33,6 +34,11 @@ export interface CompositeParams {
   chroma: number;
   /** 14 · reflets anamorphiques (0 = aucun). */
   flare: number;
+  /** 2, 3 · traînées de lumière radiales autour du centre du trou noir (plongée, dézoom) : 0 = aucune. */
+  streak: number;
+  /** 2, 3 · voile final, par-dessus tout (couche "front" comprise) : x = noir, y = blanc, z = rayon du point blanc
+   *  (NDC verticales, au centre de l'écran), w = éclat de la note du point blanc. x ou y = 1 : rien n'est rendu dessous. */
+  veil: THREE.Vector4;
 }
 
 /** Paramètres transmis au shader du trou noir (remis à zéro à chaque image comme `composite`). */
@@ -67,6 +73,16 @@ export interface BlackholeParams {
     /** 1 = patch cadré sur le champ caméra (de près) : là où un rayon courbé sort du patch, on comble avec le rayon droit. */
     fill: { value: number };
   };
+  /** 2 · plongée : x = bleuissement (0..1), y = surcroît d'éclat de la lumière reçue. */
+  dive: THREE.Vector4;
+  /** 2 · trou de ver (le shader quitte le raymarching) : x = visibilité (0 = inactif), y = phase d'écoulement,
+   *  z = torsion, w = rayon d'Einstein de la gorge (NDC verticales). */
+  tunnel: THREE.Vector4;
+  /** 2 · trou de ver : courbure du tunnel (souris), en NDC. */
+  tunnelBend: THREE.Vector2;
+  /** 3 · trou blanc (même shader) : x = mode (0 = trou noir, 1 = trou blanc), y = vitesse d'éjection radiale du disque,
+   *  z = éclat de l'horizon, w = halo autour de l'horizon. */
+  white: THREE.Vector4;
 }
 
 /** Ressources partagées, fournies une fois à init(). */
@@ -100,6 +116,10 @@ export interface FrameParams {
   bhScreen: THREE.Vector2;
   bhNdc: THREE.Vector2;
   rhNdc: number;
+  /** Demi-champ vertical (tan) de la caméra : élargi pendant la plongée et le dézoom de la fin. */
+  tanHalf: number;
+  /** Fin du parcours (lot V7) : paramètres nommés calculés depuis s (timeline.ts, finale()). */
+  fin: Finale;
   /** Souris lissée (-1..1). */
   mouse: THREE.Vector2;
   width: number;
@@ -120,6 +140,9 @@ export interface SceneElement {
   label: string;
   /** Slides actives (0-based, utiliser S(n) de timeline.ts) ou "all" (effets présents partout). */
   slides: readonly number[] | "all";
+  /** Optionnel (fin du parcours) : plage de s [début, fin[ où l'élément est actif, à la place de la fenêtre slide ± 1.
+   *  Le poids vaut alors 1 dans toute la plage. */
+  range?: readonly [number, number];
   cost: Cost;
   /** Niveau de qualité minimal : "basse" = toujours, "moyenne" = moyenne et haute, "haute" = haute seulement. */
   minTier: TierName;

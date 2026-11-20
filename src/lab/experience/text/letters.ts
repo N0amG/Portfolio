@@ -1,6 +1,6 @@
 import * as THREE from "three";
 import { GLYPH_FRAG, GLYPH_VERT } from "../shaders/glyphs";
-import { cameraPose, makePose, TAN_HALF, TEXT_DEPTH, transitionScale, viaEntry } from "../timeline";
+import { cameraPose, hasVia, makePose, TAN_HALF, TEXT_DEPTH, viaEntry } from "../timeline";
 
 /* ───────────────────────────────────────────────────────────
    Texte : un bloc par slide.
@@ -265,7 +265,7 @@ export function createLetters(texts: readonly string[], pageEl: HTMLElement, let
       // désintégration : commence quand le bloc est parti sur le côté, les lettres de tête d'abord
       // (traversée de la nébuleuse, S4 → S5 : le bloc doit avoir disparu avant que la caméra n'entre dans le gaz)
       //  progression en temps réel τ (l'ease sine.inOut défait) : fini à 90 % du temps d'arrivée dans le gaz)
-      const pBlock = transitionScale(L.b, L.b + 1) > 1
+      const pBlock = hasVia(L.b)
         ? Math.min(1, Math.max(0, (Math.acos(1 - 2 * Math.min(1, Math.max(0, d))) / Math.PI - 0.01) / (0.9 * viaEntry(L.b) - 0.01)))
         : Math.min(1, Math.max(0, (d - 0.1) / 0.9));
       const xN = ((homeX - B.cx) / B.halfW) * 0.5 + 0.5;

@@ -10,6 +10,9 @@ export const TEXTS: readonly string[] = [
   "Dernier bloc avant l'horizon. Encore un geste et il ne restera que le vide.",
 ];
 
+/** Bloc posé sur la dernière slide (S10, sur le trou blanc). Provisoire : le vrai contact arrive au lot F3. */
+export const CONTACT_TEXT = "contact@noamguez.fr";
+
 /** 18 · Texte géant de fond (en contour, derrière le trou noir, S1). Provisoire. */
 export const TITLE_TEXT = "NOAM GUEZ";
 

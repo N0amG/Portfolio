@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useSyncExternalStore } from "react";
 import { lab } from "@/lab/config";
-import { TEXTS } from "@/lab/content";
+import { CONTACT_TEXT, TEXTS } from "@/lab/content";
 import { createEngine } from "./engine";
 
 /* ───────────────────────────────────────────────────────────
@@ -63,6 +63,7 @@ function Scene() {
         hud: DEV ? { fps: fps.current!, res: res.current!, gpu: gpu.current!, qual: qual.current! } : undefined,
       },
       TEXTS,
+      CONTACT_TEXT,
     );
     let unmountDev: (() => void) | undefined;
     let alive = true;
@@ -100,7 +101,7 @@ function Scene() {
         Scroll →
       </div>
       <div ref={count} className="lab-count mono">
-        01 / 09
+        01 / 10
       </div>
     </>
   );

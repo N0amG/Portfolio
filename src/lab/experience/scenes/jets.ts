@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { S } from "../timeline";
 import { LENS_FRAG, LENS_VERT, lensUniforms, updateLens, updateView } from "./lens";
+import type GUI from "lil-gui";
 import type { FrameParams, SceneContext, SceneElement } from "./types";
 
 /* ───────────────────────────────────────────────────────────
@@ -69,21 +70,19 @@ const FRAG = /* glsl */ `
   }
 `;
 
-export function createJets(): SceneElement {
-  const P = {
-    length: 30, base: 1.3, width: 0.15, open: 0.03, twist: 0.35, bright: 1.4,
-    knots: 7, knotSpeed: 0.45, decay: 1.6, beta: 0.6, beamP: 2.5, lens: true,
-  };
+export type JetSettings = typeof JET_DEFAULTS;
+const JET_DEFAULTS = {
+  length: 30, base: 1.3, width: 0.15, open: 0.03, twist: 0.35, bright: 1.4,
+  knots: 7, knotSpeed: 0.45, decay: 1.6, beta: 0.6, beamP: 2.5, lens: true,
+};
+
+/** Deux jets polaires (géométrie, shader, réglages) : utilisés par 11 · jets relativistes et par 3 · trou blanc (quasar). */
+export function createJetRenderer(settings: Partial<JetSettings> = {}) {
+  const P = { ...JET_DEFAULTS, ...settings };
   let scene: THREE.Scene, mat: THREE.ShaderMaterial, geo: THREE.BufferGeometry;
   let lu: ReturnType<typeof lensUniforms>;
-
   return {
-    id: "jets",
-    label: "11 · Jets relativistes",
-    slides: [S(3)],
-    cost: "moyen",
-    minTier: "moyenne",
-    layers: ["front"],
+    P,
     init(ctx: SceneContext) {
       lu = lensUniforms(ctx);
       const U: number[] = [], idx: number[] = [];
@@ -113,9 +112,8 @@ export function createJets(): SceneElement {
       mesh.frustumCulled = false;
       scene = new THREE.Scene().add(mesh);
     },
-    update(f: FrameParams) {
-      // apparition sur la moitié de fenêtre la plus proche de S3 (passage de relais du budget « moyen » sans saut)
-      const fade = THREE.MathUtils.smoothstep(f.weight, 0.5, 0.85);
+    /** fade : 0..1 (apparition). */
+    update(f: FrameParams, fade: number) {
       updateLens(lu, f, P.lens);
       const u = mat.uniforms;
       u.uLen.value = P.length; u.uBase.value = P.base; u.uWidth.value = P.width; u.uOpen.value = P.open;
@@ -123,7 +121,7 @@ export function createJets(): SceneElement {
       u.uFade.value = fade; u.uBright.value = P.bright; u.uKnots.value = P.knots; u.uKnotSpeed.value = P.knotSpeed;
       u.uDecay.value = P.decay;
     },
-    render(_layer, ctx: SceneContext) {
+    render(ctx: SceneContext) {
       updateView(lu, ctx);
       ctx.renderer.render(scene, ctx.camera);
     },
@@ -131,10 +129,10 @@ export function createJets(): SceneElement {
       geo.dispose();
       mat.dispose();
     },
-    gui(folder) {
+    gui(folder: GUI) {
       folder.add(P, "bright", 0, 4, 0.05).name("Éclat");
-      folder.add(P, "length", 8, 60, 0.5).name("Longueur");
-      folder.add(P, "width", 0.02, 0.5, 0.01).name("Largeur à la base");
+      folder.add(P, "length", 8, 90, 0.5).name("Longueur");
+      folder.add(P, "width", 0.02, 0.6, 0.01).name("Largeur à la base");
       folder.add(P, "open", 0, 0.08, 0.001).name("Ouverture");
       folder.add(P, "twist", 0, 1.5, 0.01).name("Torsion");
       folder.add(P, "knots", 1, 20, 1).name("Nœuds (nombre)");
@@ -144,5 +142,25 @@ export function createJets(): SceneElement {
       folder.add(P, "beamP", 1, 4, 0.1).name("Beaming : exposant");
       folder.add(P, "lens").name("Lentille (partie derrière)");
     },
+  };
+}
+
+export function createJets(): SceneElement {
+  const jets = createJetRenderer();
+  return {
+    id: "jets",
+    label: "11 · Jets relativistes",
+    slides: [S(3)],
+    cost: "moyen",
+    minTier: "moyenne",
+    layers: ["front"],
+    init: (ctx) => jets.init(ctx),
+    update(f: FrameParams) {
+      // apparition sur la moitié de fenêtre la plus proche de S3 (passage de relais du budget « moyen » sans saut)
+      jets.update(f, THREE.MathUtils.smoothstep(f.weight, 0.5, 0.85));
+    },
+    render: (_layer, ctx) => jets.render(ctx),
+    dispose: () => jets.dispose(),
+    gui: (folder) => jets.gui(folder),
   };
 }

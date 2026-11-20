@@ -26,6 +26,9 @@ export const FINAL_FRAG = /* glsl */ `
   // Entrées des effets de composition (registre, CompositeParams) : déclarées au lot V0, utilisées à partir de V1
   // (12 ondes gravitationnelles, 13 flou de mouvement + aberration chromatique, 14 reflets anamorphiques).
   uniform vec4 uWaves[4]; uniform vec2 uMotion; uniform float uChroma, uFlare;
+  // 2, 3 · traînées de lumière radiales (plongée, dézoom) : xy = centre (uv), z = longueur (0 = aucune), w = nombre de prises
+  uniform vec4 uStreak;
+  uniform float uRing;   // rayon de l'anneau de photons (NDC verticales) : départ des traits de lumière
   // Upscale bicubique Catmull-Rom en 9 lectures (net même à basse résolution interne)
   vec4 sampleCR(sampler2D tex, vec2 uv){
     vec2 sp = uv / uTexel, tc = floor(sp - 0.5) + 0.5, f = sp - tc;
@@ -78,6 +81,34 @@ export const FINAL_FRAG = /* glsl */ `
     }
     vec3 hdr = sc.rgb + st * clamp(sc.a, 0.0, 1.0);
     hdr += uBloom * (texture2D(uB1, uv).rgb * 0.55 + texture2D(uB2, uv).rgb * 0.9);
+    if (uStreak.z > 0.0){
+      // 2, 3 · l'anneau de photons éclate en traînées : la lumière vive (bloom) est étirée vers l'extérieur, depuis le
+      // centre du trou noir ; prises décalées au hasard par pixel (pas de marches visibles)
+      vec2 dc = uv - uStreak.xy;
+      float j = hash12(gl_FragCoord.xy + fract(uTime * 3.7) * 500.0);
+      vec3 acc = vec3(0.0);
+      float wsum = 0.0;
+      for (int i = 0; i < 16; i++){
+        if (float(i) >= uStreak.w) break;
+        float k = (float(i) + j) / uStreak.w;
+        vec2 p = uStreak.xy + dc * (1.0 - uStreak.z * k);
+        float wt = 1.0 - 0.75 * k;
+        acc += (texture2D(uB1, p).rgb + texture2D(uScene, p).rgb * 0.35) * wt;
+        wsum += wt;
+      }
+      hdr += acc / wsum * 1.6 * smoothstep(0.0, 0.25, uStreak.z);
+      // traits de lumière qui partent de l'anneau vers l'extérieur (bruit angulaire fin, longueurs qui vacillent)
+      vec2 dq = dc * 2.0 * vec2(uAspect, 1.0);
+      float d = length(dq);
+      float an = atan(dq.y, dq.x) * 0.15915494 * 420.0;
+      float i0 = floor(an), fa = fract(an);
+      float h0 = hash12(vec2(mod(i0, 420.0), 7.0)), h1 = hash12(vec2(mod(i0 + 1.0, 420.0), 7.0));   // périodique : pas de couture
+      float h = mix(h0, h1, fa * fa * (3.0 - 2.0 * fa));
+      float ray = pow(h, 14.0) * (0.6 + 0.4 * sin(uTime * (3.0 + 6.0 * h0) + h0 * 40.0));
+      float L = uRing * (0.15 + 1.4 * uStreak.z) * (0.4 + 1.2 * h1);
+      float along = smoothstep(uRing * 0.97, uRing * 1.03, d) * exp(-max(d - uRing, 0.0) / max(L, 1e-3));
+      hdr += ray * along * vec3(0.55, 0.8, 1.0) * 14.0 * smoothstep(0.0, 0.4, uStreak.z);
+    }
     if (uFlare > 0.0){
       // 14 · reflets anamorphiques : traînée horizontale à partir du bloom (zones très brillantes)
       vec3 fs = vec3(0.0);
@@ -105,5 +136,26 @@ export const FINAL_FRAG = /* glsl */ `
     float vis = mix(1.0, clamp(sc.a, 0.0, 1.0), absorb);
     c = mix(c, uTextCol, cov * vis);
     gl_FragColor = vec4(max(c, 0.0), 1.0);
+  }
+`;
+
+/* 2, 3 · Voile final (après la couche "front") : noir total, point blanc et écran blanc. Mélange prémultiplié :
+   sortie = couleur + destination × (1 − alpha). */
+export const VEIL_FRAG = /* glsl */ `
+  varying vec2 vUv;
+  uniform vec4 uVeil;   // x = noir, y = blanc, z = rayon du point blanc (NDC verticales), w = note (éclat à la naissance)
+  uniform float uAspect, uPx;
+  void main(){
+    vec2 q = (vUv * 2.0 - 1.0) * vec2(uAspect, 1.0);
+    float d = length(q), R = uVeil.z;
+    float core = 0.0, halo = 0.0;
+    if (R > 0.0){
+      core = 1.0 - smoothstep(R * 0.55 - uPx, R + uPx, d);                    // disque blanc au bord doux
+      halo = exp(-d / (R * 1.6 + 0.01)) * (0.45 + 1.4 * uVeil.w) * (1.0 - core);   // lueur bleutée (#7fd6ff)
+    }
+    float W = max(uVeil.y, core);
+    float A = 1.0 - (1.0 - uVeil.x) * (1.0 - W);
+    vec3 c = vec3(W) + halo * vec3(0.5, 0.84, 1.0) * (1.0 - uVeil.y);
+    gl_FragColor = vec4(min(c, vec3(1.0)), clamp(max(A, halo * uVeil.x), 0.0, 1.0));
   }
 `;

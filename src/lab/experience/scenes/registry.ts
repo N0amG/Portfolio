@@ -3,7 +3,8 @@ import type { Cost, FrameParams, Layer, SceneContext, SceneElement } from "./typ
 
 /* ───────────────────────────────────────────────────────────
    Registre : sélection des éléments actifs à chaque image et budget de performance.
-   - Fenêtre : un élément n'est mis à jour et rendu que si |s − une de ses slides| < 1 (sa slide ± la transition).
+   - Fenêtre : un élément n'est mis à jour et rendu que si |s − une de ses slides| < 1 (sa slide ± la transition),
+     ou, s'il déclare une plage `range` (fin du parcours), que si s est dans cette plage.
    - Budget : au plus 1 élément « lourd » et 2 « moyens » actifs, les plus proches de leur slide d'abord.
    - Décor (qualité automatique) : 0 = tout, 1 = moyens coupés, 2 = légers réduits aussi.
    ─────────────────────────────────────────────────────────── */
@@ -40,8 +41,9 @@ export function createRegistry(elements: SceneElement[], ctx: SceneContext) {
   function update(f: FrameParams, tier: TierName) {
     const ti = TIER_ORDER.indexOf(tier);
     for (const e of entries) {
-      const { slides } = e.el;
-      if (slides === "all") { e.d = 0; e.slide = Math.round(f.s); }
+      const { slides, range } = e.el;
+      if (range) { e.d = f.s >= range[0] && f.s < range[1] ? 0 : Infinity; e.slide = Math.round(f.s); }
+      else if (slides === "all") { e.d = 0; e.slide = Math.round(f.s); }
       else {
         e.d = Infinity;
         for (const n of slides) {

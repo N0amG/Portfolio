@@ -173,7 +173,7 @@ Légende : coût GPU 🟢 léger · 🟠 moyen · 🔴 lourd.
 
 ### Parcours v2 (keyframes)
 
-Ce parcours remplace les pourcentages de la section 5. Chaque slide garde son bloc de texte provisoire. **Depuis le 19/11/2026 (retour de Noam sur V4)** : trois plans sur le trou noir (S1–S3, au-dessus et au-dessous du disque en alternance), puis la caméra quitte le trou noir pour la nébuleuse (S4) et le pulsar (S5), chacun au centre de son plan, puis revient se poser sur le disque (S6) avant la plongée.
+Ce parcours remplace les pourcentages de la section 5. Chaque slide garde son bloc de texte provisoire. **Depuis le 19/11/2026 (retour de Noam sur V4)** : trois plans sur le trou noir (S1–S3, au-dessus et au-dessous du disque en alternance), puis la caméra quitte le trou noir pour la nébuleuse (S4) et le pulsar (S5), chacun au centre de son plan, puis revient se poser sur le disque (S6) avant la plongée. **Depuis le 20/11/2026 (lot V7)** : plongée, trou de ver, point blanc, trou blanc et contact (S7 → S10).
 
 | Étape | Scène | Éléments propres |
 |---|---|---|
@@ -184,10 +184,15 @@ Ce parcours remplace les pourcentages de la section 5. Chaque slide garde son bl
 | S4 | **Le pulsar au centre**, trou noir au loin dans le cadre | 6 |
 | S5 | **La nébuleuse au centre**, trou noir petit et lointain dans le cadre ; vers S6, traversée de la nébuleuse | 4 (et 7, 8 : à replacer au lot V5) |
 | S6 | **Le magnétar au centre** (lignes de champ, pas de jets), arrivée de la traversée ; nébuleuse et trou noir au loin | (magnétar) |
-| S7 | **Dernière slide** : retour au trou noir, caméra **posée sur le disque, juste devant l'horizon**, l'ombre prend l'essentiel de l'écran, sans texte | (4 au fond, courbée) |
-
-**Slides S7 à S9 retirées (décision de Noam du 19/11/2026)** : le parcours s'arrêtait sur S6 (S7 depuis l'ajout du magnétar). La plongée, le point blanc et le trou blanc (2, 3, lot V7), le contact et l'easter egg n'ont plus de slide ; leur place est à redéfinir.
+| S7 | Retour au trou noir, caméra **posée sur le disque, juste devant l'horizon**, l'ombre prend l'essentiel de l'écran, sans texte | (4 au fond, courbée) |
+| S7 → S8 | **Plongée** : on franchit l'horizon ; l'anneau de photons éclate en traînées de lumière, aberration chromatique et bleuissement croissants, puis noir | 2 (plongée) |
+| S8 | **Trou de ver** : tunnel déformé animé en continu (lumière du ciel étirée le long des parois, gorge en anneau d'Einstein), puis bascule au noir total en sortant de S8 | 2 (trou de ver) |
+| S8 → S9 | **Point blanc** : un point blanc naît au centre du noir et grandit jusqu'à l'écran blanc | 3 |
+| S9 | **Trou blanc** : dézoom depuis le blanc (l'inverse de la plongée) ; horizon blanc à limbe bleu, matière éjectée (flux inversé du disque), deux jets façon quasar | 3 |
+| S10 | **Contact** (dernière slide) : trou blanc à droite du cadre, bloc provisoire `contact@noamguez.fr` en bas à gauche (le vrai contenu au lot F3) | 3 |
 | + | Easter egg | (phase ultérieure) |
+
+**Fin du parcours rétablie le 20/11/2026 (lot V7, décision de Noam : terminer le parcours avant les autres lots).** Les slides S7 à S9 avaient été retirées le 19/11 ; la fin est désormais S7 → S10 (détails en section 8, lot V7).
 
 **Effets présents partout :** 12, 13, 14, 15, 16, 17, 19.
 
@@ -341,7 +346,21 @@ Web Audio **procédural**, sans fichier au départ : aucune licence et un son en
 
 Une **session neuve par phase**, qui commence par lire ce fichier.
 
-**État au 19/11/2026 : lots V0 à V4 faits (V1 à V4 en attente de validation par Noam). Parcours à 7 slides (S1–S3 trou noir, S4 pulsar, S5 nébuleuse, traversée, S6 magnétar, S7 posé sur le disque). Prochaine étape : lot V5.**
+**État au 20/11/2026 : lots V0 à V4 et V7 faits (V1 à V4 et V7 en attente de validation par Noam ; V5 reporté). Parcours à 10 slides (S1–S3 trou noir, S4 pulsar, S5 nébuleuse, traversée, S6 magnétar, S7 posé sur le disque, plongée, S8 trou de ver, point blanc, S9 trou blanc, S10 contact). Prochaine étape : retours de Noam sur V7, puis lot V5.**
+
+**Lot V7 (fin du parcours : plongée → trou de ver → point blanc → trou blanc → contact), 20/11/2026 :**
+- **Parcours** : `KEYS` passe à 10 arrêts. S8 (dans le trou de ver, caméra à 1,05 de l'origine), S9 (trou blanc au centre : az 10,6, hauteur 0,3 rad, distance 17), S10 (contact : az 12,2, hauteur 0,1, distance 28, visée décalée de −9 : trou blanc à droite, zone libre en bas à gauche). Compteur « 01 / 10 », « ← revenir » sur S10. Le trou blanc est le **même objet que le trou noir** (origine), rendu par le même shader en mode blanc.
+- **Paramètres nommés** (`timeline.ts`, `finale(s)` → `Finale`, recalculés à chaque image dans `engine.fin`, lus par les éléments via `f.fin`) : `dive`, `streak`, `blue`, `chroma`, `tunnel`, `tunnelSpeed`, `black`, `point`, `white`, `whiteHole`, `emerge`, et deux **crochets pour le son (lot F1)** : `silence` (1 du noir au point blanc : front montant = coupure nette) et `note` (enveloppe de la note du point blanc : attaque à sa naissance, décroît pendant qu'il grandit). Tous sont des fonctions de `s` seulement : le retour S10 → S7 est l'exact inverse. `__finale` en console.
+- **Rythme** (`FIN` dans `timeline.ts`) : S7 → S8 dure 1,6 × 3,2 s (≈ 5,1 s), S8 → S9 2,4 × (≈ 7,7 s, ease de la navigation défait : temps réel τ). Repères : horizon à 62 % de S7 → S8 (le noir couvre déjà l'écran), tunnel qui sort du noir entre 66 et 90 % ; puis coupure au noir à τ = 0,07, silence, point blanc à τ = 0,3, écran blanc à τ = 0,6, bascule sur le trou blanc sous le blanc à τ = 0,66, le blanc se lève entre 0,68 et 0,86 pendant le dézoom.
+- **Caméra** (`finPose`) : plongée en échelle log de la distance (7,5 → 1,55, accélérée), tour de 0,5 rad avec le disque, roulis 0,5 rad, champ élargi jusqu'à × 2,6 (`Pose.tanHalf`, transmis au shader, à la caméra de la scène, à la lentille des éléments 3D et à la poussière) : l'anneau reste dans le cadre jusqu'à d ≈ 2 puis sort par les bords. Dézoom : l'inverse (1,75 → 17, recul qui ralentit, tour et roulis défaits, champ qui se resserre). Continuité vérifiée par pas de 0,002 sur S6 → S10 : aucun saut hors des coupures.
+- **Trois éléments 🔴** (`scenes/finale.ts`), minTier « basse » (jamais coupés, seulement allégés), chacun avec son dossier lil-gui. Ils déclarent une **plage de s** (`range`, nouveau champ du registre) au lieu de la fenêtre slide ± 1 : `FIN_RANGES` dans `timeline.ts`, bornées par les coupures (horizon/noir, noir, blanc) ; jamais deux lourds actifs.
+  - `plongee` (2) : bleuissement et surcroît d'éclat dans le shader du trou noir (`uDive`), **traînées** (`composite.streak`) : flou radial de la lumière vive depuis le centre (6 à 14 prises selon le niveau) + traits de lumière fins qui partent de l'anneau de photons vers l'extérieur ; aberration chromatique croissante.
+  - `trou-de-ver` (2) : le shader quitte le raymarching (`uTunnel`) et rend un tunnel en espace écran : traînées (étoiles étirées) et gaz bleu qui s'écoulent vers la caméra, restes ambrés du disque, ciel profond étiré le long des parois, torsion, **gorge en anneau d'Einstein** (lentille extrême, image secondaire retournée dedans, lueur blanche de l'autre côté), axe qui se courbe vers la souris. Sort du noir lancé, ralentit, s'emballe avant la coupure. La poussière (15) est masquée dans le tunnel.
+  - `trou-blanc` (3) : voile final (`VEIL_FRAG`, après la couche `front` : noir, point blanc à halo bleuté, blanc ; quand le voile est opaque, rien d'autre n'est rendu) ; mode blanc du shader (`uWhite`, palette `uW0–uW3` : `#1b4dff` assombri, `#1b4dff`, `#7fd6ff`, blanc) : horizon qui émet (cœur blanc, limbe `#7fd6ff`, liseré `#1b4dff`), halo, anneau de photons bleu, **disque à l'envers** (rotation inversée, matière éjectée vers l'extérieur, Doppler adapté) ; **étoiles éjectées** au lieu d'aspirées (temps de l'aspiration inversé, traînées courtes et bleues) ; **jets façon quasar** : les jets de 11 réutilisés (`createJetRenderer` extrait de `jets.ts`), plus longs (60), plus larges, plus brillants, qui apparaissent pendant le dézoom.
+- **Contact** : `CONTACT_TEXT` (`content.ts`) posé sur S10 par le système de lettres (un bloc par slide, slides S5–S9 sans texte).
+- **Qualité automatique** : la fin passe entièrement par le shader du trou noir (résolution interne, pas d'intégration, octaves ; une couche de traînées en moins en basse) et la composition (prises des traînées selon le niveau). Vérifié en ×90 sur S9 : résolution 1 → 0,3 puis moyenne → basse (≈ 100 → 23 ms). **Correction** dans `quality.ts` : sans élément moyen actif (S8–S10), l'étape « légers réduits » était sautée ; elle est maintenant prise avant la résolution. Et les images d'une page cachée (onglet ou fenêtre couverte, ~1–5 images/s imposées par le navigateur) ne comptent plus : elles faisaient baisser la résolution, ensuite verrouillée.
+- **Mesures** (`__bench(80)`, médiane de 5, RTX 5070 Ti, interne 2135×1233, résolution 1, haute) : S7 1,63 ms ; plongée (s = 6,4) 1,63 contre 1,34 sans l'élément, **+0,29** (traînées) ; S8 trou de ver 0,61 (0,49 sans : le trou noir vu de l'horizon), plus léger que S7 ; noir et point blanc **0,02** (rien n'est rendu sous le voile) ; dézoom (τ = 0,8) 1,39 contre 1,35, **+0,04** ; S9 trou blanc 1,26 (comme le trou noir au même endroit, jets **+0,00**) ; S10 0,98 (0,96). **Simulation ×9** (images réelles synchronisées sur le GPU, qualité auto active) : S7 16,1–16,8 ms, plongée 16,4–17,1, S8 7,0, S9 13,0, S10 10,3 ; aucune dégradation (seuil 18 ms). **Parcours réel S1 → S10 et retour** (panneau affiché, durées réelles : plongée 5,2 s, point blanc 7,7 s) : 180 fps tenus sur chaque transition, image la plus longue 11 ms (traversée de la nébuleuse), 6 ms sur S7 → S10, aucune erreur console.
+- Infrastructure : `SceneElement.range`, `FrameParams.tanHalf` et `.fin`, `CompositeParams.streak` et `.veil`, `BlackholeParams.dive`, `.tunnel`, `.tunnelBend`, `.white` ; `shadowNdc(d, tanHalf)` (écran couvert sous la sphère de photons) ; `hasVia()` (les lettres ne prennent plus « transition longue » pour « traversée ») ; `__engine` en console (dev).
 
 **Lot V4 (nébuleuse + pulsar), dans `experience/scenes/`, chacun avec son dossier lil-gui et son interrupteur :**
 - **Nouveau parcours (retour de Noam : le pulsar « faisait tache » en tournant au fond du trou noir)**. Dans `timeline.ts`, chaque arrêt de `KEYS` a un **point focal `c`** (trou noir à l'origine par défaut), interpolé pendant la transition : la caméra voyage d'un objet à l'autre.
@@ -461,7 +480,7 @@ Une **session neuve par phase**, qui commence par lire ce fichier.
 | V4 | **Nébuleuses + pulsar** : 4, 6 (fait) | Opus, élevé | S3 et S4 |
 | V5 | **Astéroïdes + planète** : 8, 7 | Sonnet, moyen | S4 et S5 |
 | V6 | **Supernova** : 1 | Opus, élevé | Le préchargement |
-| V7 | **Plongée → trou blanc** : 2, 3 (slides S7–S9 retirées le 19/11/2026 : à redéfinir) | Opus, élevé | — |
+| V7 | **Plongée → trou blanc** : 2, 3, fin du parcours S7 → S10 (fait le 20/11/2026, avant V5) | Opus, élevé | S7 → S10 et retour |
 | F1 | Son | Sonnet, moyen | L'ambiance complète |
 | F2 | Vrais textes (`content.ts`, polices en latin-ext pour « œ ») | Sonnet, moyen | Les textes |
 | F3 | Contact + easter egg | Sonnet, moyen | Fin du site |

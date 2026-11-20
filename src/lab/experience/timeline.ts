@@ -12,8 +12,9 @@ import { Observer } from "gsap/Observer";
 export const CAM_DIST = 22.0;
 export const TAN_HALF = 0.42; // demi-champ vertical
 const SHADOW_B = 2.598; // paramètre d'impact critique (3√3/2)
-/** Rayon apparent de l'ombre, en unités NDC verticales. */
-export const shadowNdc = (d: number) => Math.tan(Math.asin((SHADOW_B * Math.sqrt(1 - 1 / d)) / d)) / TAN_HALF;
+/** Rayon apparent de l'ombre, en unités NDC verticales (sous la sphère de photons, l'ombre couvre tout l'écran). */
+export const shadowNdc = (d: number, tanHalf = TAN_HALF) =>
+  d <= 1.52 ? 100 : Math.min(100, Math.tan(Math.asin(Math.min(0.9999, (SHADOW_B * Math.sqrt(1 - 1 / d)) / d))) / tanHalf);
 
 /** Ease de la transition : 0.5 − 0.5·cos(πt), identique au prototype. */
 export const TRANSITION_EASE = "sine.inOut";
@@ -51,7 +52,12 @@ export const NEBULA_R = 34;
 /** Début de l'arrivée en orbite autour de l'objet suivant (fraction de la transition ; la caméra est encore dans le gaz). */
 const VIA_ARRIVE = 0.4;
 const O: Vec3 = [0, 0, 0];
-interface Key { c: Vec3; az: number; el: number; dist: number; look: number; /** la transition vers l'arrêt suivant passe par ce point (monde) */ via?: Vec3 }
+interface Key {
+  c: Vec3; az: number; el: number; dist: number; look: number;
+  /** la transition vers l'arrêt suivant passe par ce point (monde) */ via?: Vec3;
+  /** fin du parcours (lot V7) : la transition vers l'arrêt suivant est la plongée (« dive ») ou le point blanc puis le dézoom depuis le blanc (« emerge ») */
+  fin?: "dive" | "emerge";
+}
 export const KEYS: readonly Key[] = [
   // Parcours du 19/11/2026 (retour de Noam sur V4) : trois plans sur le trou noir, puis la nébuleuse au centre (trou noir
   // au loin dans le cadre), puis le pulsar au centre (trou noir au loin), puis retour au trou noir, caméra posée sur le
@@ -62,13 +68,148 @@ export const KEYS: readonly Key[] = [
   { c: PULSAR_POS, az: 5.213, el: 0.247, dist: 13, look: 0 }, // 4 : le pulsar au centre ; trou noir à ≈ 19° de l'axe, à 62 (au fond)
   { c: NEBULA_POS, az: 6.939, el: 0.349, dist: 78, look: 0, via: NEBULA_VIA }, // 5 : la nébuleuse au centre ; trou noir à ≈ 25° de l'axe, à 165 (au fond). Vers S6 : traversée de la nébuleuse
   { c: MAGNETAR_POS, az: 8.455, el: -0.268, dist: 14, look: 0 }, // 6 : le magnétar au centre ; trou noir à ≈ 21° de l'axe, à 78 (au fond)
-  { c: O, az: 9.255, el: 0.05, dist: 7.5, look: 0 }, // 7 (dernière) : posé sur le disque, juste devant l'horizon : l'ombre fait ≈ 80 % de la hauteur
-  // Les slides 7 à 9 (plongée, point blanc, trou blanc) sont retirées depuis le 19/11/2026 (décision de Noam).
+  { c: O, az: 9.255, el: 0.05, dist: 7.5, look: 0, fin: "dive" }, // 7 : posé sur le disque, juste devant l'horizon : l'ombre fait ≈ 80 % de la hauteur. Vers S8 : plongée
+  // Fin du parcours (lot V7, 20/11/2026) : plongée → trou de ver → noir → point blanc → blanc → dézoom sur le trou blanc → contact.
+  // Le trou blanc est le même objet que le trou noir (origine), rendu par le même shader en mode « blanc ».
+  { c: O, az: 9.255 + 0.5, el: 0.05, dist: 1.05, look: 0, fin: "emerge" }, // 8 : dans le trou de ver (la caméra est passée sous l'horizon ; le tunnel est rendu en espace écran). Vers S9 : noir, point blanc, dézoom
+  { c: O, az: 10.6, el: 0.3, dist: 17, look: 0 }, // 9 : trou blanc au centre, un peu au-dessus du disque (jets façon quasar)
+  { c: O, az: 12.2, el: 0.1, dist: 28, look: -9 }, // 10 (dernière) : contact ; trou blanc à droite du cadre, zone libre en bas à gauche pour le texte
 ];
-/** Index 0-based d'une slide du parcours : S(1) = 0 … S(7) = 6. */
+/** Index 0-based d'une slide du parcours : S(1) = 0 … S(10) = 9. */
 export const S = (n: number) => n - 1;
 /** Index de la dernière slide. */
 export const LAST_SLIDE = KEYS.length - 1;
+
+/* ───────────────────────────────────────────────────────────
+   Fin du parcours (lot V7) : paramètres de scène nommés, fonctions de s seulement (réversibles : le retour est
+   l'exact inverse). Le shader du trou noir, la composition, le voile et le futur moteur audio lisent ces paramètres.
+   - S7 → S8 (t = s − 6, ease de la navigation conservé) : plongée jusqu'à l'horizon (t = HORIZON), noir, puis le
+     trou de ver apparaît et ralentit jusqu'à sa vitesse de croisière.
+   - S8 → S9 (temps réel τ, ease défait) : le tunnel accélère puis coupure nette au noir (τ = CUT), silence, un point
+     blanc naît au centre (τ = POINT) et grandit jusqu'à l'écran blanc (τ = FULL), bascule sur le trou blanc
+     (τ = SWITCH, sous le blanc), puis dézoom depuis le blanc jusqu'à la pose de S9.
+   ─────────────────────────────────────────────────────────── */
+export const FIN = {
+  /** S7 → S8 : franchissement de l'horizon (fraction de la transition, en s). */
+  HORIZON: 0.62,
+  /** S7 → S8 : le trou de ver sort du noir entre ces deux fractions. */
+  TUNNEL_IN: [0.66, 0.9] as const,
+  /** S8 → S9 (temps réel τ) : coupure au noir, naissance du point blanc, écran blanc, bascule sur le trou blanc. */
+  CUT: 0.07, POINT: 0.3, FULL: 0.6, SWITCH: 0.66,
+  /** S8 → S9 : le voile blanc se lève entre ces deux valeurs de τ (le dézoom commence à SWITCH). */
+  CLEAR: [0.68, 0.86] as const,
+  /** Rayon du point blanc à sa naissance (NDC verticales) ; il croît en exponentielle jusqu'à couvrir l'écran à FULL. */
+  POINT_R0: 0.004,
+  /** Durées relatives des deux transitions (× la durée de base de 3,2 s). */
+  DIVE_DUR: 1.6, EMERGE_DUR: 2.4,
+  /** Plongée : distance au franchissement de l'horizon, tour pris pendant la chute (rad), roulis, élargissement du champ. */
+  DIVE_R: 1.55, SWIRL: 0.5, ROLL: 0.5, FOV: 1.6,
+  /** Dézoom : distance de départ (l'horizon blanc couvre l'écran), tour et roulis défaits pendant le recul. */
+  EMERGE_R: 1.75, EMERGE_SWIRL: 0.7,
+};
+/** Index de la slide de départ de la plongée (S7) et du point blanc (S8). */
+const DIVE_I = KEYS.findIndex((k) => k.fin === "dive");
+const EMERGE_I = KEYS.findIndex((k) => k.fin === "emerge");
+const unease = (t: number) => Math.acos(1 - 2 * Math.min(1, Math.max(0, t))) / Math.PI; // sine.inOut défait : temps réel
+const ease = (tau: number) => (1 - Math.cos(Math.PI * tau)) / 2;
+/** Plages de s des trois éléments lourds de la fin (jamais deux actifs en même temps : le noir et le blanc servent de coupures). */
+export const FIN_RANGES = {
+  dive: [DIVE_I, DIVE_I + FIN.HORIZON] as const,
+  tunnel: [DIVE_I + FIN.HORIZON, EMERGE_I + ease(FIN.CUT)] as const,
+  white: [EMERGE_I + ease(FIN.CUT), KEYS.length] as const,
+};
+
+export interface Finale {
+  /** Plongée (S7 → S8) : 0 → 1 jusqu'au franchissement de l'horizon. */
+  dive: number;
+  /** Traînées de lumière radiales (l'anneau de photons éclate ; convergent à nouveau pendant le dézoom) : 0..1. */
+  streak: number;
+  /** Bleuissement de la lumière reçue pendant la chute : 0..1. */
+  blue: number;
+  /** Aberration chromatique de la plongée et du dézoom (s'ajoute à celle du mouvement). */
+  chroma: number;
+  /** Trou de ver : visibilité (0 = inactif) et vitesse d'écoulement (× la vitesse de croisière). */
+  tunnel: number;
+  tunnelSpeed: number;
+  /** Voile noir (0..1) ; 1 = noir total (rien n'est rendu dessous). */
+  black: number;
+  /** Rayon du point blanc (NDC verticales ; 0 = absent). */
+  point: number;
+  /** Voile blanc (0..1). */
+  white: number;
+  /** Mode trou blanc du shader (0 ou 1 ; bascule sous l'écran blanc). */
+  whiteHole: number;
+  /** Dézoom depuis le blanc : 0 → 1 (posé sur S9). */
+  emerge: number;
+  /** Son (lot F1) : 1 du noir au point blanc. Front montant = coupure nette du son (silence voulu de la plongée). */
+  silence: number;
+  /** Son (lot F1) : enveloppe de la note aiguë du point blanc (attaque à sa naissance, décroît pendant qu'il grandit). */
+  note: number;
+}
+export const makeFinale = (): Finale => ({
+  dive: 0, streak: 0, blue: 0, chroma: 0, tunnel: 0, tunnelSpeed: 1, black: 0, point: 0, white: 0, whiteHole: 0, emerge: 0, silence: 0, note: 0,
+});
+const sstep = (a: number, b: number, x: number) => {
+  const t = Math.min(1, Math.max(0, (x - a) / (b - a)));
+  return t * t * (3 - 2 * t);
+};
+/** Paramètres de la fin du parcours pour la position s (en slides). */
+export function finale(s: number, o: Finale): Finale {
+  o.dive = o.streak = o.blue = o.chroma = o.tunnel = o.black = o.point = o.white = o.whiteHole = o.emerge = o.silence = o.note = 0;
+  o.tunnelSpeed = 1;
+  if (s <= DIVE_I) return o;
+  if (s < EMERGE_I) {
+    const t = s - DIVE_I, H = FIN.HORIZON;
+    if (t < H) {
+      const k = t / H;
+      o.dive = k;
+      o.streak = sstep(0.3, 1, k);
+      o.blue = sstep(0.05, 0.9, k);
+      o.chroma = 0.035 * k * k;
+      o.black = sstep(H - 0.06, H - 0.005, t); // l'ombre couvre déjà l'écran : le voile garantit le noir total à la bascule
+    } else {
+      o.tunnel = 1;
+      o.black = 1 - sstep(FIN.TUNNEL_IN[0], FIN.TUNNEL_IN[1], t);
+      const j = (t - H) / (1 - H);
+      o.tunnelSpeed = 1 + 5 * Math.pow(1 - j, 2); // il sort du noir lancé, puis ralentit jusqu'à la croisière
+      o.streak = 1 - sstep(FIN.TUNNEL_IN[0], 1, t); // les traînées de la chute deviennent les parois du tunnel
+      o.blue = 1;
+      o.chroma = 0.012 + 0.02 * (1 - j);
+    }
+    return o;
+  }
+  if (s < EMERGE_I + 1) {
+    const tau = unease(s - EMERGE_I);
+    if (tau < FIN.CUT) {
+      o.tunnel = 1;
+      o.tunnelSpeed = 1 + 8 * Math.pow(tau / FIN.CUT, 2); // le tunnel s'emballe… puis coupure nette
+      o.blue = 1;
+      o.chroma = 0.012 + 0.03 * (tau / FIN.CUT);
+      return o;
+    }
+    if (tau < FIN.SWITCH) {
+      o.black = 1;
+      o.silence = tau < FIN.POINT ? 1 : 0;
+      if (tau >= FIN.POINT) {
+        const k = (tau - FIN.POINT) / (FIN.FULL - FIN.POINT);
+        o.point = FIN.POINT_R0 * Math.exp(Math.log(2 / FIN.POINT_R0) * k); // couvre les coins de l'écran à FULL
+        o.note = sstep(0, 0.02, k) * (1 - 0.7 * sstep(0, 1, k));
+        o.white = sstep(0.95, 1, k);
+      }
+      return o;
+    }
+    const k = (tau - FIN.SWITCH) / (1 - FIN.SWITCH);
+    o.whiteHole = 1;
+    o.emerge = 1 - Math.pow(1 - k, 3);
+    o.white = 1 - sstep(FIN.CLEAR[0], FIN.CLEAR[1], tau);
+    o.streak = Math.pow(1 - o.emerge, 1.5); // les traînées convergent : l'inverse de la plongée
+    o.chroma = 0.035 * Math.pow(1 - o.emerge, 2);
+    return o;
+  }
+  o.whiteHole = 1;
+  o.emerge = 1;
+  return o;
+}
 const BULGE = 0.9; // ampleur des boucles vers l'extérieur entre deux arrêts (× la longueur du trajet)
 const BULGE_MAX = 0.75; // plafond (rad) : avec des trajets plus longs, la boucle garde la même amplitude qu'avant
 const DEZOOM = 0.32; // recul de la caméra au milieu d'une boucle
@@ -85,6 +226,8 @@ export interface Pose {
   u: THREE.Vector3;
   target: THREE.Vector3;
   roll: number;
+  /** Demi-champ vertical (tan) : TAN_HALF, sauf pendant la plongée et le dézoom (champ élargi). */
+  tanHalf: number;
 }
 export const makePose = (): Pose => ({
   pos: new THREE.Vector3(),
@@ -93,6 +236,7 @@ export const makePose = (): Pose => ({
   u: new THREE.Vector3(),
   target: new THREE.Vector3(),
   roll: 0,
+  tanHalf: TAN_HALF,
 });
 
 /**
@@ -102,8 +246,11 @@ export const makePose = (): Pose => ({
 /** Durée relative de la transition entre deux slides voisines (la traversée de la nébuleuse est plus longue). */
 export const transitionScale = (a: number, b: number) => {
   const i = Math.min(a, b);
+  if (KEYS[i]?.fin) return KEYS[i].fin === "dive" ? FIN.DIVE_DUR : FIN.EMERGE_DUR;
   return KEYS[i]?.via ? viaLut(i).T / BASE_DUR : 1;
 };
+/** Vrai si la transition qui part de la slide i est une traversée (`via`). */
+export const hasVia = (i: number) => !!KEYS[i]?.via;
 /** Traversée : fraction du temps réel à laquelle la caméra entre dans la nébuleuse (le texte doit avoir disparu avant). */
 export const viaEntry = (i: number) => (KEYS[i]?.via ? viaLut(i).entry : 1);
 
@@ -219,6 +366,57 @@ function viaWarp(i: number, p: number): number {
   return (lo + (b > a ? (p - a) / (b - a) : 0)) / VIA_N;
 }
 
+/*
+ * Fin du parcours : poses de la plongée (S7 → S8) et du dézoom depuis le blanc (S8 → S9), autour de l'origine.
+ * La pose est celle d'un arrêt (keyPose) dont la distance, l'azimut, le roulis et le champ varient : continues aux deux
+ * bouts (égales aux arrêts de KEYS), et les sauts éventuels tombent sous le noir ou le blanc.
+ */
+const _fk: Key = { c: O, az: 0, el: 0, dist: 1, look: 0 };
+function finPose(A: Key, B: Key, t: number, parAz: number, parEl: number, out: Pose): Pose {
+  _fk.c = A.c; _fk.look = 0;
+  const lerpLog = (a: number, b: number, k: number) => Math.exp(Math.log(a) + (Math.log(b) - Math.log(a)) * k);
+  if (A.fin === "dive") {
+    const H = FIN.HORIZON;
+    if (t < H) {
+      // chute qui accélère (en échelle log de la distance), la caméra tourne avec le disque, s'incline, le champ s'élargit
+      const k = t / H, e = Math.pow(k, 1.6);
+      _fk.dist = lerpLog(A.dist, FIN.DIVE_R, e);
+      _fk.az = A.az + FIN.SWIRL * e * e;
+      out.roll = FIN.ROLL * e * e;
+      out.tanHalf = TAN_HALF * (1 + FIN.FOV * sstep(0, 1, k));
+    } else {
+      // sous l'horizon (le trou de ver est rendu en espace écran) : on rejoint la pose de S8
+      const j = sstep(H, 1, t);
+      _fk.dist = FIN.DIVE_R + (B.dist - FIN.DIVE_R) * j;
+      _fk.az = A.az + FIN.SWIRL + (B.az - A.az - FIN.SWIRL) * j;
+      out.roll = FIN.ROLL * (1 - j);
+      out.tanHalf = TAN_HALF * (1 + FIN.FOV * (1 - j));
+    }
+    _fk.el = A.el + (B.el - A.el) * sstep(0, 1, t);
+  } else {
+    const tau = unease(t);
+    if (tau < FIN.SWITCH) {
+      // dans le tunnel, puis sous le noir et le blanc : la caméra reste à la pose de S8
+      _fk.dist = A.dist; _fk.az = A.az; _fk.el = A.el;
+      out.roll = 0;
+      out.tanHalf = TAN_HALF;
+    } else {
+      // dézoom depuis le blanc : l'inverse visuel de la plongée (recul qui ralentit, champ qui se resserre, tour défait)
+      const e = 1 - Math.pow(1 - (tau - FIN.SWITCH) / (1 - FIN.SWITCH), 3);
+      _fk.dist = lerpLog(FIN.EMERGE_R, B.dist, e);
+      _fk.az = B.az - FIN.EMERGE_SWIRL * (1 - e) * (1 - e);
+      _fk.el = B.el;
+      out.roll = -FIN.ROLL * (1 - e) * (1 - e);
+      out.tanHalf = TAN_HALF * (1 + FIN.FOV * (1 - e) * (1 - e));
+    }
+  }
+  keyPose(_fk, parAz, parEl, out.pos, out.target);
+  out.f.copy(out.target).sub(out.pos).normalize();
+  out.r.crossVectors(out.f, UP).normalize();
+  out.u.crossVectors(out.r, out.f);
+  return out;
+}
+
 export function cameraPose(s: number, parAz: number, parEl: number, out: Pose): Pose {
   const n = KEYS.length - 1;
   const sc = Math.min(Math.max(s, 0), n);
@@ -226,6 +424,8 @@ export function cameraPose(s: number, parAz: number, parEl: number, out: Pose): 
     t = sc - i;
   const A = KEYS[i],
     B = KEYS[i + 1];
+  out.tanHalf = TAN_HALF;
+  if (A.fin && t > 0 && t < 1) return finPose(A, B, t, parAz, parEl, out);
   if (A.via && t > 0 && t < 1) {
     // l'ease sine.inOut de la navigation est défait (temps réel τ) : le rythme vient du profil de vitesse de viaLut()
     const tau = Math.acos(1 - 2 * t) / Math.PI;

@@ -100,6 +100,8 @@ export function mountDevtools(engine: Engine) {
   w.__scenes = engine.scenes;
   w.__composite = engine.composite;
   w.__bhParams = engine.bhParams;
+  w.__finale = engine.fin;
+  w.__engine = engine; // dev : uniforms du trou noir (bhMat), etc.
   // ?slide=N (1 = première slide) : F5 revient sur cette slide ; l'URL n'est pas mise à jour en naviguant
   const startSlide = Number(new URLSearchParams(location.search).get("slide"));
   if (startSlide >= 1) engine.nav.jump(startSlide - 1);
@@ -113,6 +115,6 @@ export function mountDevtools(engine: Engine) {
 
   return () => {
     gui.destroy();
-    for (const k of ["__P", "__stats", "__cam", "__go", "__nav", "__bench", "__frame", "__calibrate", "__setRes", "__calib", "__scenes", "__composite", "__bhParams"]) delete w[k];
+    for (const k of ["__P", "__stats", "__cam", "__go", "__nav", "__bench", "__frame", "__calibrate", "__setRes", "__calib", "__scenes", "__composite", "__bhParams", "__finale", "__engine"]) delete w[k];
   };
 }
