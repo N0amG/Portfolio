@@ -100,6 +100,9 @@ export function mountDevtools(engine: Engine) {
   w.__scenes = engine.scenes;
   w.__composite = engine.composite;
   w.__bhParams = engine.bhParams;
+  // ?slide=N (1 = première slide) : F5 revient sur cette slide ; l'URL n'est pas mise à jour en naviguant
+  const startSlide = Number(new URLSearchParams(location.search).get("slide"));
+  if (startSlide >= 1) engine.nav.jump(startSlide - 1);
   w.__setRes = (r: number) => {
     P.auto = false;
     P.resolution = r;

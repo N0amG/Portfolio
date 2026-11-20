@@ -339,6 +339,14 @@ export function createNavigation({ cam, last, duration, onChange }: NavOptions) 
 
   return {
     go,
+    /** Pose directement la caméra sur une slide, sans transition (dev : ?slide=N). */
+    jump(n: number) {
+      gsap.killTweensOf(cam);
+      slide = Math.max(0, Math.min(last, Math.round(n)));
+      cam.s = slide;
+      busy = false;
+      onChange(slide, busy);
+    },
     state: () => ({ slide, busy }),
     destroy() {
       observer.kill();
