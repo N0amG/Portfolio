@@ -29,6 +29,8 @@ export const FINAL_FRAG = /* glsl */ `
   // 2, 3 · traînées de lumière radiales (plongée, dézoom) : xy = centre (uv), z = longueur (0 = aucune), w = nombre de prises
   uniform vec4 uStreak;
   uniform float uRing;   // rayon de l'anneau de photons (NDC verticales) : départ des traits de lumière
+  // traits de lumière : intensité de naissance sur les 1,2 dernières secondes (case k = il y a k × 0,1 s), allumés ?
+  uniform float uRayHist[12]; uniform float uRayOn;
   // Upscale bicubique Catmull-Rom en 9 lectures (net même à basse résolution interne)
   vec4 sampleCR(sampler2D tex, vec2 uv){
     vec2 sp = uv / uTexel, tc = floor(sp - 0.5) + 0.5, f = sp - tc;
@@ -93,21 +95,38 @@ export const FINAL_FRAG = /* glsl */ `
         float k = (float(i) + j) / uStreak.w;
         vec2 p = uStreak.xy + dc * (1.0 - uStreak.z * k);
         float wt = 1.0 - 0.75 * k;
-        acc += (texture2D(uB1, p).rgb + texture2D(uScene, p).rgb * 0.35) * wt;
+        acc += texture2D(uB1, p).rgb * wt;   // la lumière vive seulement (l'image entière donnerait un voile laiteux)
         wsum += wt;
       }
-      hdr += acc / wsum * 1.6 * smoothstep(0.0, 0.25, uStreak.z);
-      // traits de lumière qui partent de l'anneau vers l'extérieur (bruit angulaire fin, longueurs qui vacillent)
-      vec2 dq = dc * 2.0 * vec2(uAspect, 1.0);
+      hdr += acc / wsum * 0.9 * smoothstep(0.0, 0.25, uStreak.z);
+    }
+    if (uRayOn > 0.5){
+      // 2 · traits de lumière : chacun naît sur l'anneau de photons, file vers l'extérieur en accélérant et en s'allongeant,
+      // et ne disparaît qu'en sortant de l'écran (la caméra le dépasse). Un trait par colonne angulaire et par période
+      // de 1,2 s ; il existe si l'intensité de naissance (historique uRayHist) le permettait : quand la plongée s'arrête,
+      // il n'en naît plus, ceux qui sont partis finissent leur course.
+      vec2 dq = (uv - uStreak.xy) * 2.0 * vec2(uAspect, 1.0);
       float d = length(dq);
       float an = atan(dq.y, dq.x) * 0.15915494 * 420.0;
-      float i0 = floor(an), fa = fract(an);
-      float h0 = hash12(vec2(mod(i0, 420.0), 7.0)), h1 = hash12(vec2(mod(i0 + 1.0, 420.0), 7.0));   // périodique : pas de couture
-      float h = mix(h0, h1, fa * fa * (3.0 - 2.0 * fa));
-      float ray = pow(h, 14.0) * (0.6 + 0.4 * sin(uTime * (3.0 + 6.0 * h0) + h0 * 40.0));
-      float L = uRing * (0.15 + 1.4 * uStreak.z) * (0.4 + 1.2 * h1);
-      float along = smoothstep(uRing * 0.97, uRing * 1.03, d) * exp(-max(d - uRing, 0.0) / max(L, 1e-3));
-      hdr += ray * along * vec3(0.55, 0.8, 1.0) * 14.0 * smoothstep(0.0, 0.4, uStreak.z);
+      float ci = mod(floor(an), 420.0), fa = fract(an);
+      float h0 = hash12(vec2(ci, 7.0)), h1 = hash12(vec2(ci, 19.0)), h2 = hash12(vec2(ci, 31.0));
+      float age = fract(uTime / 1.2 + h0) * 1.2;
+      int slot = int(clamp(floor(age / 0.1), 0.0, 11.0));
+      float born = uRayHist[slot];
+      if (h1 < born * 0.4){
+        float a = age / 1.2;
+        // départ sous le bord de l'ombre (son rayon estimé n'est qu'approché de près) : le trait est masqué tant qu'il est
+        // dans le noir de l'ombre, il apparaît donc exactement sur l'anneau visible
+        float r0 = uRing * 0.6;
+        float rH = r0 + 3.8 * pow(a, 1.6);                     // tête : jusqu'au-delà des coins de l'écran
+        float rT = max(r0, rH - (0.04 + 0.9 * a));             // queue
+        float along = smoothstep(rT, rT + 0.02, d) * (1.0 - smoothstep(rH - 0.004, rH + 0.004, d));
+        along *= mix(0.2, 1.0, clamp((d - rT) / max(rH - rT, 1e-3), 0.0, 1.0));   // plus brillant vers la tête
+        float prof = exp(-pow((fa - 0.5) / 0.18, 2.0));
+        float tr = clamp(sc.a, 0.0, 1.0);
+        float shadowMask = 1.0 - (1.0 - smoothstep(0.0, 0.08, tr)) * (1.0 - smoothstep(0.02, 0.15, dot(sc.rgb, vec3(0.333))));
+        hdr += along * prof * (0.5 + h2) * vec3(0.55, 0.8, 1.0) * 9.0 * shadowMask;
+      }
     }
     if (uFlare > 0.0){
       // 14 · reflets anamorphiques : traînée horizontale à partir du bloom (zones très brillantes)
@@ -123,11 +142,15 @@ export const FINAL_FRAG = /* glsl */ `
     }
     vec3 c = aces(hdr * 0.95);
     vec2 q = (vUv - 0.5) * vec2(uAspect, 1.0);
-    c *= mix(1.0, smoothstep(1.25, 0.25, length(q)), 0.4);
+    // 3 · horizon du trou blanc (alpha négatif) : −1 = horizon, −2 = cœur en blanc pur
+    float wa = -texture2D(uScene, uv).a;
+    c *= mix(1.0, smoothstep(1.25, 0.25, length(q)), 0.4 * (1.0 - clamp(wa, 0.0, 1.0)));   // pas de vignette sur l'horizon blanc
     c = pow(c, vec3(1.0 / 2.2));
     float l = dot(c, vec3(0.333));
     float n = hash12(gl_FragCoord.xy + fract(uTime * 7.31) * 1000.0) - 0.5;
     c += n * uGrain * (0.25 + 0.75 * sqrt(l));
+    // 3 · cœur de l'horizon du trou blanc : blanc pur (255), sans grain ni vignette (alpha négatif de l'image du trou noir)
+    c = mix(c, vec3(1.0), clamp(wa - 1.0, 0.0, 1.0));
     // lettres détachées : r = couverture, g = couverture × absorption (prémultipliés)
     vec4 lt = texture2D(uLetters, uv);
     float cov = clamp(lt.a, 0.0, 1.0);
@@ -140,22 +163,17 @@ export const FINAL_FRAG = /* glsl */ `
 `;
 
 /* 2, 3 · Voile final (après la couche "front") : noir total, point blanc et écran blanc. Mélange prémultiplié :
-   sortie = couleur + destination × (1 − alpha). */
+   sortie = couleur + destination × (1 − alpha). Le point blanc est un disque de blanc pur (255), net, sans halo. */
 export const VEIL_FRAG = /* glsl */ `
   varying vec2 vUv;
-  uniform vec4 uVeil;   // x = noir, y = blanc, z = rayon du point blanc (NDC verticales), w = note (éclat à la naissance)
+  uniform vec4 uVeil;   // x = noir, y = blanc, z = rayon du point blanc (NDC verticales), w = réservé
   uniform float uAspect, uPx;
   void main(){
     vec2 q = (vUv * 2.0 - 1.0) * vec2(uAspect, 1.0);
     float d = length(q), R = uVeil.z;
-    float core = 0.0, halo = 0.0;
-    if (R > 0.0){
-      core = 1.0 - smoothstep(R * 0.55 - uPx, R + uPx, d);                    // disque blanc au bord doux
-      halo = exp(-d / (R * 1.6 + 0.01)) * (0.45 + 1.4 * uVeil.w) * (1.0 - core);   // lueur bleutée (#7fd6ff)
-    }
+    float core = R > 0.0 ? 1.0 - smoothstep(R - uPx, R + uPx, d) : 0.0;   // bord net (anticrénelé sur un pixel)
     float W = max(uVeil.y, core);
     float A = 1.0 - (1.0 - uVeil.x) * (1.0 - W);
-    vec3 c = vec3(W) + halo * vec3(0.5, 0.84, 1.0) * (1.0 - uVeil.y);
-    gl_FragColor = vec4(min(c, vec3(1.0)), clamp(max(A, halo * uVeil.x), 0.0, 1.0));
+    gl_FragColor = vec4(vec3(W), A);
   }
 `;

@@ -4,7 +4,7 @@ import { FS_VERT } from "./shaders/common";
 import { STARS_FRAG, STARS_VERT } from "./shaders/stars";
 import { BLACKHOLE_FRAG } from "./shaders/blackhole";
 import { BLUR_FRAG, BRIGHT_FRAG, FINAL_FRAG, VEIL_FRAG } from "./shaders/post";
-import { CAM_DIST, LAST_SLIDE, TAN_HALF, cameraPose, createNavigation, finale, makeFinale, makePose, shadowNdc, transitionScale } from "./timeline";
+import { CAM_DIST, FIN_CAPTURE_S, LAST_SLIDE, TAN_HALF, cameraPose, createNavigation, finale, makeFinale, makePose, shadowNdc, transitionScale } from "./timeline";
 import { createLetters } from "./text/letters";
 import { createQuality, type TierName } from "./quality";
 import { createRegistry } from "./scenes/registry";
@@ -154,8 +154,9 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
       uNebTex: { value: null as THREE.Texture | null }, uNebC: { value: new THREE.Vector4() },
       uNebE1: { value: new THREE.Vector3() }, uNebE2: { value: new THREE.Vector3() }, uNebF: { value: 0 }, uNebFill: { value: 0 },
       uBFar: { value: new THREE.Vector3(15, 4, 1) }, uSkySec: { value: new THREE.Vector2(0.25, 0.15) },
-      uDive: { value: new THREE.Vector4() }, uTunnel: { value: new THREE.Vector4() }, uTunBend: { value: new THREE.Vector2() },
+      uDive: { value: new THREE.Vector4() }, uAberr: { value: new THREE.Vector2() }, uTunnel: { value: new THREE.Vector4() }, uTunBend: { value: new THREE.Vector4() },
       uWhite: { value: new THREE.Vector4() },
+      uTunSpin: { value: 0 }, uCapTex: { value: null as THREE.Texture | null }, uCap: { value: new THREE.Vector4() },
       // 3 · palette du trou blanc (section 4) : bleu profond assombri au bord, #1b4dff, #7fd6ff, blanc au cœur
       uW0: { value: col("#1b4dff").multiplyScalar(0.3) }, uW1: { value: col("#1b4dff") }, uW2: { value: col("#7fd6ff") }, uW3: { value: col("#ffffff") },
     },
@@ -180,6 +181,7 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
       uBloom: { value: 0.9 }, uGrain: { value: 0.045 }, uTime: { value: 0 }, uAspect: { value: 1 },
       uWaves: { value: [0, 1, 2, 3].map(() => new THREE.Vector4()) }, uMotion: { value: new THREE.Vector2() },
       uChroma: { value: 0 }, uFlare: { value: 0 }, uStreak: { value: new THREE.Vector4() }, uRing: { value: 1 },
+      uRayHist: { value: new Array(12).fill(0) }, uRayOn: { value: 0 },
     },
     vertexShader: FS_VERT,
     fragmentShader: FINAL_FRAG,
@@ -205,7 +207,9 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
     a2: new THREE.WebGLRenderTarget(1, 1, rtOpts), t2: new THREE.WebGLRenderTarget(1, 1, rtOpts),
     letters: new THREE.WebGLRenderTarget(1, 1, { minFilter: THREE.LinearFilter, magFilter: THREE.LinearFilter, depthBuffer: false }),
     sky: new THREE.WebGLRenderTarget(SKY_W, SKY_H, rtOpts), // couche "sky" du registre (taille fixe)
+    cap: new THREE.WebGLRenderTarget(1, 1, rtOpts), // 2 · vue de la chute à l'horizon, plaquée sur les parois du tunnel
   };
+  bhMat.uniforms.uCapTex.value = rt.cap.texture;
   bhMat.uniforms.uSkyTex.value = rt.sky.texture;
   let iw = 1, ih = 1;
 
@@ -215,7 +219,7 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
     iw = Math.max(64, Math.round(w * DPR * P.resolution));
     ih = Math.max(64, Math.round(h * DPR * P.resolution));
     const fw = Math.round(w * DPR), fh = Math.round(h * DPR);
-    rt.stars.setSize(fw, fh); rt.letters.setSize(fw, fh); rt.scene.setSize(iw, ih);
+    rt.stars.setSize(fw, fh); rt.letters.setSize(fw, fh); rt.scene.setSize(iw, ih); rt.cap.setSize(iw, ih);
     finalMat.uniforms.uTexel.value.set(1 / iw, 1 / ih);
     rt.a1.setSize(iw >> 1, ih >> 1); rt.t1.setSize(iw >> 1, ih >> 1);
     rt.a2.setSize(iw >> 2, ih >> 2); rt.t2.setSize(iw >> 2, ih >> 2);
@@ -278,7 +282,7 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
     camR.copy(vTmp);
     camDist = camPos.length();
     tanHalf = pose.tanHalf;
-    rhNdc = shadowNdc(camDist, tanHalf);
+    rhNdc = pose.shadow > 0 ? pose.shadow : shadowNdc(camDist, tanHalf, pose.beta);
     const W = window.innerWidth, H = window.innerHeight;
     textCam.aspect = W / H;
     textCam.fov = (2 * Math.atan(tanHalf) * 180) / Math.PI;
@@ -313,8 +317,10 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
     neb: { tex: bu.uNebTex, c: bu.uNebC.value, e1: bu.uNebE1.value, e2: bu.uNebE2.value, front: bu.uNebF, fill: bu.uNebFill },
     dive: bu.uDive.value as THREE.Vector4,
     tunnel: bu.uTunnel.value as THREE.Vector4,
-    tunnelBend: bu.uTunBend.value as THREE.Vector2,
+    tunnelBend: bu.uTunBend.value as THREE.Vector4,
     white: bu.uWhite.value as THREE.Vector4,
+    cap: bu.uCap.value as THREE.Vector4,
+    tunnelSpin: bu.uTunSpin,
   };
   const frameParams: FrameParams = {
     s: 0, slide: 0, weight: 0, dt: 0, time: 0, camPos, camF, camR, camU, viewProj, bhScreen, bhNdc, rhNdc, tanHalf, fin,
@@ -334,6 +340,7 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
     bhParams.dive.set(0, 0, 0, 0);
     bhParams.tunnel.x = 0;
     bhParams.white.x = 0;
+    bhParams.cap.x = 0;
     scenes.update(f, P.tier);
   }
   /** Rend une couche du registre dans la cible donnée, par-dessus son contenu. */
@@ -356,6 +363,58 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
   const SKY_AXIS = new THREE.Vector3(0.35, 1, 0.2).normalize();
   const skyM4 = new THREE.Matrix4();
 
+  /**
+   * 2 · traits de lumière de la plongée : historique de l'intensité de naissance (12 cases de 0,1 s). Un trait né ne
+   * disparaît qu'en sortant de l'écran : la composition lit l'intensité au moment de sa naissance, pas l'actuelle.
+   */
+  const rays = { hist: finalMat.uniforms.uRayHist.value as number[], acc: 0, on: false };
+  let betaLag = 0;
+  function updateRays(dt: number) {
+    betaLag += (pose.beta - betaLag) * (1 - Math.exp(-dt / 0.12));
+    if (pose.beta === 0) betaLag = 0;
+    const h = rays.hist;
+    rays.acc += dt;
+    while (rays.acc >= 0.1) {
+      rays.acc -= 0.1;
+      for (let k = h.length - 1; k > 0; k--) h[k] = h[k - 1];
+      h[0] = 0;
+    }
+    h[0] = Math.max(h[0], composite.streak);
+    rays.on = h.some((v) => v > 0.001);
+  }
+  /**
+   * 2 · entrée dans le trou de ver : la vue de la chute, telle qu'à l'horizon (pose, champ, aberration, bleuissement de
+   * s = FIN_CAPTURE_S), est rendue à chaque image dans rt.cap (le disque continue de tourner) ; le tunnel l'utilise
+   * comme texture de ses parois. Au moment de la bascule, l'image est donc identique, dans les deux sens.
+   */
+  const capPose = makePose(), capFin = makeFinale();
+  const capR = new THREE.Vector3(), capU = new THREE.Vector3(), capF = new THREE.Vector3(), capDive = new THREE.Vector4();
+  function renderCapture() {
+    const u = bhMat.uniforms;
+    cameraPose(FIN_CAPTURE_S, parX * 0.05, parY * 0.025, capPose);
+    finale(FIN_CAPTURE_S, capFin);
+    capF.copy(capPose.target).sub(capPose.pos).normalize();
+    capR.crossVectors(capF, UP).normalize();
+    capU.crossVectors(capR, capF);
+    const cr = Math.cos(capPose.roll), sr = Math.sin(capPose.roll);
+    vTmp.copy(capR).multiplyScalar(cr).addScaledVector(capU, sr);
+    capU.multiplyScalar(cr).addScaledVector(capR, -sr);
+    capR.copy(vTmp);
+    u.uCamPos.value.copy(capPose.pos); u.uCamF.value.copy(capF); u.uCamR.value.copy(capR); u.uCamU.value.copy(capU);
+    u.uTanHalf.value = capPose.tanHalf;
+    u.uAberr.value.set(capPose.beta, capPose.beta - Math.max(0, pose.beta - betaLag)); // traînées du ciel : même vitesse qu'en ce moment
+    capDive.copy(bhParams.dive);
+    bhParams.dive.set(capFin.blue, capFin.bright, capFin.diskFade, 0);
+    const tx = bhParams.tunnel.x;
+    bhParams.tunnel.x = 0;
+    u.uIntensity.value = P.plasmaIntensity;
+    u.uDoppler.value = P.doppler;
+    u.uCapTex.value = null; // on dessine dans rt.cap : il ne doit pas être lié en entrée (boucle de rétroaction, rendu refusé)
+    pass(bhMat, rt.cap);
+    u.uCapTex.value = rt.cap.texture;
+    bhParams.tunnel.x = tx;
+    bhParams.dive.copy(capDive);
+  }
   /** Nombre de prises des traînées radiales (2, 3) selon le niveau de qualité. */
   const STREAK_TAPS = { haute: 14, moyenne: 10, basse: 6 } as const;
   function render() {
@@ -398,7 +457,10 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
       renderLayer("sky", rt.sky);
     }
     u.uTime.value = clock.disk;
+    if (bhParams.cap.x > 0) renderCapture();
     u.uTanHalf.value = tanHalf;
+    // 2 · aberration de la plongée : suit la caméra (timeline), pas un réglage d'élément ; y = β d'il y a ≈ 0,12 s (traînées)
+    u.uAberr.value.set(pose.beta, betaLag);
     u.uCamPos.value.copy(camPos); u.uCamF.value.copy(camF); u.uCamR.value.copy(camR); u.uCamU.value.copy(camU);
     u.uIntensity.value = P.plasmaIntensity;
     u.uDoppler.value = P.doppler;
@@ -423,6 +485,7 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
     f.uChroma.value = composite.chroma; f.uFlare.value = composite.flare; // uWaves et uMotion partagent leurs vecteurs avec `composite`
     f.uStreak.value.set((bhNdc.x + 1) / 2, (bhNdc.y + 1) / 2, composite.streak, STREAK_TAPS[P.tier]);
     f.uRing.value = Math.min(rhNdc, 4);
+    f.uRayOn.value = rays.on ? 1 : 0;
     pass(finalMat, null);
 
     // 6. couche "front" du registre, directement à l'écran
@@ -504,6 +567,7 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
     updateCamera(dt);
     letters.update({ camS: cam.s, explosion: P.explosion, bhScreen, rhNdc, textCam });
     updateScenes(dt);
+    updateRays(dt);
     render();
     // Simulation d'un GPU plus faible (dev) : le rendu complet est refait N-1 fois de plus (charge GPU × N)
     for (let k = 1; k < P.simGpu; k++) render();
@@ -559,6 +623,7 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
       window.addEventListener("resize", onResize);
       window.addEventListener("pointermove", onPointer);
       scenes.init();
+      cameraPose(FIN_CAPTURE_S, 0, 0, capPose); // précalcule le bord de l'ombre de la plongée (≈ 20 ms) au chargement, pas pendant la chute
       onResize();
       updateCamera(0);
       updateScenes(0);

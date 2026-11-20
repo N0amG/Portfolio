@@ -78,8 +78,13 @@ export interface BlackholeParams {
   /** 2 · trou de ver (le shader quitte le raymarching) : x = visibilité (0 = inactif), y = phase d'écoulement,
    *  z = torsion, w = rayon d'Einstein de la gorge (NDC verticales). */
   tunnel: THREE.Vector4;
-  /** 2 · trou de ver : courbure du tunnel (souris), en NDC. */
-  tunnelBend: THREE.Vector2;
+  /** 2 · trou de ver : xy = courbure du tunnel (souris, NDC), z = intérieur de la gorge noir (0..1), w = éclat. */
+  tunnelBend: THREE.Vector4;
+  /** 2 · entrée dans le trou de ver : image de la chute sur les parois. x = active (0/1), y = rayon de l'ombre au moment
+   *  de la capture (NDC), z = avance de l'écoulement depuis la capture, w = rotation depuis la capture (rad). */
+  cap: THREE.Vector4;
+  /** 2 · trou de ver : rotation de l'image (rad), même sens que le roulis de la chute. */
+  tunnelSpin: { value: number };
   /** 3 · trou blanc (même shader) : x = mode (0 = trou noir, 1 = trou blanc), y = vitesse d'éjection radiale du disque,
    *  z = éclat de l'horizon, w = halo autour de l'horizon. */
   white: THREE.Vector4;

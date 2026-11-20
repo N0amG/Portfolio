@@ -1,5 +1,5 @@
 import * as THREE from "three";
-import { FIN_RANGES, S } from "../timeline";
+import { FIN, FIN_RANGES, FIN_SPIN_H, S } from "../timeline";
 import { createJetRenderer } from "./jets";
 import type { FrameParams, SceneContext, SceneElement } from "./types";
 
@@ -28,7 +28,7 @@ function veil(f: FrameParams, black: number, white = 0, point = 0, note = 0) {
 // 2 · Plongée (S7 → S8, jusqu'à l'horizon)
 // ---------------------------------------------------------------------------
 export function createDive(): SceneElement {
-  const P = { streak: 0.6, blue: 1, bright: 0.35, chroma: 1 };
+  const P = { streak: 0.6, blue: 1, bright: 1, chroma: 1 };
   return {
     id: "plongee",
     label: "2 · Plongée (S7 → S8)",
@@ -41,11 +41,11 @@ export function createDive(): SceneElement {
     update(f: FrameParams) {
       const F = f.fin;
       // la lumière qui tombe avec nous : bleuie et plus brillante à l'approche de l'horizon
-      f.bh.dive.set(F.blue * P.blue, F.dive * F.dive * P.bright, 0, 0);
+      // (l'aberration du ciel suit la caméra : Pose.beta, appliquée par le moteur)
+      f.bh.dive.set(F.blue * P.blue, F.bright * P.bright, F.diskFade, 0);
       // l'anneau de photons éclate en traînées, aberration chromatique croissante
       f.composite.streak = Math.max(f.composite.streak, F.streak * P.streak);
       f.composite.chroma += F.chroma * P.chroma;
-      veil(f, F.black);
     },
     render: noop,
     dispose: noop,
@@ -62,7 +62,7 @@ export function createDive(): SceneElement {
 // 2 · Trou de ver (fin de S7 → S8, S8, début de S8 → S9 jusqu'à la coupure au noir)
 // ---------------------------------------------------------------------------
 export function createWormhole(): SceneElement {
-  const P = { speed: 2.2, twist: 0.35, throat: 0.075, breathe: 0.08, bend: 0.22, bright: 1, streak: 0.45, chroma: 1 };
+  const P = { speed: 2.2, twist: 0.35, throat: 0.075, breathe: 0.08, bend: 0.22, bright: 1, streak: 0.6, chroma: 1 };
   let phase = 0;
   return {
     id: "trou-de-ver",
@@ -78,9 +78,19 @@ export function createWormhole(): SceneElement {
       // écoulement continu ; il sort du noir lancé, ralentit, puis s'emballe juste avant la coupure
       phase += f.dt * P.speed * F.tunnelSpeed;
       if (phase > 4000) phase -= 4000; // précision du shader (la coordonnée d'écoulement reste petite)
-      f.bh.tunnel.set(Math.max(1e-4, F.tunnel * P.bright), phase, P.twist, P.throat * (1 + P.breathe * Math.sin(f.time * 1.3)));
-      // l'axe du tunnel se courbe vers la souris
-      f.bh.tunnelBend.set(f.mouse.x * P.bend, -f.mouse.y * P.bend);
+      // gorge : à l'entrée, elle a la taille de l'ombre vue pendant la chute (puis se resserre jusqu'à la croisière) ;
+      // au bout du tunnel, elle s'ouvre jusqu'à couvrir l'écran (sa sortie est noire)
+      const throat = P.throat * (1 + P.breathe * Math.sin(f.time * 1.3));
+      let rE = throat * Math.pow(FIN.THROAT_END / throat, F.tunnelEnd);
+      if (F.tunnelIntro > 0) rE *= Math.pow(Math.min(f.rhNdc, FIN.THROAT_END) / rE, F.tunnelIntro);
+      f.bh.tunnel.set(Math.max(1e-4, F.tunnel), phase, P.twist, rE);
+      // l'axe du tunnel se courbe vers la souris (et se redresse aux deux bouts) ; z = intérieur de la gorge noir
+      const b = P.bend * (1 - F.tunnelEnd) * (1 - F.tunnelIntro);
+      f.bh.tunnelBend.set(f.mouse.x * b, -f.mouse.y * b, Math.max(F.tunnelEnd, F.tunnelIntro), P.bright);
+      // rotation : celle de la chute, poursuivie dans le même sens (elle ralentit jusqu'à S8, sans jamais repartir en arrière)
+      f.bh.tunnelSpin.value = F.spin;
+      // entrée : la vue de la chute (capturée à l'horizon par le moteur) sert de texture aux parois et file vers l'extérieur
+      if (F.capture > 0) f.bh.cap.set(1, Math.min(f.rhNdc, FIN.THROAT_END), F.capFlow, f.bh.tunnelSpin.value - FIN_SPIN_H);
       f.composite.streak = Math.max(f.composite.streak, F.streak * P.streak);
       f.composite.chroma += F.chroma * P.chroma;
       veil(f, F.black);
@@ -104,7 +114,7 @@ export function createWormhole(): SceneElement {
 // 3 · Point blanc → trou blanc (+ jets façon quasar), jusqu'au contact (S10)
 // ---------------------------------------------------------------------------
 export function createWhiteHole(): SceneElement {
-  const P = { flow: 0.35, horizon: 1, halo: 1, note: 1, streak: 0.6, chroma: 1, jets: true };
+  const P = { flow: 0.35, horizon: 1, halo: 1, jets: true };
   // jets du quasar : mêmes jets que 11, plus longs, plus larges et plus rapides
   const jets = createJetRenderer({ length: 60, base: 1.6, width: 0.28, open: 0.035, twist: 0.2, bright: 2.2, knots: 11, knotSpeed: 0.8, decay: 1.0, beta: 0.8, beamP: 2.2 });
   let jetFade = 0;
@@ -119,14 +129,11 @@ export function createWhiteHole(): SceneElement {
     init: (ctx: SceneContext) => jets.init(ctx),
     update(f: FrameParams) {
       const F = f.fin;
-      veil(f, F.black, F.white, F.point, F.note * P.note);
+      veil(f, F.black, F.white, F.point);
       jetFade = 0;
       if (F.whiteHole <= 0) return;
       // même shader que le trou noir : palette bleue, flux inversé (matière éjectée), horizon qui émet
       f.bh.white.set(1, P.flow, P.horizon, P.halo);
-      // dézoom depuis le blanc : les traînées convergent, l'aberration s'éteint
-      f.composite.streak = Math.max(f.composite.streak, F.streak * P.streak);
-      f.composite.chroma += F.chroma * P.chroma;
       jetFade = P.jets ? THREE.MathUtils.smoothstep(F.emerge, 0.35, 0.95) : 0;
       jets.update(f, jetFade);
     },
@@ -138,9 +145,6 @@ export function createWhiteHole(): SceneElement {
       folder.add(P, "flow", 0, 1.5, 0.01).name("Éjection du disque");
       folder.add(P, "horizon", 0, 3, 0.05).name("Éclat de l'horizon");
       folder.add(P, "halo", 0, 3, 0.05).name("Halo");
-      folder.add(P, "note", 0, 3, 0.05).name("Éclat du point blanc (note)");
-      folder.add(P, "streak", 0, 1, 0.01).name("Traînées (dézoom)");
-      folder.add(P, "chroma", 0, 3, 0.05).name("Aberration chromatique");
       folder.add(P, "jets").name("Jets du quasar");
       jets.gui(folder.addFolder("Jets du quasar"));
     },

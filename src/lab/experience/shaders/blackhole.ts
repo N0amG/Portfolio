@@ -28,9 +28,14 @@ export const BLACKHOLE_FRAG = /* glsl */ `
     return cv > 0.0 ? textureLod(uNebTex, nuv, 0.0) * cv : vec4(0.0);
   }
   uniform vec3 uCamPos, uCamR, uCamU, uCamF, uC0, uC1, uC2, uC3;
-  uniform vec4 uDive;    // 2 · plongée : (bleuissement, surcroît d'éclat, -, -)
+  uniform vec4 uDive;    // 2 · plongée : (bleuissement, surcroît d'éclat, atténuation du disque en fin de chute, -)
+  uniform vec2 uAberr;   // 2 · plongée : vitesse de chute vers le trou noir (β), aberration relativiste ; y = β d'il y a un instant (traînées)
   uniform vec4 uTunnel;  // 2 · trou de ver : (visibilité, phase d'écoulement, torsion, rayon d'Einstein de la gorge) ; x = 0 : inactif
-  uniform vec2 uTunBend; // 2 · courbure du tunnel (souris)
+  uniform vec4 uTunBend; // 2 · trou de ver : xy = courbure du tunnel (souris), z = intérieur de la gorge noir (0..1), w = éclat
+  uniform float uTunSpin; // 2 · trou de ver : rotation de l'image (rad), même sens que le roulis de la chute
+  // 2 · entrée dans le trou de ver : image de la chute capturée à l'horizon, plaquée sur les parois.
+  // (active 0/1, rayon de l'ombre à la capture, avance de l'écoulement depuis, rotation depuis)
+  uniform sampler2D uCapTex; uniform vec4 uCap;
   uniform vec4 uWhite;   // 3 · trou blanc : (mode 0/1, vitesse d'éjection radiale, éclat de l'horizon, halo)
   uniform vec3 uW0, uW1, uW2, uW3;   // 3 · palette du trou blanc (bord → cœur)
   uniform vec3 uBFar;    // raccord rayons raymarchés / analytiques : (b de bascule, largeur du fondu en b, poids du terme de 2e ordre)
@@ -122,6 +127,35 @@ export const BLACKHOLE_FRAG = /* glsl */ `
     return normalize(rd * cos(defl) + toC * sin(defl));
   }
 
+  // étoiles ponctuelles seules (sans la nébulosité), pour les traînées de la plongée
+  vec3 starPts(vec3 d){
+    d = uSkyRot * d;
+    vec3 c = vec3(0.0);
+    for (int l = 0; l < 2; l++){
+      float sc = l == 0 ? 70.0 : 160.0;
+      vec3 p = d * sc;
+      vec3 id = floor(p);
+      vec3 h = hash33(id + float(l) * 31.7);
+      if (h.x > 0.8){
+        vec3 sp = id + 0.15 + 0.7 * hash33(id + 4.7);
+        float dist2 = dot(p - sp, p - sp);
+        c += exp(-dist2 * (l == 0 ? 150.0 : 70.0)) * (0.5 + 3.0 * h.y * h.y * h.y) * mix(vec3(0.75, 0.85, 1.0), vec3(1.0, 0.85, 0.65), h.z);
+      }
+    }
+    return c;
+  }
+  // aberration : direction vue (repère de la caméra qui tombe le long de nf à la vitesse beta) → repère statique
+  vec3 aberrate(vec3 rd, vec3 nf, float beta){
+    float co = dot(rd, nf);
+    float cs = (co - beta) / (1.0 - beta * co);
+    vec3 pp = rd - nf * co;
+    float pl = length(pp);
+    return pl > 1e-6 ? nf * cs + pp / pl * sqrt(max(0.0, 1.0 - cs * cs)) : nf * sign(cs);
+  }
+  vec3 skyAt(vec3 d){
+    return textureLod(uSkyTex, vec2(atan(d.z, d.x) * 0.15915494 + 0.5, asin(clamp(d.y, -1.0, 1.0)) * 0.31830989 + 0.5), 0.0).rgb;
+  }
+
   vec3 starField(vec3 d){
     d = uSkyRot * d;                   // le ciel tourne lentement : il défile à travers la lentille
     vec3 c = vec3(0.0);
@@ -156,17 +190,20 @@ export const BLACKHOLE_FRAG = /* glsl */ `
   // 2 · trou de ver, en espace écran (p : unités NDC verticales, centre de l'écran). Parois tapissées de la lumière du ciel
   // étirée le long de l'écoulement ; gorge en anneau d'Einstein (lentille extrême : les parois convergent sur l'anneau
   // des deux côtés, image secondaire retournée à l'intérieur), lueur blanche de l'autre côté.
+  float tunT;   // transmission de l'image du tunnel (non nulle là où l'image de la chute est encore plaquée)
   vec3 tunnelCol(vec2 p){
+    tunT = 0.0;
     float r = length(p);
-    // l'axe du tunnel se courbe avec la profondeur (souris + lente ondulation)
-    vec2 bend = uTunBend + 0.07 * vec2(sin(uTunnel.y * 0.11), cos(uTunnel.y * 0.083));
+    // l'axe du tunnel se courbe avec la profondeur (souris + lente ondulation ; droit à l'entrée et au bout)
+    vec2 bend = uTunBend.xy + 0.07 * (1.0 - uTunBend.z) * vec2(sin(uTunnel.y * 0.11), cos(uTunnel.y * 0.083));
     p -= bend * (1.0 - 1.0 / (1.0 + 0.3 / max(r, 1e-3)));
     r = length(p);
     float rE = uTunnel.w;
     float rs = abs(r - rE * rE / max(r, 1e-4));
     float inner = step(r, rE);
     float z = 1.0 / max(rs, 1e-3);                                  // profondeur dans le tunnel
-    float a = atan(p.y, p.x) + uTunnel.z * log(1.0 + z) + inner * 3.14159265;   // torsion ; image secondaire retournée
+    float a0 = atan(p.y, p.x);
+    float a = a0 + uTunSpin + uTunnel.z * log(1.0 + z) + inner * 3.14159265;   // rotation, torsion ; image secondaire retournée
     float w = z + uTunnel.y;                                        // coordonnée d'écoulement
     float an = a * 0.15915494 + 0.5;
     vec3 c = vec3(0.0);
@@ -177,24 +214,54 @@ export const BLACKHOLE_FRAG = /* glsl */ `
     c += mix(uW1, uW2, neb) * smoothstep(0.35, 0.8, neb) * 0.55;    // gaz bleu qui s'écoule
     c += uC1 * 0.3 * smoothstep(0.55, 0.85, fbm2(cyl * 1.9 + 5.0)); // restes ambrés du disque
     if (uSkyOn > 0.5) c += textureLod(uSkyTex, vec2(an, 0.5 + 0.4 * sin(w * 0.05)), 0.0).rgb * 2.5;   // ciel profond étiré
-    c *= exp(-z * 0.16) * (1.0 - 0.65 * inner);                      // les parois s'assombrissent vers la gorge
+    // les parois s'assombrissent vers la gorge ; au bout, l'intérieur de la gorge (la sortie) est noir
+    c *= exp(-z * 0.16) * (1.0 - mix(0.65, 1.0, smoothstep(0.0, 0.25, uTunBend.z)) * inner);
     c *= 0.55 + 0.45 * smoothstep(1.9, 0.5, r);                       // parois toutes proches (bords) : moins nettes
     // anneau d'Einstein de la gorge et lueur blanche de l'autre côté (annonce du point blanc)
-    float ring = exp(-pow((r - rE) / (0.006 + 0.08 * rE), 2.0));
-    c += ring * mix(uW2, uW3, 0.5) * 2.4;
-    c += inner * uW3 * 0.5 * exp(-3.0 * r / max(rE, 1e-3));
-    return c * uTunnel.x;
+    float ring = exp(-pow((r - rE) / (0.006 + 0.08 * min(rE, 0.12)), 2.0));   // liseré fin, même quand la gorge s'ouvre
+    c += ring * mix(uW2, uW3, 0.5) * 2.4 * (1.0 - 0.75 * uTunBend.z);
+    c += inner * uW3 * 0.5 * exp(-3.0 * r / max(rE, 1e-3)) * (1.0 - smoothstep(0.0, 0.25, uTunBend.z));   // au bout : la sortie est noire
+    c *= uTunBend.w;
+    if (uCap.x > 0.0 && inner < 0.5){
+      // entrée : l'image de la chute est la texture des parois. Le point de paroi vu ici à la profondeur z était, au
+      // moment de la capture, à la profondeur z + avance : on retrouve son rayon à l'écran d'alors (r − R²/r = 1/z),
+      // et sa direction, tournée de la rotation depuis. Au départ (avance 0, gorge = ombre) l'image est identique ;
+      // ensuite elle file vers l'extérieur en s'étirant, et le tunnel la remplace depuis la gorge.
+      float zH = z + uCap.z;
+      float x = 1.0 / zH, R = uCap.y;
+      float rH = 0.5 * (x + sqrt(x * x + 4.0 * R * R));
+      float aH = a0 + uCap.w;
+      vec2 cuv = rH * vec2(cos(aH), sin(aH)) / vec2(uRes.x / uRes.y, 1.0) * 0.5 + 0.5;
+      vec4 cap = textureLod(uCapTex, cuv, 0.0);
+      float wc = 1.0 - smoothstep(20.0, 40.0, zH);
+      c = mix(c, cap.rgb, wc);
+      tunT = clamp(cap.a, 0.0, 1.0) * wc;
+    }
+    return c;
   }
 
   void main(){
     vec2 uv = vUv * 2.0 - 1.0;
     uv.x *= uRes.x / uRes.y;
-    if (uTunnel.x > 0.0){
+    if (uTunnel.x >= 0.999){
       // 2 · trou de ver : plus de raymarching (la caméra est sous l'horizon) ; transmission nulle (étoiles aspirées cachées)
-      gl_FragColor = vec4(tunnelCol(uv), 0.0);
+      vec3 tc = tunnelCol(uv);
+      gl_FragColor = vec4(tc, tunT);
       return;
     }
     vec3 rd = normalize(uCamF + uTanHalf * (uv.x * uCamR + uv.y * uCamU));
+    float dop = 1.0;
+    vec3 rd0 = rd;
+    if (uAberr.x > 0.0){
+      // 2 · plongée : aberration relativiste. La caméra tombe vers le trou noir à la vitesse β : chaque direction vue est
+      // ramenée au repère statique (cos θs = (cos θ − β) / (1 − β cos θ)). Tout le ciel (étoiles, ciel profond,
+      // nébuleuse, texte géant) et le disque se resserrent vers l'avant et se déforment avec nous ; l'ombre ne couvre
+      // plus l'écran. Facteur Doppler D = 1 / (γ (1 − β cos θ)) : l'avant bleuit et brille, l'arrière s'éteint.
+      vec3 nf = normalize(-uCamPos);
+      float co = dot(rd, nf);
+      rd = aberrate(rd, nf, uAberr.x);
+      dop = sqrt(1.0 - uAberr.x * uAberr.x) / (1.0 - uAberr.x * co);
+    }
     vec3 hv = cross(uCamPos, rd);
     float h2 = dot(hv, hv);
     float b = sqrt(h2);                       // paramètre d'impact (rayon droit)
@@ -255,16 +322,38 @@ export const BLACKHOLE_FRAG = /* glsl */ `
       title = uTitleCol * (texture2D(uTitleTex, tuv).a * inside * uTitleA2.w);
     }
     vec3 bg = vec3(0.0);
+    float whiteCore = 0.0;
     if (captured && uWhite.x > 0.0){
-      // 3 · horizon du trou blanc : il émet. Cœur blanc éblouissant, limbe horizon bleu, liseré bleu profond
-      // (b est conservé le long du rayon : b / b_c = position dans le disque de l'horizon, 1 au bord)
+      // 3 · horizon du trou blanc : il émet. Cœur blanc pur, limbe horizon bleu, liseré bleu profond
+      // (b est conservé le long du rayon : b / b_c = position dans le disque de l'horizon, 1 au bord).
+      // Le cœur (b / b_c < 0,62) est marqué pour être composé en blanc pur (255) après le tonemapping : vu de tout près
+      // au début du dézoom, il remplit l'écran exactement comme l'écran blanc qui le précède.
       float lb = clamp(b / 2.598, 0.0, 1.0);
-      vec3 hc = mix(uW3 * 1.5, uW2 * 1.15, smoothstep(0.35, 0.9, lb));
-      hc = mix(hc, uW1 * 1.1, smoothstep(0.88, 1.0, lb));
+      vec3 hc = mix(uW3 * 1.5, uW2 * 1.6, smoothstep(0.62, 0.92, lb));
+      hc = mix(hc, uW1 * 1.1, smoothstep(0.92, 1.0, lb));
       acc_col += (1.0 - alpha) * hc * uWhite.z * uWhite.x;
+      whiteCore = (1.0 - smoothstep(0.62, 0.8, lb)) * (1.0 - alpha) * uWhite.x * min(uWhite.z, 1.0);
     }
     if (!captured){
       bg = starField(dir) + title;
+      vec3 trailAx = vec3(0.0);
+      float trailAng = 0.0;
+      if (uAberr.x > 0.0 && abs(uAberr.x - uAberr.y) > 1e-4){
+        // 2 · plongée : chaque astre glisse très vite dans l'image pendant que la vitesse de chute augmente ; on trace sa
+        // traînée le long de ce glissement (de sa position d'il y a un instant à l'actuelle) : le ciel se déforme avec nous
+        vec3 rdL = aberrate(rd0, normalize(-uCamPos), uAberr.y);
+        vec3 ax = cross(rd, rdL);
+        float sa = length(ax);
+        if (sa > 1e-5){
+          trailAx = ax / sa;
+          trailAng = atan(sa, dot(rd, rdL));
+          for (int k = 1; k <= 4; k++){
+            float a = trailAng * float(k) / 4.0;
+            vec3 dk = dir * cos(a) + cross(trailAx, dir) * sin(a) + trailAx * dot(trailAx, dir) * (1.0 - cos(a));
+            bg += starPts(dk) * (0.75 - 0.15 * float(k));
+          }
+        }
+      }
       if (uSkyOn > 0.5){
         // Image secondaire (rayon passé de l'autre côté de l'axe caméra → trou noir) : ses objets sont comprimés en
         // anneau fin autour de l'ombre (ex. S3, galaxie aspirée), exagéré ici car le ciel est traité comme infiniment
@@ -277,7 +366,15 @@ export const BLACKHOLE_FRAG = /* glsl */ `
           float beta = dot(dir - ax * dot(ax, dir), it) * inversesqrt(max(dot(it, it), 1e-12));
           wsec = mix(uSkySec.x, 1.0, smoothstep(-uSkySec.y, uSkySec.y * 0.25, beta));
         }
-        bg += wsec * textureLod(uSkyTex, vec2(atan(dir.z, dir.x) * 0.15915494 + 0.5, asin(clamp(dir.y, -1.0, 1.0)) * 0.31830989 + 0.5), 0.0).rgb;
+        bg += wsec * skyAt(dir);
+        if (trailAng > 0.0){
+          // traînées du ciel profond (galaxies, nébuleuses) pendant la plongée
+          for (int k = 1; k <= 3; k++){
+            float a = trailAng * float(k) / 3.0;
+            vec3 dk = dir * cos(a) + cross(trailAx, dir) * sin(a) + trailAx * dot(trailAx, dir) * (1.0 - cos(a));
+            bg += wsec * skyAt(dk) * (0.6 - 0.15 * float(k));
+          }
+        }
       }
       if (uNebC.w > 0.0 && uNebF < 1.0){
         // 4 · nébuleuse derrière le trou noir : devant le fond (sa poussière masque les étoiles), lentille gratuite
@@ -299,9 +396,16 @@ export const BLACKHOLE_FRAG = /* glsl */ `
         acc_col += (1.0 - alpha * 0.5) * uWhite.w * uWhite.x * mix(uW2, uW1, smoothstep(2.6, 9.0, b)) * exp(-(b - 2.598) * 0.45) * 0.6;
       }
     }
+    if (uAberr.x > 0.0){
+      // Doppler de la chute : le ciel de l'avant s'éclaire fort, le disque (déjà très brillant de près) beaucoup moins
+      acc_col *= pow(dop, 0.4) * (1.0 - uDive.z);   // en fin de chute le disque est derrière nous : il s'efface
+      bg *= pow(dop, 1.3);
+    }
     acc_col += (1.0 - alpha) * bg;
     // alpha = transmission vers le fond : sert à composer les étoiles aspirées (pleine résolution) dans la passe finale
-    float trans = captured ? 0.0 : (1.0 - alpha);
+    // (trou blanc : alpha négatif, lu par la composition finale : −1 sur l'horizon (pas de vignette), jusqu'à −2 sur
+    //  son cœur (part de blanc pur))
+    float trans = captured ? -(min(uWhite.x, 1.0) + whiteCore) : (1.0 - alpha);
     if (uNebC.w > 0.0 && uNebF > 0.0){
       // 4 · caméra dans la nébuleuse (traversée) : le gaz est devant tout, trou noir compris (rayon droit, pas de lentille)
       vec4 nb = nebAt(rd);
@@ -310,10 +414,16 @@ export const BLACKHOLE_FRAG = /* glsl */ `
       trans *= 1.0 - nb.a * min(g, 1.0);
     }
     if (uDive.x > 0.0){
-      // 2 · plongée : la lumière qui tombe avec nous est décalée vers le bleu et plus brillante
+      // 2 · plongée : la lumière reçue de l'avant est décalée vers le bleu (selon D quand la caméra tombe) et plus brillante
       float l = dot(acc_col, vec3(0.2126, 0.7152, 0.0722));
       vec3 tint = vec3(0.22, 0.5, 1.35);
-      acc_col = mix(acc_col, mix(acc_col * tint, l * tint, 0.5), uDive.x) * (1.0 + uDive.y);
+      float bl = uDive.x * (uAberr.x > 0.0 ? smoothstep(0.7, 2.0, dop) : 1.0);
+      acc_col = mix(acc_col, mix(acc_col * tint, l * tint, 0.5), bl) * (1.0 + uDive.y);
+    }
+    if (uTunnel.x > 0.0){
+      // 2 · entrée dans le trou de ver : fondu enchaîné (l'ombre devient la gorge, le ciel déformé devient les parois)
+      acc_col = mix(acc_col, tunnelCol(uv), uTunnel.x);
+      trans *= 1.0 - uTunnel.x;
     }
     gl_FragColor = vec4(acc_col, trans);
   }
