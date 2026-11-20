@@ -15,7 +15,7 @@ import type { FrameParams, SceneContext, SceneElement } from "./types";
      et celle de la planète sur les anneaux (distance du rayon lumineux au centre de la sphère, bord adouci).
    - Couche "front", tampon de profondeur vidé avant la passe : la planète cache ce qui est derrière (trou noir,
      nébuleuse, étoiles) ; elle est toujours devant le plan du trou noir pendant son passage (pas de lentille).
-   - Active seulement de s = 3 à 4 (plage `range`) ; fondu en taille aux deux bouts de la plage.
+   - Active de s = 2,9 à 4,2 (plage `range`), jamais de fondu visible : à S5 elle reste là, petite, devant la nébuleuse ; la nébuleuse passe devant elle : chaque fragment lit le patch raymarché de la nébuleuse (opacité + émission) sur sa ligne de visée et se rend transparent là où le gaz est dense (réglage « Occlusion »). Plage jusqu'à s = 4,35 (caméra au cœur du gaz, planète entièrement cachée).
    Aucune texture : tout est procédural.
    ─────────────────────────────────────────────────────────── */
 
@@ -30,6 +30,20 @@ const COMMON = /* glsl */ `
   }
   uniform vec3 uC, uL, uN, uCamPos;
   uniform float uR, uRin, uRout, uRingOp, uScale;
+  // occlusion par la nébuleuse : le patch raymarché (uniforms uNeb*) est sur la ligne de visée ; son opacité (poussière)
+  // et son émission cachent la planète quand le gaz passe devant elle (elle est derrière la nébuleuse vue de S5)
+  uniform sampler2D uNebTex; uniform vec4 uNebC; uniform vec3 uNebE1, uNebE2; uniform float uOccK;
+  float nebOcc(vec3 w){
+    if (uNebC.w <= 0.0) return 1.0;
+    vec3 d = normalize(w - uCamPos);
+    float dc = dot(d, uNebC.xyz);
+    if (dc <= 0.05) return 1.0;
+    vec2 uv = vec2(dot(d, uNebE1), dot(d, uNebE2)) / dc * 0.5 + 0.5;
+    if (uv.x < 0.0 || uv.x > 1.0 || uv.y < 0.0 || uv.y > 1.0) return 1.0;
+    vec4 t = texture2D(uNebTex, uv);
+    float o = clamp(t.a + dot(t.rgb, vec3(0.33)) * 0.6, 0.0, 1.0);
+    return 1.0 - clamp(o * uOccK, 0.0, 1.0);
+  }
   // densité des anneaux en fonction de u = (ρ − rin) / (rout − rin), 0..1
   float ringDensity(float u){
     float bands = 0.30 + 0.70 * vn1(u * 26.0 + 3.0) * (0.55 + 0.45 * vn1(u * 71.0));
@@ -55,6 +69,8 @@ const PLANET_FRAG = /* glsl */ `
   uniform float uTime, uAtm, uLight;
   varying vec3 vN, vW;
   void main(){
+    float occ = nebOcc(vW);
+    if (occ < 0.004) discard;
     vec3 N = normalize(vN);
     vec3 V = normalize(uCamPos - vW);
     vec3 L = normalize(uL - vW);
@@ -87,7 +103,7 @@ const PLANET_FRAG = /* glsl */ `
     // atmosphère fine : liseré de Fresnel, plus lumineux côté éclairé
     float rim = pow(1.0 - max(dot(N, V), 0.0), 3.5);
     col += vec3(0.50, 0.76, 1.0) * rim * (0.10 + 0.9 * smoothstep(-0.25, 0.6, lam)) * uAtm;
-    gl_FragColor = vec4(1.0 - exp(-col * 1.5), 1.0);
+    gl_FragColor = vec4(1.0 - exp(-col * 1.5), occ);
   }
 `;
 
@@ -96,11 +112,12 @@ const SHELL_FRAG = /* glsl */ `
   uniform float uAtm;
   varying vec3 vN, vW;
   void main(){
+    float occ = nebOcc(vW);
     vec3 N = normalize(vN);
     vec3 V = normalize(uCamPos - vW);
     float k = clamp(-dot(N, V) / 0.34, 0.0, 1.0);      // 1 au bord de la planète, 0 au bord de la coque
     float lit = smoothstep(-0.3, 0.5, dot(N, normalize(uL - vW)));
-    float g = pow(k, 1.6) * (0.08 + lit) * uAtm;
+    float g = pow(k, 1.6) * (0.08 + lit) * uAtm * occ;
     gl_FragColor = vec4(vec3(0.45, 0.72, 1.0) * g * 0.75, 1.0);
   }
 `;
@@ -131,6 +148,7 @@ const RING_FRAG = /* glsl */ `
     float rho = length(vQ) * uRout;
     float u = (rho - uRin) / (uRout - uRin);
     if (u <= 0.0 || u >= 1.0) discard;
+    float occ = nebOcc(vW);
     float dens = ringDensity(u);
     vec3 pr = (vW - uC) / uScale;
     vec3 L = normalize(uL - vW), V = normalize(uCamPos - vW);
@@ -145,7 +163,7 @@ const RING_FRAG = /* glsl */ `
     alb = mix(alb, vec3(0.95, 0.80, 0.55), vn1(u * 9.0) * 0.4);
     vec3 col = alb * vec3(0.82, 0.93, 1.0) * lit * shadow * uLight + alb * vec3(0.106, 0.302, 1.0) * 0.02;
     float edgeSoft = 1.0;
-    gl_FragColor = vec4(1.0 - exp(-col * 1.5), dens * uRingOp * edgeSoft);
+    gl_FragColor = vec4(1.0 - exp(-col * 1.5), dens * uRingOp * edgeSoft * occ);
   }
 `;
 
@@ -154,15 +172,18 @@ export function createPlanet(): SceneElement {
     // position relative au pulsar (monde)
     ox: 5, oy: 8.9, oz: 27.3,
     radius: 4.2, ringIn: 1.45, ringOut: 2.7, ringOpacity: 0.9,
-    tiltA: 0.55, tiltB: -0.35, light: 4.5, atmosphere: 1.8, spinSpeed: 1,
-    sIn: 3.0, sIn1: 3.06, sOut0: 3.82, sOut1: 3.98,
+    occlusion: 3, tiltA: 0.55, tiltB: -0.35, light: 4.5, atmosphere: 1.8, spinSpeed: 1,
+    sIn: 2.9, sIn1: 2.95, sOut0: 4.3, sOut1: 4.35,
   };
   let scene: THREE.Scene, planetMat: THREE.ShaderMaterial, shellMat: THREE.ShaderMaterial, ringMat: THREE.ShaderMaterial;
   let sphereGeo: THREE.SphereGeometry, shellGeo: THREE.SphereGeometry, quadGeo: THREE.PlaneGeometry;
   const all: THREE.ShaderMaterial[] = [];
   const pulsar = new THREE.Vector3(...PULSAR_POS);
   const C = new THREE.Vector3(), N = new THREE.Vector3(), Ra = new THREE.Vector3(), Rb = new THREE.Vector3();
-  const CAM = new THREE.Vector3();
+  const CAM = new THREE.Vector3(), zero4 = new THREE.Vector4();
+  const emptyTex = new THREE.DataTexture(new Uint8Array([0, 0, 0, 0]), 1, 1);
+  emptyTex.needsUpdate = true;
+  let bh: FrameParams["bh"];
 
   function frame() {
     C.set(pulsar.x + P.ox, pulsar.y + P.oy, pulsar.z + P.oz);
@@ -177,7 +198,7 @@ export function createPlanet(): SceneElement {
     id: "planete",
     label: "7 · Planète à anneaux (S4 → S5)",
     slides: [S(4)],
-    range: [3, 4],
+    range: [2.9, 4.35],
     cost: "leger", // à confirmer par la mesure (voir SPEC.md, lot V5)
     minTier: "basse",
     layers: ["front"],
@@ -185,7 +206,7 @@ export function createPlanet(): SceneElement {
       frame();
       const shared = () => ({
         uC: { value: C }, uL: { value: pulsar }, uN: { value: N }, uCamPos: { value: CAM },
-        uR: { value: P.radius }, uRin: { value: 1 }, uRout: { value: 1 }, uRingOp: { value: 1 }, uScale: { value: 1 },
+        uNebTex: { value: null }, uNebC: { value: new THREE.Vector4() }, uNebE1: { value: new THREE.Vector3() }, uNebE2: { value: new THREE.Vector3() }, uOccK: { value: 1 }, uR: { value: P.radius }, uRin: { value: 1 }, uRout: { value: 1 }, uRingOp: { value: 1 }, uScale: { value: 1 },
         uLight: { value: 1 }, uAtm: { value: 1 }, uTime: { value: 0 },
       });
       sphereGeo = new THREE.SphereGeometry(1, 64, 48);
@@ -202,6 +223,7 @@ export function createPlanet(): SceneElement {
         side: THREE.DoubleSide, transparent: true, depthTest: true, depthWrite: false,
       });
       all.push(planetMat, shellMat, ringMat);
+      planetMat.transparent = true;
       const planet = new THREE.Mesh(sphereGeo, planetMat), shell = new THREE.Mesh(shellGeo, shellMat), ring = new THREE.Mesh(quadGeo, ringMat);
       shell.renderOrder = 1; ring.renderOrder = 2;
       for (const m of [planet, shell, ring]) m.frustumCulled = false;
@@ -210,19 +232,29 @@ export function createPlanet(): SceneElement {
     update(f: FrameParams) {
       CAM.copy(f.camPos);
       const k = THREE.MathUtils.smoothstep(f.s, P.sIn, P.sIn1) * (1 - THREE.MathUtils.smoothstep(f.s, P.sOut0, P.sOut1));
+      bh = f.bh;
       for (const m of all) {
         const u = m.uniforms;
+        u.uOccK.value = P.occlusion;
         u.uR.value = P.radius; u.uRin.value = P.radius * P.ringIn; u.uRout.value = P.radius * P.ringOut;
         u.uRingOp.value = P.ringOpacity; u.uScale.value = k; u.uLight.value = P.light; u.uAtm.value = P.atmosphere;
         u.uTime.value = f.time * P.spinSpeed;
       }
     },
     render(_layer, ctx: SceneContext) {
+      // patch de la nébuleuse de cette image (rempli par nebula.ts pendant les update)
+      const nb = bh.neb;
+      for (const m of all) {
+        const u = m.uniforms;
+        u.uNebTex.value = nb.tex.value ?? emptyTex;
+        (u.uNebC.value as THREE.Vector4).copy(nb.tex.value ? nb.c : zero4);
+        (u.uNebE1.value as THREE.Vector3).copy(nb.e1); (u.uNebE2.value as THREE.Vector3).copy(nb.e2);
+      }
       ctx.renderer.clearDepth();
       ctx.renderer.render(scene, ctx.camera);
     },
     dispose() {
-      sphereGeo.dispose(); shellGeo.dispose(); quadGeo.dispose();
+      emptyTex.dispose(); sphereGeo.dispose(); shellGeo.dispose(); quadGeo.dispose();
       for (const m of all) m.dispose();
     },
     gui(folder) {
@@ -236,6 +268,7 @@ export function createPlanet(): SceneElement {
       folder.add(P, "tiltB", -3.14, 3.14, 0.01).name("Direction de l'inclinaison").onChange(frame);
       folder.add(P, "light", 0, 10, 0.05).name("Éclairage du pulsar");
       folder.add(P, "atmosphere", 0, 3, 0.05).name("Atmosphère");
+      folder.add(P, "occlusion", 0, 3, 0.05).name("Occlusion par la nébuleuse");
       folder.add(P, "spinSpeed", 0, 10, 0.1).name("Vitesse des bandes");
       const w = folder.addFolder("Fenêtre en s (fondu en taille)");
       w.add(P, "sIn", 3, 3.5, 0.01).name("Entrée : début");

@@ -124,6 +124,9 @@ export const FIN = {
   /** S8 → S9, durées des phases (s, avec la durée de base de 3,2 s) : fin du tunnel (accélération jusqu'au bout), noir,
    *  point blanc lointain, approche de plus en plus rapide, écran blanc, dézoom (sans fondu : le blanc est le cœur du trou blanc). */
   EM: { TUNNEL: 4.5, BLACK: 0.5, FAR: 2, APPROACH: 1.5, WHITE: 1.5, DEZOOM: 4.5 },
+  /** Dézoom depuis le blanc (retour de Noam du 20/11/2026 : « 50 % plus lent au début ») : il démarre à SLOW_RATE de sa
+   *  vitesse, puis la retrouve progressivement sur SLOW_RAMP s. Le dézoom dure DEZOOM + (1 − SLOW_RATE) · SLOW_RAMP / 2 s. */
+  SLOW_RATE: 0.5, SLOW_RAMP: 2,
   /** Fin du tunnel : vitesse d'écoulement atteinte au bout (× la croisière) ; rayon final de la gorge (couvre l'écran). */
   TUNNEL_TOP: 14, THROAT_END: 2.4,
   /** Rayon du point blanc (NDC verticales) : à sa naissance, puis à la fin de la phase lointaine ; ensuite il couvre l'écran. */
@@ -233,11 +236,22 @@ export const FIN_CAPTURE_S = DIVE_I + FIN.HORIZON;
 export const FIN_SPIN_H = FIN.ROLL;
 /** S8 → S9 : repères en temps réel normalisé τ (0..1), déduits des durées de FIN.EM. */
 const EMT = (() => {
-  const e = FIN.EM, T = e.TUNNEL + e.BLACK + e.FAR + e.APPROACH + e.WHITE + e.DEZOOM;
+  const e = FIN.EM, T = e.TUNNEL + e.BLACK + e.FAR + e.APPROACH + e.WHITE + e.DEZOOM + (1 - FIN.SLOW_RATE) * FIN.SLOW_RAMP / 2;
   const cut = e.TUNNEL / T, point = cut + e.BLACK / T, near = point + e.FAR / T, full = near + e.APPROACH / T;
   const dz = full + e.WHITE / T;
   return { T, cut, point, near, full, switch: (full + dz) / 2, dz };
 })();
+/**
+ * Dézoom depuis le blanc : progression 0 → 1 (départ et arrivée au repos) pour le temps réel normalisé τ de S8 → S9.
+ * Le temps du dézoom est ralenti au début : vitesse SLOW_RATE, qui remonte à 1 sur SLOW_RAMP s (sans à-coup).
+ */
+function emergeAt(tau: number) {
+  const x = Math.max(0, (tau - EMT.dz) * EMT.T); // secondes depuis le début du dézoom
+  const R = FIN.SLOW_RATE, L = FIN.SLOW_RAMP;
+  const u = Math.min(1, x / L);
+  const ramp = x < L ? L * (u * u * u - (u * u * u * u) / 2) : L / 2 + (x - L); // ∫ smoothstep
+  return sstep(0, 1, (R * x + (1 - R) * ramp) / FIN.EM.DEZOOM);
+}
 /** Plages de s des trois éléments lourds de la fin (jamais deux actifs en même temps : le noir et le blanc servent de coupures). */
 export const FIN_RANGES = {
   dive: [DIVE_I, DIVE_I + FIN.HORIZON] as const,
@@ -363,7 +377,7 @@ export function finale(s: number, o: Finale): Finale {
     if (tau < EMT.dz) { o.white = 1; return o; } // écran blanc tenu
     // dézoom lent, qui part et arrive au repos. Pas de fondu : au départ, la caméra est si près du cœur de l'horizon
     // (rendu en blanc pur) qu'il remplit l'écran, le contour bleu juste au-delà des bords ; on recule doucement.
-    o.emerge = sstep(EMT.dz, 1, tau);
+    o.emerge = emergeAt(tau);
     return o;
   }
   o.whiteHole = 1;
@@ -575,7 +589,7 @@ function finPose(A: Key, B: Key, t: number, parAz: number, parEl: number, out: P
     } else {
       // dézoom depuis le blanc : recul lent depuis le cœur blanc de l'horizon, champ qui se resserre, tour défait
       // (posée au départ du dézoom sous le blanc tenu, puis recul lent qui part et arrive au repos)
-      const e = sstep(EMT.dz, 1, tau);
+      const e = emergeAt(tau);
       _fk.dist = lerpLog(FIN.EMERGE_R, B.dist, e);
       _fk.az = B.az - FIN.EMERGE_SWIRL * (1 - e) * (1 - e);
       _fk.el = B.el;

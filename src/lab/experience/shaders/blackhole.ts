@@ -179,8 +179,10 @@ export const BLACKHOLE_FRAG = /* glsl */ `
 
   // 2 · trou de ver : traînée de lumière dans une cellule (g.x = colonne autour du tunnel, g.y = écoulement).
   // Tête brillante côté caméra (les traînées viennent vers nous), queue vers la gorge.
-  float tStreak(vec2 g, float seed){
+  // n = nombre de colonnes sur un tour : l'indice de colonne boucle (sinon décalage net à la couture de l'angle, à gauche)
+  float tStreak(vec2 g, float seed, float n){
     vec2 id = floor(g), f = fract(g);
+    id.x = mod(id.x, n);
     vec3 h = hash33(vec3(id, seed));
     float x = (f.x - 0.5) * 2.0 / (0.1 + 0.22 * h.y);
     float v = f.y / (0.3 + 0.6 * h.z);
@@ -207,13 +209,14 @@ export const BLACKHOLE_FRAG = /* glsl */ `
     float w = z + uTunnel.y;                                        // coordonnée d'écoulement
     float an = a * 0.15915494 + 0.5;
     vec3 c = vec3(0.0);
-    c += tStreak(vec2(an * 90.0, w * 0.9), 1.0) * vec3(0.75, 0.88, 1.0) * 1.7;
-    if (uOct > 2.5) c += tStreak(vec2(an * 210.0, w * 2.1), 7.0) * vec3(1.0, 0.88, 0.72) * 0.9;
+    c += tStreak(vec2(an * 90.0, w * 0.9), 1.0, 90.0) * vec3(0.75, 0.88, 1.0) * 1.7;
+    if (uOct > 2.5) c += tStreak(vec2(an * 210.0, w * 2.1), 7.0, 210.0) * vec3(1.0, 0.88, 0.72) * 0.9;
     vec3 cyl = vec3(cos(a) * 1.6, sin(a) * 1.6, w * 0.35);
     float neb = fbm(cyl);
     c += mix(uW1, uW2, neb) * smoothstep(0.35, 0.8, neb) * 0.55;    // gaz bleu qui s'écoule
     c += uC1 * 0.3 * smoothstep(0.55, 0.85, fbm2(cyl * 1.9 + 5.0)); // restes ambrés du disque
-    if (uSkyOn > 0.5) c += textureLod(uSkyTex, vec2(an, 0.5 + 0.4 * sin(w * 0.05)), 0.0).rgb * 2.5;   // ciel profond étiré
+    // ciel profond étiré ; fract : avec la rotation et la torsion, l'angle dépasse 0..1 (sinon bande pleine coupée net à la couture)
+    if (uSkyOn > 0.5) c += textureLod(uSkyTex, vec2(fract(an), 0.5 + 0.4 * sin(w * 0.05)), 0.0).rgb * 2.5;
     // les parois s'assombrissent vers la gorge ; au bout, l'intérieur de la gorge (la sortie) est noir
     c *= exp(-z * 0.16) * (1.0 - mix(0.65, 1.0, smoothstep(0.0, 0.25, uTunBend.z)) * inner);
     c *= 0.55 + 0.45 * smoothstep(1.9, 0.5, r);                       // parois toutes proches (bords) : moins nettes

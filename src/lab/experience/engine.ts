@@ -210,6 +210,7 @@ export function createEngine(els: EngineEls, texts: readonly string[], lastText 
     cap: new THREE.WebGLRenderTarget(1, 1, rtOpts), // 2 · vue de la chute à l'horizon, plaquée sur les parois du tunnel
   };
   bhMat.uniforms.uCapTex.value = rt.cap.texture;
+  rt.sky.texture.wrapS = THREE.RepeatWrapping; // équirectangulaire : la longitude boucle (filtrage continu à la couture)
   bhMat.uniforms.uSkyTex.value = rt.sky.texture;
   let iw = 1, ih = 1;
 
